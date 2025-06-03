@@ -22,3 +22,5 @@ Running the script opens a full-screen menu with buttons for the available
 settings. Choose **Morrison** or **Hell Creek** to start the text-based game in
 the terminal. Use commands `north`, `south`, `east`, `west` to move and `hunt`
 to try to catch prey. The **Quit** button exits the program.
+=======
+Follow the prompts to select a setting and a dinosaur. Use commands `north`, `south`, `east`, `west` to move and `hunt` to try to catch prey.
