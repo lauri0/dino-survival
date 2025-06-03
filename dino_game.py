@@ -1,3 +1,4 @@
+import tkinter as tk
 from dinosurvival.game import Game
 from dinosurvival.settings import MORRISON, HELL_CREEK
 
@@ -7,25 +8,19 @@ SETTINGS = {
 }
 
 
-def choose_setting() -> Game:
-    print("Choose a setting:")
-    for idx, key in enumerate(SETTINGS.keys(), start=1):
-        print(f"{idx}. {key}")
-    sidx = int(input("> ")) - 1
-    setting_key = list(SETTINGS.keys())[sidx]
-    setting = SETTINGS[setting_key]
-
+def choose_dinosaur(setting) -> str:
+    """Prompt the user to pick a dinosaur for the chosen setting."""
     print("Choose a dinosaur:")
     for idx, d in enumerate(setting.playable_dinos.keys(), start=1):
         print(f"{idx}. {d}")
     didx = int(input("> ")) - 1
-    dino_name = list(setting.playable_dinos.keys())[didx]
-
-    return Game(setting, dino_name)
+    return list(setting.playable_dinos.keys())[didx]
 
 
-def main():
-    game = choose_setting()
+def run_game(setting):
+    """Run the text-based portion of the game for the given setting."""
+    dino_name = choose_dinosaur(setting)
+    game = Game(setting, dino_name)
     print("Type commands: north, south, east, west, hunt, quit")
     while True:
         action = input("> ").strip()
@@ -35,6 +30,30 @@ def main():
         print(result)
         if "Game Over" in result:
             break
+
+
+def launch_menu():
+    """Display the opening menu as a full-screen window."""
+    root = tk.Tk()
+    root.title("Dinosaur Survival")
+    root.attributes("-fullscreen", True)
+
+    frame = tk.Frame(root)
+    frame.pack(expand=True)
+
+    tk.Label(frame, text="Dinosaur Survival", font=("Helvetica", 24)).pack(pady=20)
+
+    tk.Button(frame, text="Morrison", width=20, height=2,
+              command=lambda: (root.destroy(), run_game(MORRISON))).pack(pady=10)
+    tk.Button(frame, text="Hell Creek", width=20, height=2,
+              command=lambda: (root.destroy(), run_game(HELL_CREEK))).pack(pady=10)
+    tk.Button(frame, text="Quit", width=20, height=2, command=root.destroy).pack(pady=10)
+
+    root.mainloop()
+
+
+def main():
+    launch_menu()
 
 
 if __name__ == "__main__":
