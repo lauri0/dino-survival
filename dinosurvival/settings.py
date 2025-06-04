@@ -13,10 +13,10 @@ class Setting:
 MORRISON = Setting(
     name="Morrison Formation",
     playable_dinos={
-        "Allosaurus": {"hunger_threshold": 5, "growth_stages": 3},
-        "Ceratosaurus": {"hunger_threshold": 4, "growth_stages": 3},
-        "Torvosaurus": {"hunger_threshold": 5, "growth_stages": 3},
-        "Ornitholestes": {"hunger_threshold": 3, "growth_stages": 3},
+        "Allosaurus": {"energy_threshold": 0, "growth_stages": 3},
+        "Ceratosaurus": {"energy_threshold": 0, "growth_stages": 3},
+        "Torvosaurus": {"energy_threshold": 0, "growth_stages": 3},
+        "Ornitholestes": {"energy_threshold": 0, "growth_stages": 3},
     },
     terrains={
         "plains": Terrain("plains", {"small_prey": 0.8, "large_prey": 0.2}),
@@ -31,8 +31,8 @@ MORRISON = Setting(
 HELL_CREEK = Setting(
     name="Hell Creek",
     playable_dinos={
-        "Tyrannosaurus": {"hunger_threshold": 6, "growth_stages": 4},
-        "Dakotaraptor": {"hunger_threshold": 4, "growth_stages": 3},
+        "Tyrannosaurus": {"energy_threshold": 0, "growth_stages": 4},
+        "Dakotaraptor": {"energy_threshold": 0, "growth_stages": 3},
     },
     terrains={
         "floodplain": Terrain("floodplain", {"small_prey": 0.4, "large_prey": 0.6}),
