@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import messagebox
 import random
 from dinosurvival.game import Game, DINO_STATS
 from dinosurvival.settings import MORRISON, HELL_CREEK
@@ -134,6 +135,16 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     encounter_list = tk.Frame(encounter_frame)
     encounter_list.pack(fill="both", expand=True)
 
+    def do_hunt(target_name: str) -> None:
+        result = game.hunt_dinosaur(target_name)
+        append_output(result)
+        update_stats()
+        update_encounters()
+        if "Game Over" in result:
+            for b in move_buttons.values():
+                b.config(state="disabled")
+            messagebox.showinfo("Game Over", "Game Over")
+
     def update_encounters() -> None:
         for w in encounter_list.winfo_children():
             w.destroy()
@@ -155,7 +166,13 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
                     width=28,
                     anchor="w",
                 ).pack(side="left")
-                tk.Button(row, text="Hunt", width=7, font=("Helvetica", 12)).pack(side="right")
+                tk.Button(
+                    row,
+                    text="Hunt",
+                    width=7,
+                    font=("Helvetica", 12),
+                    command=lambda n=name: do_hunt(n),
+                ).pack(side="right")
 
     # Top-right map
     map_frame = tk.Frame(main)

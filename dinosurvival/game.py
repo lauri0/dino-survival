@@ -30,12 +30,42 @@ class Game:
 
     def hunt(self):
         terrain = self.map.terrain_at(self.x, self.y)
-        prey_type = random.choices(list(terrain.spawn_chance.keys()), weights=list(terrain.spawn_chance.values()))[0]
+        prey_type = random.choices(
+            list(terrain.spawn_chance.keys()),
+            weights=list(terrain.spawn_chance.values()),
+        )[0]
         success = random.random() < 0.6  # simple success rate
         if success:
             self.player.energy = 100.0
             return f"Caught {prey_type}!"
         return f"Failed to catch {prey_type}."
+
+    def hunt_dinosaur(self, target_name: str) -> str:
+        """Hunt a specific dinosaur encountered on the map."""
+        target = DINO_STATS.get(target_name)
+        if not target:
+            return f"Unknown target {target_name}."
+
+        player_speed = max(self.player.speed, 0.1)
+        target_speed = max(target.get("adult_speed", 0.1), 0.1)
+        catch_chance = player_speed / (player_speed + target_speed)
+        if random.random() > catch_chance:
+            return f"The {target_name} escaped before you could catch it."
+
+        player_f = max(self.player.fierceness, 0.1)
+        target_f = max(target.get("adult_fierceness", 0.1), 0.1)
+        rel_f = target_f / player_f
+        damage = (rel_f ** 2) * 100
+        self.player.health = max(0.0, self.player.health - damage)
+        if self.player.health <= 0:
+            return (
+                f"You fought the {target_name} but received fatal injuries. Game Over."
+            )
+
+        self.player.energy = 100.0
+        return (
+            f"You caught and defeated the {target_name} but lost {damage:.0f}% health."
+        )
 
     def move(self, dx: int, dy: int):
         nx = max(0, min(self.map.width - 1, self.x + dx))
