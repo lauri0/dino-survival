@@ -148,6 +148,10 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             "forest": "green",
             "plains": "yellowgreen",
             "floodplain": "tan",
+            "swamp": "olivedrab",
+            "woodlands": "palegreen",
+            "badlands": "yellow",
+            "lake": "blue",
         }
         for y, r in enumerate(map_tiles):
             for x, canvas in enumerate(r):

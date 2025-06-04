@@ -21,6 +21,10 @@ MORRISON = Setting(
     terrains={
         "plains": Terrain("plains", {"small_prey": 0.8, "large_prey": 0.2}),
         "forest": Terrain("forest", {"small_prey": 0.6, "large_prey": 0.4}),
+        "swamp": Terrain("swamp", {"small_prey": 0.7, "large_prey": 0.3}),
+        "woodlands": Terrain("woodlands", {"small_prey": 0.6, "large_prey": 0.4}),
+        "badlands": Terrain("badlands", {"small_prey": 0.3, "large_prey": 0.7}),
+        "lake": Terrain("lake", {"small_prey": 0.9, "large_prey": 0.1}),
     },
 )
 
@@ -33,5 +37,9 @@ HELL_CREEK = Setting(
     terrains={
         "floodplain": Terrain("floodplain", {"small_prey": 0.4, "large_prey": 0.6}),
         "forest": Terrain("forest", {"small_prey": 0.7, "large_prey": 0.3}),
+        "swamp": Terrain("swamp", {"small_prey": 0.7, "large_prey": 0.3}),
+        "woodlands": Terrain("woodlands", {"small_prey": 0.6, "large_prey": 0.4}),
+        "badlands": Terrain("badlands", {"small_prey": 0.3, "large_prey": 0.7}),
+        "lake": Terrain("lake", {"small_prey": 0.9, "large_prey": 0.1}),
     },
 )
