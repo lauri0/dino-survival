@@ -262,7 +262,19 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             text=f"Energy: {game.player.energy:.0f}%",
             fg=color_for(game.player.energy),
         )
-        weight_label.config(text=f"Weight: {game.player.weight:.1f} kg")
+        pct = 0.0
+        growth_range = game.player.adult_weight - game.player.hatchling_weight
+        if growth_range > 0:
+            pct = (
+                (game.player.weight - game.player.hatchling_weight)
+                / growth_range
+            ) * 100
+        weight_label.config(
+            text=(
+                f"Weight: {game.player.weight:.1f}kg/"
+                f"{game.player.adult_weight:.0f}kg ({pct:.1f}%)"
+            )
+        )
         fierce_label.config(text=f"Fierceness: {game.player.fierceness:.1f}")
         speed_label.config(text=f"Speed: {game.player.speed:.1f}")
 

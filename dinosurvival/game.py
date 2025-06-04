@@ -79,7 +79,27 @@ class Game:
             )
 
         self.player.energy = 100.0
-        self.player.weight += target_weight * target.get("carcass_food_value_modifier", 1.0)
+        weight_gain = target_weight * target.get("carcass_food_value_modifier", 1.0)
+        weight_gain = min(weight_gain, self.player.growth_speed)
+        self.player.weight = min(
+            self.player.weight + weight_gain,
+            self.player.adult_weight,
+        )
+
+        growth_range = self.player.adult_weight - self.player.hatchling_weight
+        if growth_range > 0:
+            pct = (
+                self.player.weight - self.player.hatchling_weight
+            ) / growth_range
+            self.player.fierceness = (
+                self.player.hatchling_fierceness
+                + pct * (self.player.adult_fierceness - self.player.hatchling_fierceness)
+            )
+            self.player.speed = (
+                self.player.hatchling_speed
+                + pct * (self.player.adult_speed - self.player.hatchling_speed)
+            )
+
         return (
             f"You caught and defeated the {target_name} but lost {damage:.0f}% health."
         )
