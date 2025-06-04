@@ -1,5 +1,6 @@
 import tkinter as tk
-from dinosurvival.game import Game
+import random
+from dinosurvival.game import Game, DINO_STATS
 from dinosurvival.settings import MORRISON, HELL_CREEK
 
 SETTINGS = {
@@ -107,6 +108,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         update_biome()
         update_map()
         update_stats()
+        update_encounters()
         if "Game Over" in result:
             for b in move_buttons.values():
                 b.config(state="disabled")
@@ -123,6 +125,28 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     move_buttons["stay"].grid(row=1, column=1)
     move_buttons["east"].grid(row=1, column=2)
     move_buttons["south"].grid(row=2, column=1)
+
+    # Bottom-left encounter display
+    encounter_frame = tk.Frame(main)
+    encounter_frame.grid(row=1, column=0, sticky="nsew", padx=10, pady=10)
+    tk.Label(encounter_frame, text="Encounters", font=("Helvetica", 16)).pack()
+    encounter_list = tk.Frame(encounter_frame)
+    encounter_list.pack(fill="both", expand=True)
+
+    def update_encounters() -> None:
+        for w in encounter_list.winfo_children():
+            w.destroy()
+        terrain = game.map.terrain_at(game.x, game.y).name
+        for name, stats in DINO_STATS.items():
+            if name == dinosaur_name:
+                continue
+            chance = stats.get("encounter_chance", {}).get(terrain, 0)
+            if random.random() < chance:
+                row = tk.Frame(encounter_list)
+                row.pack(anchor="w", pady=2, fill="x")
+                info = f"{name}  F:{stats.get('adult_fierceness',0)} S:{stats.get('adult_speed',0)}"
+                tk.Label(row, text=info).pack(side="left")
+                tk.Button(row, text="Hunt", width=5).pack(side="right")
 
     # Top-right map
     map_frame = tk.Frame(main)
@@ -216,6 +240,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     update_biome()
     update_map()
     update_stats()
+    update_encounters()
 
     root.mainloop()
 

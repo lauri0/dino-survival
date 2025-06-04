@@ -12,7 +12,7 @@ with open(STATS_FILE) as f:
 
 
 class Game:
-    def __init__(self, setting: Setting, dinosaur_name: str, width: int = 30, height: int = 20):
+    def __init__(self, setting: Setting, dinosaur_name: str, width: int = 18, height: int = 10):
         self.setting = setting
         dstats = setting.playable_dinos[dinosaur_name]
         base = DINO_STATS.get(dinosaur_name, {"name": dinosaur_name})
