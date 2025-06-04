@@ -17,13 +17,8 @@ def choose_dinosaur(setting) -> str:
     return list(setting.playable_dinos.keys())[didx]
 
 
-def choose_dinosaur_gui(setting) -> str:
-    """Display a full-screen menu to pick a dinosaur."""
-    selected = {"name": None}
-
-    root = tk.Tk()
-    root.title("Choose Dinosaur")
-    root.attributes("-fullscreen", True)
+def choose_dinosaur_gui(root: tk.Tk, setting, on_select) -> None:
+    """Display a dinosaur selection menu inside an existing root window."""
 
     frame = tk.Frame(root)
     frame.pack(expand=True)
@@ -34,18 +29,23 @@ def choose_dinosaur_gui(setting) -> str:
         font=("Helvetica", 24),
     ).pack(pady=20)
 
-    def make_cmd(d):
-        return lambda: (frame.destroy(), root.destroy(), selected.update({"name": d}))
+    def choose(d):
+        on_select(d)
+        root.destroy()
 
     for dino in setting.playable_dinos.keys():
-        tk.Button(frame, text=dino, width=20, height=2, command=make_cmd(dino)).pack(
-            pady=10
-        )
+        tk.Button(
+            frame,
+            text=dino,
+            width=20,
+            height=2,
+            command=lambda d=dino: choose(d),
+        ).pack(pady=10)
 
     tk.Button(frame, text="Quit", width=20, height=2, command=root.destroy).pack(pady=10)
 
-    root.mainloop()
-    return selected["name"]
+    # This function does not start a new main loop; the provided root must already
+    # be running. The window will be destroyed when a dinosaur is chosen.
 
 
 def run_game(setting, dinosaur_name: str | None = None):
@@ -72,34 +72,44 @@ def launch_menu():
     root.title("Dinosaur Survival")
     root.attributes("-fullscreen", True)
 
-    frame = tk.Frame(root)
-    frame.pack(expand=True)
+    selection: dict[str, str | None] = {"setting": None, "dino": None}
 
-    tk.Label(frame, text="Dinosaur Survival", font=("Helvetica", 24)).pack(pady=20)
+    def show_start_menu():
+        frame = tk.Frame(root)
+        frame.pack(expand=True)
 
-    def start_setting(setting):
-        root.destroy()
-        dino = choose_dinosaur_gui(setting)
-        if dino:
-            run_game(setting, dino)
+        tk.Label(frame, text="Dinosaur Survival", font=("Helvetica", 24)).pack(pady=20)
 
-    tk.Button(
-        frame,
-        text="Morrison",
-        width=20,
-        height=2,
-        command=lambda: start_setting(MORRISON),
-    ).pack(pady=10)
-    tk.Button(
-        frame,
-        text="Hell Creek",
-        width=20,
-        height=2,
-        command=lambda: start_setting(HELL_CREEK),
-    ).pack(pady=10)
-    tk.Button(frame, text="Quit", width=20, height=2, command=root.destroy).pack(pady=10)
+        tk.Button(
+            frame,
+            text="Morrison",
+            width=20,
+            height=2,
+            command=lambda: show_dino_menu(MORRISON, frame),
+        ).pack(pady=10)
+        tk.Button(
+            frame,
+            text="Hell Creek",
+            width=20,
+            height=2,
+            command=lambda: show_dino_menu(HELL_CREEK, frame),
+        ).pack(pady=10)
+        tk.Button(frame, text="Quit", width=20, height=2, command=root.destroy).pack(pady=10)
 
+    def show_dino_menu(setting, prev_frame):
+        prev_frame.destroy()
+
+        def on_select(dino):
+            selection["setting"] = setting
+            selection["dino"] = dino
+
+        choose_dinosaur_gui(root, setting, on_select)
+
+    show_start_menu()
     root.mainloop()
+
+    if selection["setting"] and selection["dino"]:
+        run_game(selection["setting"], selection["dino"])
 
 
 def main():
