@@ -145,7 +145,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             chance = stats.get("encounter_chance", {}).get(terrain, 0)
             if random.random() < chance:
                 row = tk.Frame(encounter_list)
-                row.pack(anchor="w", pady=2, fill="x")
+                row.pack(fill="x", pady=2, expand=True)
                 rel_f = stats.get("adult_fierceness", 0) / player_f
                 rel_s = stats.get("adult_speed", 0) / player_s
                 info = f"{name}  F:{rel_f:.2f} S:{rel_s:.2f}"
