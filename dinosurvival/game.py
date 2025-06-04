@@ -1,15 +1,24 @@
 import random
+import json
+import os
 from typing import Optional
 from .dinosaur import DinosaurStats
 from .map import Map
 from .settings import Setting
+
+STATS_FILE = os.path.join(os.path.dirname(__file__), "dino_stats.yaml")
+with open(STATS_FILE) as f:
+    DINO_STATS = json.load(f)
 
 
 class Game:
     def __init__(self, setting: Setting, dinosaur_name: str, width: int = 30, height: int = 20):
         self.setting = setting
         dstats = setting.playable_dinos[dinosaur_name]
-        self.player = DinosaurStats(dinosaur_name, hunger=0, **dstats)
+        base = DINO_STATS.get(dinosaur_name, {"name": dinosaur_name})
+        combined = {**base, **dstats}
+        self.player = DinosaurStats(hunger=0, **combined)
+        self.player.weight = self.player.hatchling_weight
         self.map = Map(width, height, setting.terrains)
         self.x = width // 2
         self.y = height // 2

@@ -6,6 +6,20 @@ class DinosaurStats:
     hunger: int
     hunger_threshold: int
     growth_stages: int
+    growth_speed: float = 0.0
+    hatchling_weight: float = 0.0
+    adult_weight: float = 0.0
+    hatchling_fierceness: float = 0.0
+    adult_fierceness: float = 0.0
+    hatchling_speed: float = 0.0
+    adult_speed: float = 0.0
+    hatchling_energy_drain: float = 0.0
+    adult_energy_drain: float = 0.0
+    walking_energy_drain_multiplier: float = 1.0
+    carcass_food_value_modifier: float = 1.0
+    health: float = 100.0
+    energy: float = 100.0
+    weight: float = 0.0
 
     def is_starving(self) -> bool:
         return self.hunger >= self.hunger_threshold

@@ -24,3 +24,5 @@ menu appears allowing you to pick a dinosaur. Once a dinosaur is chosen the
 window clears and a new interface appears. Use the direction buttons to move
 between squares or stay put and watch the text box at the bottom for game
 updates. The **Quit** button in the stats panel exits the program.
+
+Each dinosaur's base attributes are defined in `dinosurvival/dino_stats.yaml`.
