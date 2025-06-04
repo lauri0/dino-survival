@@ -18,7 +18,7 @@
       "swamp": 0.01,
       "woodlands": 0.03,
       "badlands": 0.02,
-      "lake": 0.01,
+      "lake": 0.50,
       "floodplain": 0.03
     }
   },
@@ -40,7 +40,7 @@
       "forest": 0.05,
       "swamp": 0.02,
       "woodlands": 0.03,
-      "badlands": 0.02,
+      "badlands": 0.50,
       "lake": 0.01,
       "floodplain": 0.03
     }
