@@ -152,7 +152,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
                     row,
                     text=info,
                     font=("Helvetica", 12),
-                    width=22,
+                    width=28,
                     anchor="w",
                 ).pack(side="left")
                 tk.Button(row, text="Hunt", width=7, font=("Helvetica", 12)).pack(side="right")
