@@ -138,8 +138,6 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             w.destroy()
         terrain = game.map.terrain_at(game.x, game.y).name
         for name, stats in DINO_STATS.items():
-            if name == dinosaur_name:
-                continue
             chance = stats.get("encounter_chance", {}).get(terrain, 0)
             if random.random() < chance:
                 row = tk.Frame(encounter_list)
