@@ -6,7 +6,7 @@ from .settings import Setting
 
 
 class Game:
-    def __init__(self, setting: Setting, dinosaur_name: str, width: int = 5, height: int = 5):
+    def __init__(self, setting: Setting, dinosaur_name: str, width: int = 20, height: int = 30):
         self.setting = setting
         dstats = setting.playable_dinos[dinosaur_name]
         self.player = DinosaurStats(dinosaur_name, hunger=0, **dstats)
