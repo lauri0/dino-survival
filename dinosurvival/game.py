@@ -21,6 +21,8 @@ class Game:
         filtered = {k: v for k, v in combined.items() if k in allowed_fields}
         self.player = DinosaurStats(hunger=0, **filtered)
         self.player.weight = self.player.hatchling_weight
+        self.player.fierceness = self.player.hatchling_fierceness
+        self.player.speed = self.player.hatchling_speed
         self.map = Map(width, height, setting.terrains)
         self.x = width // 2
         self.y = height // 2

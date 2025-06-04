@@ -137,14 +137,18 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         for w in encounter_list.winfo_children():
             w.destroy()
         terrain = game.map.terrain_at(game.x, game.y).name
+        player_f = game.player.fierceness or 1
+        player_s = game.player.speed or 1
         for name, stats in DINO_STATS.items():
             chance = stats.get("encounter_chance", {}).get(terrain, 0)
             if random.random() < chance:
                 row = tk.Frame(encounter_list)
                 row.pack(anchor="w", pady=2, fill="x")
-                info = f"{name}  F:{stats.get('adult_fierceness',0)} S:{stats.get('adult_speed',0)}"
-                tk.Label(row, text=info).pack(side="left")
-                tk.Button(row, text="Hunt", width=5).pack(side="right")
+                rel_f = stats.get("adult_fierceness", 0) / player_f
+                rel_s = stats.get("adult_speed", 0) / player_s
+                info = f"{name}  F:{rel_f:.2f} S:{rel_s:.2f}"
+                tk.Label(row, text=info, font=("Helvetica", 12)).pack(side="left")
+                tk.Button(row, text="Hunt", width=7, font=("Helvetica", 12)).pack(side="right")
 
     # Top-right map
     map_frame = tk.Frame(main)
@@ -205,7 +209,9 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             f"Dinosaur: {dinosaur_name}\n"
             f"Health: {game.player.health:.0f}%\n"
             f"Energy: {game.player.energy:.0f}%\n"
-            f"Weight: {game.player.weight:.1f} kg"
+            f"Weight: {game.player.weight:.1f} kg\n"
+            f"Fierceness: {game.player.fierceness:.1f}\n"
+            f"Speed: {game.player.speed:.1f}"
         )
 
     # Bottom-right stats
