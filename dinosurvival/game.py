@@ -17,7 +17,9 @@ class Game:
         dstats = setting.playable_dinos[dinosaur_name]
         base = DINO_STATS.get(dinosaur_name, {"name": dinosaur_name})
         combined = {**base, **dstats}
-        self.player = DinosaurStats(hunger=0, **combined)
+        allowed_fields = set(DinosaurStats.__dataclass_fields__.keys())
+        filtered = {k: v for k, v in combined.items() if k in allowed_fields}
+        self.player = DinosaurStats(hunger=0, **filtered)
         self.player.weight = self.player.hatchling_weight
         self.map = Map(width, height, setting.terrains)
         self.x = width // 2
