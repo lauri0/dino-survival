@@ -40,20 +40,36 @@ class Game:
             return f"Caught {prey_type}!"
         return f"Failed to catch {prey_type}."
 
-    def hunt_dinosaur(self, target_name: str) -> str:
+    def hunt_dinosaur(self, target_name: str, juvenile: bool = False) -> str:
         """Hunt a specific dinosaur encountered on the map."""
         target = DINO_STATS.get(target_name)
         if not target:
             return f"Unknown target {target_name}."
 
         player_speed = max(self.player.speed, 0.1)
-        target_speed = max(target.get("adult_speed", 0.1), 0.1)
+        if juvenile:
+            target_speed = max(
+                (target.get("hatchling_speed", 0) + target.get("adult_speed", 0))
+                / 2,
+                0.1,
+            )
+            target_f = (
+                target.get("hatchling_fierceness", 0)
+                + target.get("adult_fierceness", 0)
+            ) / 2
+            target_weight = (
+                target.get("hatchling_weight", 0) + target.get("adult_weight", 0)
+            ) / 2
+        else:
+            target_speed = max(target.get("adult_speed", 0.1), 0.1)
+            target_f = target.get("adult_fierceness", 0.1)
+            target_weight = target.get("adult_weight", 0.0)
         catch_chance = player_speed / (player_speed + target_speed)
         if random.random() > catch_chance:
             return f"The {target_name} escaped before you could catch it."
 
         player_f = max(self.player.fierceness, 0.1)
-        target_f = max(target.get("adult_fierceness", 0.1), 0.1)
+        target_f = max(target_f, 0.1)
         rel_f = target_f / player_f
         damage = (rel_f ** 2) * 100
         self.player.health = max(0.0, self.player.health - damage)
@@ -63,6 +79,7 @@ class Game:
             )
 
         self.player.energy = 100.0
+        self.player.weight += target_weight * target.get("carcass_food_value_modifier", 1.0)
         return (
             f"You caught and defeated the {target_name} but lost {damage:.0f}% health."
         )
