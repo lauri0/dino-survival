@@ -20,6 +20,7 @@ class DinosaurStats:
     health: float = 100.0
     energy: float = 100.0
     weight: float = 0.0
+    health_regen: float = 0.0
 
     def is_exhausted(self) -> bool:
         return self.energy <= 0

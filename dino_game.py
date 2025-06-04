@@ -228,23 +228,43 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
                         width=2,
                     )
 
+    def color_for(val: float) -> str:
+        if val <= 25:
+            return "red"
+        if val <= 50:
+            return "orange"
+        if val <= 75:
+            return "yellow"
+        return "green"
+
     def update_stats() -> None:
-        stats_var.set(
-            f"Dinosaur: {dinosaur_name}\n"
-            f"Health: {game.player.health:.0f}%\n"
-            f"Energy: {game.player.energy:.0f}%\n"
-            f"Weight: {game.player.weight:.1f} kg\n"
-            f"Fierceness: {game.player.fierceness:.1f}\n"
-            f"Speed: {game.player.speed:.1f}"
+        health_label.config(
+            text=f"Health: {game.player.health:.0f}%",
+            fg=color_for(game.player.health),
         )
+        energy_label.config(
+            text=f"Energy: {game.player.energy:.0f}%",
+            fg=color_for(game.player.energy),
+        )
+        weight_label.config(text=f"Weight: {game.player.weight:.1f} kg")
+        fierce_label.config(text=f"Fierceness: {game.player.fierceness:.1f}")
+        speed_label.config(text=f"Speed: {game.player.speed:.1f}")
 
     # Bottom-right stats
     stats_frame = tk.Frame(main)
     stats_frame.grid(row=1, column=1, sticky="nsew", padx=10, pady=10)
 
-    stats_var = tk.StringVar()
-    stats_label = tk.Label(stats_frame, textvariable=stats_var, font=("Helvetica", 16))
-    stats_label.pack()
+    tk.Label(stats_frame, text=f"Dinosaur: {dinosaur_name}", font=("Helvetica", 16)).pack()
+    health_label = tk.Label(stats_frame, font=("Helvetica", 16))
+    health_label.pack()
+    energy_label = tk.Label(stats_frame, font=("Helvetica", 16))
+    energy_label.pack()
+    weight_label = tk.Label(stats_frame, font=("Helvetica", 16))
+    weight_label.pack()
+    fierce_label = tk.Label(stats_frame, font=("Helvetica", 16))
+    fierce_label.pack()
+    speed_label = tk.Label(stats_frame, font=("Helvetica", 16))
+    speed_label.pack()
     tk.Button(stats_frame, text="Quit", width=10, command=root.destroy).pack(pady=10)
 
     # Bottom text output

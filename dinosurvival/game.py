@@ -110,4 +110,8 @@ class Game:
         if self.player.is_exhausted():
             return result + "\nYou have collapsed from exhaustion! Game Over."
 
+        regen = getattr(self.player, "health_regen", 0.0)
+        if regen:
+            self.player.health = min(100.0, self.player.health + regen)
+
         return result
