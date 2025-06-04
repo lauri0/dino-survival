@@ -73,6 +73,8 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
 
     root = tk.Tk()
     root.title("Dinosaur Survival")
+    root.geometry("1400x800")
+    root.minsize(1400, 800)
 
     main = tk.Frame(root)
     main.pack(fill="both", expand=True)
