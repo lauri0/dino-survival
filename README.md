@@ -20,6 +20,7 @@ python dino_game.py
 
 Running the script opens a full-screen menu with buttons for the available
 geological settings. After selecting **Morrison** or **Hell Creek**, another
-menu appears allowing you to pick a dinosaur. The game then starts in the
-terminal. Use commands `north`, `south`, `east`, `west` to move and `hunt` to
-try to catch prey. The **Quit** button exits the program.
+menu appears allowing you to pick a dinosaur. Once a dinosaur is chosen the
+window clears and a new interface appears. Use the direction buttons to move
+between squares or stay put and watch the text box at the bottom for game
+updates. The **Quit** button in the stats panel exits the program.

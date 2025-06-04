@@ -66,6 +66,113 @@ def run_game(setting, dinosaur_name: str | None = None):
             break
 
 
+def run_game_gui(setting, dinosaur_name: str) -> None:
+    """Run the game using a graphical interface."""
+    game = Game(setting, dinosaur_name)
+
+    root = tk.Tk()
+    root.title("Dinosaur Survival")
+
+    main = tk.Frame(root)
+    main.pack(fill="both", expand=True)
+
+    main.grid_rowconfigure(0, weight=1)
+    main.grid_rowconfigure(1, weight=0)
+    main.grid_rowconfigure(2, weight=1)
+    main.grid_columnconfigure(0, weight=0)
+    main.grid_columnconfigure(1, weight=1)
+
+    # Top-left controls and biome
+    control_frame = tk.Frame(main)
+    control_frame.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
+
+    biome_var = tk.StringVar()
+    biome_label = tk.Label(control_frame, textvariable=biome_var, font=("Helvetica", 16))
+    biome_label.pack(pady=(0, 10))
+
+    def update_biome() -> None:
+        terrain = game.map.terrain_at(game.x, game.y)
+        biome_var.set(f"Biome: {terrain.name}")
+
+    # Movement buttons
+    btn_frame = tk.Frame(control_frame)
+    btn_frame.pack()
+
+    def perform(action: str) -> None:
+        if action == "stay":
+            result = "Stayed put"
+        else:
+            result = game.turn(action)
+        append_output(result)
+        update_biome()
+        update_map()
+        if "Game Over" in result:
+            for b in move_buttons.values():
+                b.config(state="disabled")
+
+    move_buttons = {}
+    move_buttons["north"] = tk.Button(btn_frame, text="North", width=8, command=lambda: perform("north"))
+    move_buttons["south"] = tk.Button(btn_frame, text="South", width=8, command=lambda: perform("south"))
+    move_buttons["east"] = tk.Button(btn_frame, text="East", width=8, command=lambda: perform("east"))
+    move_buttons["west"] = tk.Button(btn_frame, text="West", width=8, command=lambda: perform("west"))
+    move_buttons["stay"] = tk.Button(btn_frame, text="Stay", width=8, command=lambda: perform("stay"))
+
+    move_buttons["north"].grid(row=0, column=1)
+    move_buttons["west"].grid(row=1, column=0)
+    move_buttons["stay"].grid(row=1, column=1)
+    move_buttons["east"].grid(row=1, column=2)
+    move_buttons["south"].grid(row=2, column=1)
+
+    # Top-right map
+    map_frame = tk.Frame(main)
+    map_frame.grid(row=0, column=1, sticky="nsew", padx=10, pady=10)
+
+    map_labels = []
+    for y in range(game.map.height):
+        row = []
+        for x in range(game.map.width):
+            lbl = tk.Label(map_frame, width=4, height=2, relief="ridge", borderwidth=1)
+            lbl.grid(row=y, column=x, padx=1, pady=1)
+            row.append(lbl)
+        map_labels.append(row)
+
+    def update_map() -> None:
+        for y, r in enumerate(map_labels):
+            for x, lbl in enumerate(r):
+                color = "green" if (x, y) == (game.x, game.y) else "white"
+                lbl.configure(bg=color)
+
+    # Bottom-right stats
+    stats_frame = tk.Frame(main)
+    stats_frame.grid(row=1, column=1, sticky="nsew", padx=10, pady=10)
+
+    tk.Label(stats_frame, text=f"Dinosaur: {dinosaur_name}", font=("Helvetica", 16)).pack()
+    tk.Button(stats_frame, text="Quit", width=10, command=root.destroy).pack(pady=10)
+
+    # Bottom text output
+    text_frame = tk.Frame(main)
+    text_frame.grid(row=2, column=0, columnspan=2, sticky="nsew")
+    text_frame.grid_rowconfigure(0, weight=1)
+    text_frame.grid_columnconfigure(0, weight=1)
+
+    output = tk.Text(text_frame, height=10, state="disabled")
+    output.grid(row=0, column=0, sticky="nsew")
+    scrollbar = tk.Scrollbar(text_frame, command=output.yview)
+    scrollbar.grid(row=0, column=1, sticky="ns")
+    output.configure(yscrollcommand=scrollbar.set)
+
+    def append_output(text: str) -> None:
+        output.configure(state="normal")
+        output.insert(tk.END, text + "\n")
+        output.see(tk.END)
+        output.configure(state="disabled")
+
+    update_biome()
+    update_map()
+
+    root.mainloop()
+
+
 def launch_menu():
     """Display the opening menu as a full-screen window."""
     root = tk.Tk()
@@ -109,7 +216,7 @@ def launch_menu():
     root.mainloop()
 
     if selection["setting"] and selection["dino"]:
-        run_game(selection["setting"], selection["dino"])
+        run_game_gui(selection["setting"], selection["dino"])
 
 
 def main():
