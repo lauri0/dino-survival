@@ -135,8 +135,8 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     encounter_list = tk.Frame(encounter_frame)
     encounter_list.pack(fill="both", expand=True)
 
-    def do_hunt(target_name: str) -> None:
-        result = game.hunt_dinosaur(target_name)
+    def do_hunt(target_name: str, juvenile: bool) -> None:
+        result = game.hunt_dinosaur(target_name, juvenile)
         append_output(result)
         update_stats()
         update_encounters()
@@ -154,11 +154,27 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         for name, stats in DINO_STATS.items():
             chance = stats.get("encounter_chance", {}).get(terrain, 0)
             if random.random() < chance:
+                juvenile = random.random() < 0.5
                 row = tk.Frame(encounter_list)
                 row.pack(fill="x", pady=2, expand=True)
-                rel_f = stats.get("adult_fierceness", 0) / player_f
-                rel_s = stats.get("adult_speed", 0) / player_s
-                info = f"{name}  F:{rel_f:.2f} S:{rel_s:.2f}"
+                if juvenile:
+                    target_f = (
+                        stats.get("hatchling_fierceness", 0)
+                        + stats.get("adult_fierceness", 0)
+                    ) / 2
+                    target_s = (
+                        stats.get("hatchling_speed", 0)
+                        + stats.get("adult_speed", 0)
+                    ) / 2
+                    disp_name = f"{name} (J)"
+                else:
+                    target_f = stats.get("adult_fierceness", 0)
+                    target_s = stats.get("adult_speed", 0)
+                    disp_name = name
+
+                rel_f = target_f / player_f
+                rel_s = target_s / player_s
+                info = f"{disp_name}  F:{rel_f:.2f} S:{rel_s:.2f}"
                 tk.Label(
                     row,
                     text=info,
@@ -171,7 +187,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
                     text="Hunt",
                     width=7,
                     font=("Helvetica", 12),
-                    command=lambda n=name: do_hunt(n),
+                    command=lambda n=name, j=juvenile: do_hunt(n, j),
                 ).pack(side="right")
 
     # Top-right map
@@ -234,7 +250,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         if val <= 50:
             return "orange"
         if val <= 75:
-            return "yellow"
+            return "goldenrod"
         return "green"
 
     def update_stats() -> None:
