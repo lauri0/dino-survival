@@ -127,37 +127,51 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     map_frame = tk.Frame(main)
     map_frame.grid(row=0, column=1, sticky="nsew", padx=10, pady=10)
 
-    map_labels = []
+    map_tiles = []
+    tile_size = 20
     for y in range(game.map.height):
         row = []
         for x in range(game.map.width):
-            lbl = tk.Label(
+            c = tk.Canvas(
                 map_frame,
-                width=2,
-                height=1,
-                relief="ridge",
-                borderwidth=1,
+                width=tile_size,
+                height=tile_size,
                 highlightthickness=0,
+                bd=0,
             )
-            lbl.grid(row=y, column=x, padx=1, pady=1)
-            row.append(lbl)
-        map_labels.append(row)
+            c.grid(row=y, column=x, padx=1, pady=1)
+            row.append(c)
+        map_tiles.append(row)
 
     def update_map() -> None:
-        color_map = {"forest": "green", "plains": "yellowgreen"}
-        for y, r in enumerate(map_labels):
-            for x, lbl in enumerate(r):
+        color_map = {
+            "forest": "green",
+            "plains": "yellowgreen",
+            "floodplain": "tan",
+        }
+        for y, r in enumerate(map_tiles):
+            for x, canvas in enumerate(r):
                 terrain = game.map.terrain_at(x, y)
-                color = color_map.get(terrain.name, "white")
+                revealed = game.map.is_revealed(x, y)
+                color = color_map.get(terrain.name, "white") if revealed else "gray"
+                canvas.delete("all")
+                canvas.create_rectangle(
+                    0,
+                    0,
+                    tile_size,
+                    tile_size,
+                    fill=color,
+                    outline="black",
+                )
                 if (x, y) == (game.x, game.y):
-                    lbl.configure(
-                        bg=color,
-                        highlightbackground="black",
-                        highlightcolor="black",
-                        highlightthickness=2,
+                    canvas.create_rectangle(
+                        2,
+                        2,
+                        tile_size - 2,
+                        tile_size - 2,
+                        outline="black",
+                        width=2,
                     )
-                else:
-                    lbl.configure(bg=color, highlightthickness=0)
 
     # Bottom-right stats
     stats_frame = tk.Frame(main)
