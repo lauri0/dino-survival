@@ -73,8 +73,8 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
 
     root = tk.Tk()
     root.title("Dinosaur Survival")
-    root.geometry("1400x800")
-    root.minsize(1400, 800)
+    root.geometry("1200x800")
+    root.minsize(1200, 800)
 
     main = tk.Frame(root)
     main.pack(fill="both", expand=True)
@@ -82,11 +82,11 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     main.grid_rowconfigure(0, weight=1)
     main.grid_rowconfigure(1, weight=0)
     main.grid_rowconfigure(2, weight=1)
-    main.grid_columnconfigure(0, weight=0, minsize=300)
+    main.grid_columnconfigure(0, weight=0, minsize=400)
     main.grid_columnconfigure(1, weight=1)
 
     # Top-left controls and biome
-    control_frame = tk.Frame(main, width=300)
+    control_frame = tk.Frame(main, width=400)
     control_frame.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
     control_frame.grid_propagate(False)
 
@@ -130,7 +130,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     move_buttons["south"].grid(row=2, column=1)
 
     # Bottom-left encounter display
-    encounter_frame = tk.Frame(main, width=300)
+    encounter_frame = tk.Frame(main, width=400)
     encounter_frame.grid(row=1, column=0, sticky="nsew", padx=10, pady=10)
     encounter_frame.grid_propagate(False)
     tk.Label(encounter_frame, text="Encounters", font=("Helvetica", 16)).pack()
