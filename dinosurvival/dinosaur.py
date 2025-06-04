@@ -3,8 +3,6 @@ from dataclasses import dataclass
 @dataclass
 class DinosaurStats:
     name: str
-    hunger: int
-    hunger_threshold: int
     growth_stages: int
     growth_speed: float = 0.0
     hatchling_weight: float = 0.0
@@ -23,13 +21,13 @@ class DinosaurStats:
     energy: float = 100.0
     weight: float = 0.0
 
-    def is_starving(self) -> bool:
-        return self.hunger >= self.hunger_threshold
+    def is_exhausted(self) -> bool:
+        return self.energy <= 0
 
     def grow(self):
         if self.growth_stages > 0:
             self.growth_stages -= 1
-            self.hunger = 0
+            self.energy = 100.0
             if self.growth_stages == 0:
                 self.weight = self.adult_weight
                 self.fierceness = self.adult_fierceness

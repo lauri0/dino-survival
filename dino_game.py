@@ -103,10 +103,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     btn_frame.pack()
 
     def perform(action: str) -> None:
-        if action == "stay":
-            result = "Stayed put"
-        else:
-            result = game.turn(action)
+        result = game.turn(action)
         append_output(result)
         update_biome()
         update_map()
