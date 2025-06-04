@@ -82,12 +82,13 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     main.grid_rowconfigure(0, weight=1)
     main.grid_rowconfigure(1, weight=0)
     main.grid_rowconfigure(2, weight=1)
-    main.grid_columnconfigure(0, weight=0)
+    main.grid_columnconfigure(0, weight=0, minsize=300)
     main.grid_columnconfigure(1, weight=1)
 
     # Top-left controls and biome
-    control_frame = tk.Frame(main)
+    control_frame = tk.Frame(main, width=300)
     control_frame.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
+    control_frame.grid_propagate(False)
 
     biome_var = tk.StringVar()
     biome_label = tk.Label(control_frame, textvariable=biome_var, font=("Helvetica", 16))
@@ -129,8 +130,9 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     move_buttons["south"].grid(row=2, column=1)
 
     # Bottom-left encounter display
-    encounter_frame = tk.Frame(main)
+    encounter_frame = tk.Frame(main, width=300)
     encounter_frame.grid(row=1, column=0, sticky="nsew", padx=10, pady=10)
+    encounter_frame.grid_propagate(False)
     tk.Label(encounter_frame, text="Encounters", font=("Helvetica", 16)).pack()
     encounter_list = tk.Frame(encounter_frame)
     encounter_list.pack(fill="both", expand=True)
@@ -149,7 +151,13 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
                 rel_f = stats.get("adult_fierceness", 0) / player_f
                 rel_s = stats.get("adult_speed", 0) / player_s
                 info = f"{name}  F:{rel_f:.2f} S:{rel_s:.2f}"
-                tk.Label(row, text=info, font=("Helvetica", 12)).pack(side="left")
+                tk.Label(
+                    row,
+                    text=info,
+                    font=("Helvetica", 12),
+                    width=22,
+                    anchor="w",
+                ).pack(side="left")
                 tk.Button(row, text="Hunt", width=7, font=("Helvetica", 12)).pack(side="right")
 
     # Top-right map
