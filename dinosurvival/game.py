@@ -6,13 +6,14 @@ from .settings import Setting
 
 
 class Game:
-    def __init__(self, setting: Setting, dinosaur_name: str, width: int = 20, height: int = 30):
+    def __init__(self, setting: Setting, dinosaur_name: str, width: int = 30, height: int = 20):
         self.setting = setting
         dstats = setting.playable_dinos[dinosaur_name]
         self.player = DinosaurStats(dinosaur_name, hunger=0, **dstats)
         self.map = Map(width, height, setting.terrains)
         self.x = width // 2
         self.y = height // 2
+        self.map.reveal(self.x, self.y)
 
     def hunt(self):
         terrain = self.map.terrain_at(self.x, self.y)
@@ -28,6 +29,7 @@ class Game:
         nx = max(0, min(self.map.width - 1, self.x + dx))
         ny = max(0, min(self.map.height - 1, self.y + dy))
         self.x, self.y = nx, ny
+        self.map.reveal(self.x, self.y)
 
     def turn(self, action: str) -> str:
         if action == "hunt":
