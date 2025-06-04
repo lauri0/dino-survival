@@ -106,6 +106,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         append_output(result)
         update_biome()
         update_map()
+        update_stats()
         if "Game Over" in result:
             for b in move_buttons.values():
                 b.config(state="disabled")
@@ -177,11 +178,21 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
                         width=2,
                     )
 
+    def update_stats() -> None:
+        stats_var.set(
+            f"Dinosaur: {dinosaur_name}\n"
+            f"Health: {game.player.health:.0f}%\n"
+            f"Energy: {game.player.energy:.0f}%\n"
+            f"Weight: {game.player.weight:.1f} kg"
+        )
+
     # Bottom-right stats
     stats_frame = tk.Frame(main)
     stats_frame.grid(row=1, column=1, sticky="nsew", padx=10, pady=10)
 
-    tk.Label(stats_frame, text=f"Dinosaur: {dinosaur_name}", font=("Helvetica", 16)).pack()
+    stats_var = tk.StringVar()
+    stats_label = tk.Label(stats_frame, textvariable=stats_var, font=("Helvetica", 16))
+    stats_label.pack()
     tk.Button(stats_frame, text="Quit", width=10, command=root.destroy).pack(pady=10)
 
     # Bottom text output
@@ -204,6 +215,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
 
     update_biome()
     update_map()
+    update_stats()
 
     root.mainloop()
 
