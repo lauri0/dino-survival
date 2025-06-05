@@ -88,42 +88,33 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         Image = None  # type: ignore
         ImageTk = None  # type: ignore
 
+    def load_scaled_image(path: str, width: int, height: int) -> tk.PhotoImage | None:
+        if not os.path.exists(path):
+            return None
+        if Image and ImageTk:
+            img = Image.open(path)
+            scale = width / img.width
+            resample = getattr(getattr(Image, "Resampling", Image), "LANCZOS")
+            resized = img.resize((width, int(img.height * scale)), resample)
+            if resized.height > height:
+                top = int((resized.height - height) / 2)
+                resized = resized.crop((0, top, width, top + height))
+            return ImageTk.PhotoImage(resized, master=root)
+        return tk.PhotoImage(master=root, file=path)
+
     for tname in game.setting.terrains.keys():
         fname = f"{game.setting.formation.lower()}_{tname}.png"
         path = os.path.join(assets_dir, fname)
-        if os.path.exists(path):
-            if Image and ImageTk:
-                img = Image.open(path)
-                target_w, target_h = 400, 250
-                scale = target_w / img.width
-                # Use LANCZOS resampling if available
-                resample = getattr(getattr(Image, "Resampling", Image), "LANCZOS")
-                resized = img.resize((target_w, int(img.height * scale)), resample)
-                if resized.height > target_h:
-                    top = int((resized.height - target_h) / 2)
-                    resized = resized.crop((0, top, target_w, top + target_h))
-                biome_images[tname] = ImageTk.PhotoImage(resized, master=root)
-            else:
-                biome_images[tname] = tk.PhotoImage(master=root, file=path)
+        img = load_scaled_image(path, 400, 250)
+        if img:
+            biome_images[tname] = img
 
     # Load player dinosaur image if available
     dino_image = None
     dino_image_path = DINO_STATS.get(dinosaur_name, {}).get("image")
     if dino_image_path:
         abs_path = os.path.join(os.path.dirname(__file__), dino_image_path)
-        if os.path.exists(abs_path):
-            if Image and ImageTk:
-                img = Image.open(abs_path)
-                target_w, target_h = 400, 250
-                scale = target_w / img.width
-                resample = getattr(getattr(Image, "Resampling", Image), "LANCZOS")
-                resized = img.resize((target_w, int(img.height * scale)), resample)
-                if resized.height > target_h:
-                    top = int((resized.height - target_h) / 2)
-                    resized = resized.crop((0, top, target_w, top + target_h))
-                dino_image = ImageTk.PhotoImage(resized, master=root)
-            else:
-                dino_image = tk.PhotoImage(master=root, file=abs_path)
+        dino_image = load_scaled_image(abs_path, 400, 250)
 
     main = tk.Frame(root)
     main.pack(fill="both", expand=True)
@@ -198,12 +189,24 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
                 b.config(state="disabled")
 
     move_buttons = {}
-    move_buttons["north"] = tk.Button(btn_frame, text="North", width=8, command=lambda: perform("north"))
-    move_buttons["south"] = tk.Button(btn_frame, text="South", width=8, command=lambda: perform("south"))
-    move_buttons["east"] = tk.Button(btn_frame, text="East", width=8, command=lambda: perform("east"))
-    move_buttons["west"] = tk.Button(btn_frame, text="West", width=8, command=lambda: perform("west"))
-    move_buttons["stay"] = tk.Button(btn_frame, text="Stay", width=8, command=lambda: perform("stay"))
-    move_buttons["drink"] = tk.Button(btn_frame, text="Drink", width=8, command=lambda: perform("drink"))
+    move_buttons["north"] = tk.Button(
+        btn_frame, text="North", width=12, height=2, command=lambda: perform("north")
+    )
+    move_buttons["south"] = tk.Button(
+        btn_frame, text="South", width=12, height=2, command=lambda: perform("south")
+    )
+    move_buttons["east"] = tk.Button(
+        btn_frame, text="East", width=12, height=2, command=lambda: perform("east")
+    )
+    move_buttons["west"] = tk.Button(
+        btn_frame, text="West", width=12, height=2, command=lambda: perform("west")
+    )
+    move_buttons["stay"] = tk.Button(
+        btn_frame, text="Stay", width=12, height=2, command=lambda: perform("stay")
+    )
+    move_buttons["drink"] = tk.Button(
+        btn_frame, text="Drink", width=12, height=2, command=lambda: perform("drink")
+    )
 
     move_buttons["north"].grid(row=0, column=1)
     move_buttons["drink"].grid(row=0, column=2)
@@ -219,6 +222,19 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     tk.Label(encounter_frame, text="Encounters", font=("Helvetica", 16)).pack()
     encounter_list = tk.Frame(encounter_frame)
     encounter_list.pack(fill="both", expand=True)
+    encounter_rows = []
+    encounter_images: dict[str, tk.PhotoImage] = {}
+    for _ in range(4):
+        row = tk.Frame(encounter_list)
+        img = tk.Label(row)
+        btn = tk.Button(row, text="Hunt", width=4, height=3)
+        info = tk.Label(row, font=("Helvetica", 12), anchor="w", width=30)
+        img.grid(row=0, column=0, sticky="w")
+        btn.grid(row=0, column=1, sticky="e")
+        info.grid(row=1, column=0, columnspan=2, sticky="w")
+        row.grid_columnconfigure(0, weight=0)
+        row.grid_columnconfigure(1, weight=1)
+        encounter_rows.append({"frame": row, "img": img, "btn": btn, "info": info})
 
     def do_hunt(target_name: str, juvenile: bool) -> None:
         result = game.hunt_dinosaur(target_name, juvenile)
@@ -231,52 +247,60 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
                 b.config(state="disabled")
 
     def update_encounters() -> None:
-        for w in encounter_list.winfo_children():
-            w.destroy()
+        for slot in encounter_rows:
+            slot["frame"].pack_forget()
+
         terrain = game.map.terrain_at(game.x, game.y).name
         player_f = game.player.fierceness or 1
         player_s = game.player.speed or 1
+        found: list[tuple[str, bool]] = []
         for name, stats in DINO_STATS.items():
+            if len(found) >= 4:
+                break
             formations = stats.get("formations", [])
             if game.setting.formation not in formations:
                 continue
             chance = stats.get("encounter_chance", {}).get(terrain, 0)
             if random.random() < chance:
-                juvenile = random.random() < 0.5
-                row = tk.Frame(encounter_list)
-                row.pack(fill="x", pady=2, expand=True)
-                if juvenile:
-                    target_f = (
-                        stats.get("hatchling_fierceness", 0)
-                        + stats.get("adult_fierceness", 0)
-                    ) / 2
-                    target_s = (
-                        stats.get("hatchling_speed", 0)
-                        + stats.get("adult_speed", 0)
-                    ) / 2
-                    disp_name = f"{name} (J)"
-                else:
-                    target_f = stats.get("adult_fierceness", 0)
-                    target_s = stats.get("adult_speed", 0)
-                    disp_name = name
+                found.append((name, random.random() < 0.5))
+        for slot, (name, juvenile) in zip(encounter_rows, found):
+            stats = DINO_STATS[name]
+            if juvenile:
+                target_f = (
+                    stats.get("hatchling_fierceness", 0)
+                    + stats.get("adult_fierceness", 0)
+                ) / 2
+                target_s = (
+                    stats.get("hatchling_speed", 0)
+                    + stats.get("adult_speed", 0)
+                ) / 2
+                disp_name = f"{name} (J)"
+            else:
+                target_f = stats.get("adult_fierceness", 0)
+                target_s = stats.get("adult_speed", 0)
+                disp_name = name
 
-                rel_f = target_f / player_f
-                rel_s = target_s / player_s
-                info = f"{disp_name}  F:{rel_f:.2f} S:{rel_s:.2f}"
-                tk.Label(
-                    row,
-                    text=info,
-                    font=("Helvetica", 12),
-                    width=28,
-                    anchor="w",
-                ).pack(side="left")
-                tk.Button(
-                    row,
-                    text="Hunt",
-                    width=7,
-                    font=("Helvetica", 12),
-                    command=lambda n=name, j=juvenile: do_hunt(n, j),
-                ).pack(side="right")
+            rel_f = target_f / player_f
+            rel_s = target_s / player_s
+            info = f"{disp_name}  F:{rel_f:.2f} S:{rel_s:.2f}"
+
+            img_path = stats.get("image")
+            img = None
+            if img_path:
+                abs_path = os.path.join(os.path.dirname(__file__), img_path)
+                if name not in encounter_images:
+                    encounter_images[name] = load_scaled_image(abs_path, 100, 63)
+                img = encounter_images.get(name)
+            if img:
+                slot["img"].configure(image=img)
+                slot["img"].image = img
+            else:
+                slot["img"].configure(image="")
+                slot["img"].image = None
+
+            slot["info"].configure(text=info)
+            slot["btn"].configure(command=lambda n=name, j=juvenile: do_hunt(n, j))
+            slot["frame"].pack(fill="x", pady=2, expand=True)
 
     # Top-right map
     map_frame = tk.Frame(main)
