@@ -73,6 +73,11 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     """Run the game using a graphical interface."""
     game = Game(setting, dinosaur_name)
 
+    root = tk.Tk()
+    root.title("Dinosaur Survival")
+    root.geometry("1200x800")
+    root.minsize(1200, 800)
+
     # Preload biome images if available
     assets_dir = os.path.join(os.path.dirname(__file__), "assets", "biomes")
     biome_images: dict[str, tk.PhotoImage] = {}
@@ -80,12 +85,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         fname = f"{game.setting.formation.lower()}_{tname}.png"
         path = os.path.join(assets_dir, fname)
         if os.path.exists(path):
-            biome_images[tname] = tk.PhotoImage(file=path)
-
-    root = tk.Tk()
-    root.title("Dinosaur Survival")
-    root.geometry("1200x800")
-    root.minsize(1200, 800)
+            biome_images[tname] = tk.PhotoImage(master=root, file=path)
 
     main = tk.Frame(root)
     main.pack(fill="both", expand=True)
