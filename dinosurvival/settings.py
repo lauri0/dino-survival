@@ -6,12 +6,14 @@ from .map import Terrain
 @dataclass
 class Setting:
     name: str
+    formation: str
     playable_dinos: Dict[str, Dict]
     terrains: Dict[str, Terrain]
 
 
 MORRISON = Setting(
     name="Morrison Formation",
+    formation="Morrison",
     playable_dinos={
         "Allosaurus": {"energy_threshold": 0, "growth_stages": 3},
         "Ceratosaurus": {"energy_threshold": 0, "growth_stages": 3},
@@ -30,6 +32,7 @@ MORRISON = Setting(
 
 HELL_CREEK = Setting(
     name="Hell Creek",
+    formation="Hell Creek",
     playable_dinos={
         "Tyrannosaurus": {"energy_threshold": 0, "growth_stages": 4},
         "Dakotaraptor": {"energy_threshold": 0, "growth_stages": 3},
