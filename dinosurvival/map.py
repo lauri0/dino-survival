@@ -14,15 +14,25 @@ class Map:
         self.height = height
         self.terrains = terrains
         terrain_list = list(terrains.values())
-        noise = self._generate_noise(width, height)
-        self.grid = []
-        for y in range(height):
-            row: List[Terrain] = []
-            for x in range(width):
-                n = noise[y][x]
-                idx = min(int(n * len(terrain_list)), len(terrain_list) - 1)
-                row.append(terrain_list[idx])
-            self.grid.append(row)
+        # Keep generating maps until at least one lake tile is present
+        has_lake = False
+        while not has_lake:
+            noise = self._generate_noise(width, height)
+            grid: List[List[Terrain]] = []
+            has_lake = False
+            for y in range(height):
+                row: List[Terrain] = []
+                for x in range(width):
+                    n = noise[y][x]
+                    idx = min(int(n * len(terrain_list)), len(terrain_list) - 1)
+                    terrain = terrain_list[idx]
+                    if terrain.name == "lake":
+                        has_lake = True
+                    row.append(terrain)
+                grid.append(row)
+            if has_lake:
+                self.grid = grid
+        
         self.revealed = [[False for _ in range(width)] for _ in range(height)]
 
     def terrain_at(self, x: int, y: int) -> Terrain:

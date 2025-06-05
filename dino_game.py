@@ -152,7 +152,6 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         if "Game Over" in result:
             for b in move_buttons.values():
                 b.config(state="disabled")
-            messagebox.showinfo("Game Over", "Game Over")
 
     def update_encounters() -> None:
         for w in encounter_list.winfo_children():
