@@ -21,9 +21,14 @@ class DinosaurStats:
     energy: float = 100.0
     weight: float = 0.0
     health_regen: float = 0.0
+    hydration: float = 100.0
+    hydration_drain: float = 0.0
 
     def is_exhausted(self) -> bool:
         return self.energy <= 0
+
+    def is_dehydrated(self) -> bool:
+        return self.hydration <= 0
 
     def grow(self):
         if self.growth_stages > 0:

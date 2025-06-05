@@ -57,7 +57,7 @@ def run_game(setting, dinosaur_name: str | None = None):
     else:
         dino_name = dinosaur_name
     game = Game(setting, dino_name)
-    print("Type commands: north, south, east, west, hunt, quit")
+    print("Type commands: north, south, east, west, hunt, drink, quit")
     while True:
         action = input("> ").strip()
         if action == "quit":
@@ -98,6 +98,12 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     def update_biome() -> None:
         terrain = game.map.terrain_at(game.x, game.y)
         biome_var.set(f"Biome: {terrain.name}")
+        update_drink_button()
+
+    def update_drink_button() -> None:
+        terrain = game.map.terrain_at(game.x, game.y)
+        state = "normal" if terrain.name == "lake" else "disabled"
+        move_buttons["drink"].config(state=state)
 
     # Movement buttons
     btn_frame = tk.Frame(control_frame)
@@ -120,8 +126,10 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     move_buttons["east"] = tk.Button(btn_frame, text="East", width=8, command=lambda: perform("east"))
     move_buttons["west"] = tk.Button(btn_frame, text="West", width=8, command=lambda: perform("west"))
     move_buttons["stay"] = tk.Button(btn_frame, text="Stay", width=8, command=lambda: perform("stay"))
+    move_buttons["drink"] = tk.Button(btn_frame, text="Drink", width=8, command=lambda: perform("drink"))
 
     move_buttons["north"].grid(row=0, column=1)
+    move_buttons["drink"].grid(row=0, column=2)
     move_buttons["west"].grid(row=1, column=0)
     move_buttons["stay"].grid(row=1, column=1)
     move_buttons["east"].grid(row=1, column=2)
@@ -139,6 +147,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         result = game.hunt_dinosaur(target_name, juvenile)
         append_output(result)
         update_stats()
+        update_drink_button()
         update_encounters()
         if "Game Over" in result:
             for b in move_buttons.values():
@@ -262,6 +271,10 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             text=f"Energy: {game.player.energy:.0f}%",
             fg=color_for(game.player.energy),
         )
+        hydration_label.config(
+            text=f"Hydration: {game.player.hydration:.0f}%",
+            fg=color_for(game.player.hydration),
+        )
         pct = 0.0
         growth_range = game.player.adult_weight - game.player.hatchling_weight
         if growth_range > 0:
@@ -287,6 +300,8 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     health_label.pack()
     energy_label = tk.Label(stats_frame, font=("Helvetica", 16))
     energy_label.pack()
+    hydration_label = tk.Label(stats_frame, font=("Helvetica", 16))
+    hydration_label.pack()
     weight_label = tk.Label(stats_frame, font=("Helvetica", 16))
     weight_label.pack()
     fierce_label = tk.Label(stats_frame, font=("Helvetica", 16))
