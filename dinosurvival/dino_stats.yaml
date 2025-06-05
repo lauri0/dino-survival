@@ -2,9 +2,9 @@
   "Allosaurus": {
     "name": "Allosaurus",
     "formations": ["Morrison"],
-    "growth_speed": 2.0,
+    "growth_speed": 10.0,
     "hatchling_weight": 10.0,
-    "adult_weight": 1500.0,
+    "adult_weight": 3000.0,
     "hatchling_fierceness": 10,
     "adult_fierceness": 80,
     "hatchling_speed": 80,
@@ -28,7 +28,7 @@
   "Ceratosaurus": {
     "name": "Ceratosaurus",
     "formations": ["Morrison"],
-    "growth_speed": 2.1,
+    "growth_speed": 6.0,
     "hatchling_weight": 9.0,
     "adult_weight": 980.0,
     "hatchling_fierceness": 9,
@@ -54,7 +54,7 @@
   "Torvosaurus": {
     "name": "Torvosaurus",
     "formations": ["Morrison"],
-    "growth_speed": 1.8,
+    "growth_speed": 8.0,
     "hatchling_weight": 12.0,
     "adult_weight": 2000.0,
     "hatchling_fierceness": 11,
