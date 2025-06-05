@@ -78,9 +78,16 @@ class Game:
                 f"You fought the {target_name} but received fatal injuries. Game Over."
             )
 
-        self.player.energy = 100.0
-        weight_gain = target_weight * target.get("carcass_food_value_modifier", 1.0)
-        weight_gain = min(weight_gain, self.player.growth_speed)
+        prey_meat = target_weight * target.get("carcass_food_value_modifier", 1.0)
+        energy_gain = 1000 * prey_meat / max(self.player.weight, 0.1)
+        needed = 100.0 - self.player.energy
+        actual_energy_gain = min(energy_gain, needed)
+        self.player.energy = min(100.0, self.player.energy + actual_energy_gain)
+
+        meat_used = actual_energy_gain * self.player.weight / 1000
+        leftover_meat = max(0.0, prey_meat - meat_used)
+
+        weight_gain = min(leftover_meat, self.player.growth_speed)
         self.player.weight = min(
             self.player.weight + weight_gain,
             self.player.adult_weight,
