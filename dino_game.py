@@ -106,6 +106,25 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             else:
                 biome_images[tname] = tk.PhotoImage(master=root, file=path)
 
+    # Load player dinosaur image if available
+    dino_image = None
+    dino_image_path = DINO_STATS.get(dinosaur_name, {}).get("image")
+    if dino_image_path:
+        abs_path = os.path.join(os.path.dirname(__file__), dino_image_path)
+        if os.path.exists(abs_path):
+            if Image and ImageTk:
+                img = Image.open(abs_path)
+                target_w, target_h = 200, 150
+                scale = target_w / img.width
+                resample = getattr(getattr(Image, "Resampling", Image), "LANCZOS")
+                resized = img.resize((target_w, int(img.height * scale)), resample)
+                if resized.height > target_h:
+                    top = int((resized.height - target_h) / 2)
+                    resized = resized.crop((0, top, target_w, top + target_h))
+                dino_image = ImageTk.PhotoImage(resized, master=root)
+            else:
+                dino_image = tk.PhotoImage(master=root, file=abs_path)
+
     main = tk.Frame(root)
     main.pack(fill="both", expand=True)
 
@@ -121,6 +140,9 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     biome_frame.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
     biome_frame.grid_propagate(False)
 
+    biome_image_label = tk.Label(biome_frame)
+    biome_image_label.pack(pady=(0, 10))
+
     biome_var = tk.StringVar()
     biome_label = tk.Label(biome_frame, textvariable=biome_var, font=("Helvetica", 16))
     biome_label.pack(pady=(0, 2))
@@ -129,12 +151,20 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     danger_label = tk.Label(biome_frame, textvariable=danger_var, font=("Helvetica", 14))
     danger_label.pack(pady=(0, 2))
 
-    biome_image_label = tk.Label(biome_frame)
-    biome_image_label.pack(pady=(0, 10))
+    # Player dinosaur image in the top middle
+    dino_frame = tk.Frame(main, width=200)
+    dino_frame.grid(row=0, column=1, sticky="nsew", padx=10, pady=10)
+    dino_frame.grid_propagate(False)
+
+    dino_image_label = tk.Label(dino_frame)
+    if dino_image:
+        dino_image_label.configure(image=dino_image)
+        dino_image_label.image = dino_image
+    dino_image_label.pack()
 
     def update_biome() -> None:
         terrain = game.map.terrain_at(game.x, game.y)
-        biome_var.set(f"Biome: {terrain.name}")
+        biome_var.set(terrain.name.capitalize())
         danger = game.map.danger_at(game.x, game.y)
         danger_var.set(f"Danger: {danger:.0f}")
         img = biome_images.get(terrain.name)
@@ -151,9 +181,9 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         state = "normal" if terrain.name == "lake" else "disabled"
         move_buttons["drink"].config(state=state)
 
-    # Movement buttons between biome info and map
+    # Movement buttons on the bottom right
     btn_frame = tk.Frame(main, width=200)
-    btn_frame.grid(row=0, column=1, sticky="nsew", padx=10, pady=10)
+    btn_frame.grid(row=1, column=2, sticky="nsew", padx=10, pady=10)
     btn_frame.grid_propagate(False)
 
     def perform(action: str) -> None:
@@ -340,9 +370,9 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         fierce_label.config(text=f"Fierceness: {game.player.fierceness:.1f}")
         speed_label.config(text=f"Speed: {game.player.speed:.1f}")
 
-    # Bottom-right stats
+    # Bottom middle stats
     stats_frame = tk.Frame(main)
-    stats_frame.grid(row=1, column=2, sticky="nsew", padx=10, pady=10)
+    stats_frame.grid(row=1, column=1, sticky="nsew", padx=10, pady=10)
 
     tk.Label(stats_frame, text=f"Dinosaur: {dinosaur_name}", font=("Helvetica", 16)).pack()
     health_label = tk.Label(stats_frame, font=("Helvetica", 16))
