@@ -75,8 +75,8 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
 
     root = tk.Tk()
     root.title("Dinosaur Survival")
-    root.geometry("1200x800")
-    root.minsize(1200, 800)
+    root.geometry("1400x800")
+    root.minsize(1400, 800)
 
     # Preload biome images if available
     assets_dir = os.path.join(os.path.dirname(__file__), "assets", "biomes")
@@ -114,7 +114,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         if os.path.exists(abs_path):
             if Image and ImageTk:
                 img = Image.open(abs_path)
-                target_w, target_h = 200, 150
+                target_w, target_h = 400, 250
                 scale = target_w / img.width
                 resample = getattr(getattr(Image, "Resampling", Image), "LANCZOS")
                 resized = img.resize((target_w, int(img.height * scale)), resample)
