@@ -81,11 +81,30 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     # Preload biome images if available
     assets_dir = os.path.join(os.path.dirname(__file__), "assets", "biomes")
     biome_images: dict[str, tk.PhotoImage] = {}
+
+    try:
+        from PIL import Image, ImageTk  # type: ignore
+    except Exception:
+        Image = None  # type: ignore
+        ImageTk = None  # type: ignore
+
     for tname in game.setting.terrains.keys():
         fname = f"{game.setting.formation.lower()}_{tname}.png"
         path = os.path.join(assets_dir, fname)
         if os.path.exists(path):
-            biome_images[tname] = tk.PhotoImage(master=root, file=path)
+            if Image and ImageTk:
+                img = Image.open(path)
+                target_w, target_h = 400, 250
+                scale = target_w / img.width
+                # Use LANCZOS resampling if available
+                resample = getattr(getattr(Image, "Resampling", Image), "LANCZOS")
+                resized = img.resize((target_w, int(img.height * scale)), resample)
+                if resized.height > target_h:
+                    top = int((resized.height - target_h) / 2)
+                    resized = resized.crop((0, top, target_w, top + target_h))
+                biome_images[tname] = ImageTk.PhotoImage(resized, master=root)
+            else:
+                biome_images[tname] = tk.PhotoImage(master=root, file=path)
 
     main = tk.Frame(root)
     main.pack(fill="both", expand=True)
