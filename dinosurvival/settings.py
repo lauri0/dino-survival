@@ -21,12 +21,12 @@ MORRISON = Setting(
         "Ornitholestes": {"energy_threshold": 0, "growth_stages": 3},
     },
     terrains={
-        "plains": Terrain("plains", {"small_prey": 0.8, "large_prey": 0.2}),
-        "forest": Terrain("forest", {"small_prey": 0.6, "large_prey": 0.4}),
-        "swamp": Terrain("swamp", {"small_prey": 0.7, "large_prey": 0.3}),
-        "woodlands": Terrain("woodlands", {"small_prey": 0.6, "large_prey": 0.4}),
-        "badlands": Terrain("badlands", {"small_prey": 0.3, "large_prey": 0.7}),
-        "lake": Terrain("lake", {"small_prey": 0.9, "large_prey": 0.1}),
+        "badlands": Terrain("badlands", {"small_prey": 0.3, "large_prey": 0.7}, abundance=0.15),
+        "plains": Terrain("plains", {"small_prey": 0.8, "large_prey": 0.2}, abundance=0.25),
+        "woodlands": Terrain("woodlands", {"small_prey": 0.6, "large_prey": 0.4}, abundance=0.15),
+        "forest": Terrain("forest", {"small_prey": 0.6, "large_prey": 0.4}, abundance=0.25),
+        "swamp": Terrain("swamp", {"small_prey": 0.7, "large_prey": 0.3}, abundance=0.05),
+        "lake": Terrain("lake", {"small_prey": 0.9, "large_prey": 0.1}, abundance=0.15),
     },
 )
 
@@ -38,11 +38,11 @@ HELL_CREEK = Setting(
         "Dakotaraptor": {"energy_threshold": 0, "growth_stages": 3},
     },
     terrains={
-        "floodplain": Terrain("floodplain", {"small_prey": 0.4, "large_prey": 0.6}),
-        "forest": Terrain("forest", {"small_prey": 0.7, "large_prey": 0.3}),
-        "swamp": Terrain("swamp", {"small_prey": 0.7, "large_prey": 0.3}),
-        "woodlands": Terrain("woodlands", {"small_prey": 0.6, "large_prey": 0.4}),
-        "badlands": Terrain("badlands", {"small_prey": 0.3, "large_prey": 0.7}),
-        "lake": Terrain("lake", {"small_prey": 0.9, "large_prey": 0.1}),
+        "badlands": Terrain("badlands", {"small_prey": 0.3, "large_prey": 0.7}, abundance=0.15),
+        "floodplain": Terrain("floodplain", {"small_prey": 0.4, "large_prey": 0.6}, abundance=0.25),
+        "woodlands": Terrain("woodlands", {"small_prey": 0.6, "large_prey": 0.4}, abundance=0.15),
+        "forest": Terrain("forest", {"small_prey": 0.7, "large_prey": 0.3}, abundance=0.25),
+        "swamp": Terrain("swamp", {"small_prey": 0.7, "large_prey": 0.3}, abundance=0.05),
+        "lake": Terrain("lake", {"small_prey": 0.9, "large_prey": 0.1}, abundance=0.15),
     },
 )

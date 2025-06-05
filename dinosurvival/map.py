@@ -6,6 +6,7 @@ import random
 class Terrain:
     name: str
     spawn_chance: Dict[str, float]
+    abundance: float = 1.0
 
 
 class Map:
@@ -14,6 +15,17 @@ class Map:
         self.height = height
         self.terrains = terrains
         terrain_list = list(terrains.values())
+        abundances = [t.abundance for t in terrain_list]
+        total_abundance = sum(abundances)
+        if total_abundance <= 0:
+            thresholds = [(i + 1) / len(terrain_list) for i in range(len(terrain_list))]
+        else:
+            cumulative = 0.0
+            thresholds = []
+            for a in abundances:
+                cumulative += a
+                thresholds.append(cumulative / total_abundance)
+
         # Keep generating maps until at least one lake tile is present
         has_lake = False
         while not has_lake:
@@ -24,8 +36,12 @@ class Map:
                 row: List[Terrain] = []
                 for x in range(width):
                     n = noise[y][x]
-                    idx = min(int(n * len(terrain_list)), len(terrain_list) - 1)
-                    terrain = terrain_list[idx]
+                    for idx, tval in enumerate(thresholds):
+                        if n <= tval:
+                            terrain = terrain_list[idx]
+                            break
+                    else:
+                        terrain = terrain_list[-1]
                     if terrain.name == "lake":
                         has_lake = True
                     row.append(terrain)
