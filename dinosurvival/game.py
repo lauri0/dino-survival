@@ -36,20 +36,24 @@ class Game:
             else self.player.adult_energy_drain
         )
 
+    def _start_turn(self) -> str:
+        self.map.decay_danger()
+        self.player.hydration = max(
+            0.0, self.player.hydration - self.player.hydration_drain
+        )
+        if self.player.is_dehydrated():
+            return "\nYou have perished from dehydration! Game Over."
+        return ""
+
     def _apply_turn_costs(self, moved: bool, multiplier: float = 1.0) -> str:
         drain = self._base_energy_drain()
         if moved:
             drain *= self.player.walking_energy_drain_multiplier
         drain *= multiplier
         self.player.energy = max(0.0, self.player.energy - drain)
-        self.player.hydration = max(
-            0.0, self.player.hydration - self.player.hydration_drain
-        )
         message = ""
         if self.player.is_exhausted():
             message = "\nYou have collapsed from exhaustion! Game Over."
-        if self.player.is_dehydrated():
-            message = "\nYou have perished from dehydration! Game Over."
         regen = getattr(self.player, "health_regen", 0.0)
         if regen and not message:
             self.player.health = min(100.0, self.player.health + regen)
@@ -64,6 +68,7 @@ class Game:
         success = random.random() < 0.6  # simple success rate
         if success:
             self.player.energy = 100.0
+            self.map.increase_danger(self.x, self.y)
             self._energy_multiplier = 1.0
             return f"Caught {prey_type}!"
         self._energy_multiplier = 5.0
@@ -110,6 +115,7 @@ class Game:
             )
 
         prey_meat = target_weight * target.get("carcass_food_value_modifier", 1.0)
+        self.map.increase_danger(self.x, self.y)
         energy_gain = 1000 * prey_meat / max(self.player.weight, 0.1)
         needed = 100.0 - self.player.energy
         actual_energy_gain = min(energy_gain, needed)
@@ -151,6 +157,9 @@ class Game:
         self.map.reveal(self.x, self.y)
 
     def turn(self, action: str) -> str:
+        pre = self._start_turn()
+        if pre:
+            return pre
         moved = False
         if action == "hunt":
             result = self.hunt()

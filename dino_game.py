@@ -160,6 +160,9 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         player_f = game.player.fierceness or 1
         player_s = game.player.speed or 1
         for name, stats in DINO_STATS.items():
+            formations = stats.get("formations", [])
+            if game.setting.formation not in formations:
+                continue
             chance = stats.get("encounter_chance", {}).get(terrain, 0)
             if random.random() < chance:
                 juvenile = random.random() < 0.5

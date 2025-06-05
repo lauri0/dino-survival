@@ -1,6 +1,7 @@
 {
   "Allosaurus": {
     "name": "Allosaurus",
+    "formations": ["Morrison"],
     "growth_speed": 2.0,
     "hatchling_weight": 10.0,
     "adult_weight": 1500.0,
@@ -26,6 +27,7 @@
   },
   "Ceratosaurus": {
     "name": "Ceratosaurus",
+    "formations": ["Morrison"],
     "growth_speed": 2.1,
     "hatchling_weight": 9.0,
     "adult_weight": 980.0,
@@ -51,6 +53,7 @@
   },
   "Torvosaurus": {
     "name": "Torvosaurus",
+    "formations": ["Morrison"],
     "growth_speed": 1.8,
     "hatchling_weight": 12.0,
     "adult_weight": 2000.0,
@@ -76,6 +79,7 @@
   },
   "Ornitholestes": {
     "name": "Ornitholestes",
+    "formations": ["Morrison"],
     "growth_speed": 2.5,
     "hatchling_weight": 2.0,
     "adult_weight": 20.0,
@@ -101,6 +105,7 @@
   },
   "Nanosaurus": {
     "name": "Nanosaurus",
+    "formations": ["Morrison"],
     "growth_speed": 2.8,
     "hatchling_weight": 0.5,
     "adult_weight": 10.0,
@@ -126,6 +131,7 @@
   },
   "Dryosaurus": {
     "name": "Dryosaurus",
+    "formations": ["Morrison"],
     "growth_speed": 2.4,
     "hatchling_weight": 1.0,
     "adult_weight": 80.0,
@@ -151,6 +157,7 @@
   },
   "Camptosaurus": {
     "name": "Camptosaurus",
+    "formations": ["Morrison"],
     "growth_speed": 2.0,
     "hatchling_weight": 5.0,
     "adult_weight": 700.0,
@@ -176,6 +183,7 @@
   },
   "Stegosaurus": {
     "name": "Stegosaurus",
+    "formations": ["Morrison"],
     "growth_speed": 1.5,
     "hatchling_weight": 5.0,
     "adult_weight": 3000.0,
