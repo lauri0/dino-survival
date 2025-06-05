@@ -25,7 +25,8 @@ class Game:
         self.player.speed = self.player.hatchling_speed
         self.map = Map(width, height, setting.terrains)
 
-        # Pick a random starting location no more than two tiles from a lake
+        # Pick a random starting location that is within two tiles of a lake but
+        # not on a lake tile itself
         candidates = set()
         for ly in range(height):
             for lx in range(width):
@@ -34,7 +35,8 @@ class Game:
                         for dx in range(-2, 3):
                             nx, ny = lx + dx, ly + dy
                             if 0 <= nx < width and 0 <= ny < height:
-                                candidates.add((nx, ny))
+                                if self.map.terrain_at(nx, ny).name != "lake":
+                                    candidates.add((nx, ny))
         # Fallback to map center if something went wrong
         if candidates:
             self.x, self.y = random.choice(list(candidates))
