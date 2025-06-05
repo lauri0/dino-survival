@@ -24,8 +24,23 @@ class Game:
         self.player.fierceness = self.player.hatchling_fierceness
         self.player.speed = self.player.hatchling_speed
         self.map = Map(width, height, setting.terrains)
-        self.x = width // 2
-        self.y = height // 2
+
+        # Pick a random starting location no more than two tiles from a lake
+        candidates = set()
+        for ly in range(height):
+            for lx in range(width):
+                if self.map.terrain_at(lx, ly).name == "lake":
+                    for dy in range(-2, 3):
+                        for dx in range(-2, 3):
+                            nx, ny = lx + dx, ly + dy
+                            if 0 <= nx < width and 0 <= ny < height:
+                                candidates.add((nx, ny))
+        # Fallback to map center if something went wrong
+        if candidates:
+            self.x, self.y = random.choice(list(candidates))
+        else:
+            self.x = width // 2
+            self.y = height // 2
         self.map.reveal(self.x, self.y)
         self._energy_multiplier = 1.0
 
