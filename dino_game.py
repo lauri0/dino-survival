@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 import random
+import os
 from dinosurvival.game import Game, DINO_STATS
 from dinosurvival.settings import MORRISON, HELL_CREEK
 
@@ -72,6 +73,15 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     """Run the game using a graphical interface."""
     game = Game(setting, dinosaur_name)
 
+    # Preload biome images if available
+    assets_dir = os.path.join(os.path.dirname(__file__), "assets", "biomes")
+    biome_images: dict[str, tk.PhotoImage] = {}
+    for tname in game.setting.terrains.keys():
+        fname = f"{game.setting.formation.lower()}_{tname}.png"
+        path = os.path.join(assets_dir, fname)
+        if os.path.exists(path):
+            biome_images[tname] = tk.PhotoImage(file=path)
+
     root = tk.Tk()
     root.title("Dinosaur Survival")
     root.geometry("1200x800")
@@ -83,27 +93,38 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     main.grid_rowconfigure(0, weight=1)
     main.grid_rowconfigure(1, weight=0)
     main.grid_rowconfigure(2, weight=1)
-    main.grid_columnconfigure(0, weight=0, minsize=400)
-    main.grid_columnconfigure(1, weight=1)
+    main.grid_columnconfigure(0, weight=0, minsize=200)
+    main.grid_columnconfigure(1, weight=0, minsize=200)
+    main.grid_columnconfigure(2, weight=1)
 
-    # Top-left controls and biome
-    control_frame = tk.Frame(main, width=400)
-    control_frame.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
-    control_frame.grid_propagate(False)
+    # Biome information on the left
+    biome_frame = tk.Frame(main, width=200)
+    biome_frame.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
+    biome_frame.grid_propagate(False)
 
     biome_var = tk.StringVar()
-    biome_label = tk.Label(control_frame, textvariable=biome_var, font=("Helvetica", 16))
+    biome_label = tk.Label(biome_frame, textvariable=biome_var, font=("Helvetica", 16))
     biome_label.pack(pady=(0, 2))
 
     danger_var = tk.StringVar()
-    danger_label = tk.Label(control_frame, textvariable=danger_var, font=("Helvetica", 14))
-    danger_label.pack(pady=(0, 10))
+    danger_label = tk.Label(biome_frame, textvariable=danger_var, font=("Helvetica", 14))
+    danger_label.pack(pady=(0, 2))
+
+    biome_image_label = tk.Label(biome_frame)
+    biome_image_label.pack(pady=(0, 10))
 
     def update_biome() -> None:
         terrain = game.map.terrain_at(game.x, game.y)
         biome_var.set(f"Biome: {terrain.name}")
         danger = game.map.danger_at(game.x, game.y)
         danger_var.set(f"Danger: {danger:.0f}")
+        img = biome_images.get(terrain.name)
+        if img:
+            biome_image_label.configure(image=img)
+            biome_image_label.image = img
+        else:
+            biome_image_label.configure(image="")
+            biome_image_label.image = None
         update_drink_button()
 
     def update_drink_button() -> None:
@@ -111,9 +132,10 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         state = "normal" if terrain.name == "lake" else "disabled"
         move_buttons["drink"].config(state=state)
 
-    # Movement buttons
-    btn_frame = tk.Frame(control_frame)
-    btn_frame.pack()
+    # Movement buttons between biome info and map
+    btn_frame = tk.Frame(main, width=200)
+    btn_frame.grid(row=0, column=1, sticky="nsew", padx=10, pady=10)
+    btn_frame.grid_propagate(False)
 
     def perform(action: str) -> None:
         result = game.turn(action)
@@ -209,7 +231,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
 
     # Top-right map
     map_frame = tk.Frame(main)
-    map_frame.grid(row=0, column=1, sticky="nsew", padx=10, pady=10)
+    map_frame.grid(row=0, column=2, sticky="nsew", padx=10, pady=10)
 
     map_tiles = []
     tile_size = 20
@@ -301,7 +323,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
 
     # Bottom-right stats
     stats_frame = tk.Frame(main)
-    stats_frame.grid(row=1, column=1, sticky="nsew", padx=10, pady=10)
+    stats_frame.grid(row=1, column=2, sticky="nsew", padx=10, pady=10)
 
     tk.Label(stats_frame, text=f"Dinosaur: {dinosaur_name}", font=("Helvetica", 16)).pack()
     health_label = tk.Label(stats_frame, font=("Helvetica", 16))
@@ -320,7 +342,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
 
     # Bottom text output
     text_frame = tk.Frame(main)
-    text_frame.grid(row=2, column=0, columnspan=2, sticky="nsew")
+    text_frame.grid(row=2, column=0, columnspan=3, sticky="nsew")
     text_frame.grid_rowconfigure(0, weight=1)
     text_frame.grid_columnconfigure(0, weight=1)
 
