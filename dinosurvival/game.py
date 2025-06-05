@@ -27,6 +27,33 @@ class Game:
         self.x = width // 2
         self.y = height // 2
         self.map.reveal(self.x, self.y)
+        self._energy_multiplier = 1.0
+
+    def _base_energy_drain(self) -> float:
+        return (
+            self.player.hatchling_energy_drain
+            if self.player.growth_stages > 0
+            else self.player.adult_energy_drain
+        )
+
+    def _apply_turn_costs(self, moved: bool, multiplier: float = 1.0) -> str:
+        drain = self._base_energy_drain()
+        if moved:
+            drain *= self.player.walking_energy_drain_multiplier
+        drain *= multiplier
+        self.player.energy = max(0.0, self.player.energy - drain)
+        self.player.hydration = max(
+            0.0, self.player.hydration - self.player.hydration_drain
+        )
+        message = ""
+        if self.player.is_exhausted():
+            message = "\nYou have collapsed from exhaustion! Game Over."
+        if self.player.is_dehydrated():
+            message = "\nYou have perished from dehydration! Game Over."
+        regen = getattr(self.player, "health_regen", 0.0)
+        if regen and not message:
+            self.player.health = min(100.0, self.player.health + regen)
+        return message
 
     def hunt(self):
         terrain = self.map.terrain_at(self.x, self.y)
@@ -37,7 +64,9 @@ class Game:
         success = random.random() < 0.6  # simple success rate
         if success:
             self.player.energy = 100.0
+            self._energy_multiplier = 1.0
             return f"Caught {prey_type}!"
+        self._energy_multiplier = 5.0
         return f"Failed to catch {prey_type}."
 
     def hunt_dinosaur(self, target_name: str, juvenile: bool = False) -> str:
@@ -66,7 +95,9 @@ class Game:
             target_weight = target.get("adult_weight", 0.0)
         catch_chance = player_speed / (player_speed + target_speed)
         if random.random() > catch_chance:
-            return f"The {target_name} escaped before you could catch it."
+            msg = f"The {target_name} escaped before you could catch it."
+            msg += self._apply_turn_costs(False, 5.0)
+            return msg
 
         player_f = max(self.player.fierceness, 0.1)
         target_f = max(target_f, 0.1)
@@ -107,9 +138,11 @@ class Game:
                 + pct * (self.player.adult_speed - self.player.hatchling_speed)
             )
 
-        return (
+        msg = (
             f"You caught and defeated the {target_name} but lost {damage:.0f}% health."
         )
+        msg += self._apply_turn_costs(False)
+        return msg
 
     def move(self, dx: int, dy: int):
         nx = max(0, min(self.map.width - 1, self.x + dx))
@@ -139,23 +172,15 @@ class Game:
             result = "Moved west"
         elif action == "stay":
             result = "Stayed put"
+        elif action == "drink":
+            if self.map.terrain_at(self.x, self.y).name == "lake":
+                self.player.hydration = 100.0
+                result = "You drink from the lake."
+            else:
+                result = "There is no water source here."
         else:
             result = "Unknown action"
 
-        drain = (
-            self.player.hatchling_energy_drain
-            if self.player.growth_stages > 0
-            else self.player.adult_energy_drain
-        )
-        if moved:
-            drain *= self.player.walking_energy_drain_multiplier
-        self.player.energy = max(0.0, self.player.energy - drain)
-
-        if self.player.is_exhausted():
-            return result + "\nYou have collapsed from exhaustion! Game Over."
-
-        regen = getattr(self.player, "health_regen", 0.0)
-        if regen:
-            self.player.health = min(100.0, self.player.health + regen)
-
+        result += self._apply_turn_costs(moved, self._energy_multiplier)
+        self._energy_multiplier = 1.0
         return result

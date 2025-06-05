@@ -13,6 +13,7 @@
     "walking_energy_drain_multiplier": 1.2,
     "carcass_food_value_modifier": 0.7,
     "health_regen": 2.5,
+    "hydration_drain": 2.5,
     "encounter_chance": {
       "plains": 0.05,
       "forest": 0.04,
@@ -37,6 +38,7 @@
     "walking_energy_drain_multiplier": 1.1,
     "carcass_food_value_modifier": 0.68,
     "health_regen": 2.5,
+    "hydration_drain": 2.5,
     "encounter_chance": {
       "plains": 0.04,
       "forest": 0.05,
@@ -61,6 +63,7 @@
     "walking_energy_drain_multiplier": 1.3,
     "carcass_food_value_modifier": 0.72,
     "health_regen": 2.5,
+    "hydration_drain": 2.5,
     "encounter_chance": {
       "plains": 0.03,
       "forest": 0.02,
@@ -85,6 +88,7 @@
     "walking_energy_drain_multiplier": 1.0,
     "carcass_food_value_modifier": 0.6,
     "health_regen": 2.5,
+    "hydration_drain": 2.5,
     "encounter_chance": {
       "plains": 0.05,
       "forest": 0.06,
@@ -109,6 +113,7 @@
     "walking_energy_drain_multiplier": 1.0,
     "carcass_food_value_modifier": 0.5,
     "health_regen": 2.5,
+    "hydration_drain": 2.5,
     "encounter_chance": {
       "plains": 0.06,
       "forest": 0.05,
@@ -133,6 +138,7 @@
     "walking_energy_drain_multiplier": 1.0,
     "carcass_food_value_modifier": 0.55,
     "health_regen": 2.5,
+    "hydration_drain": 2.5,
     "encounter_chance": {
       "plains": 0.05,
       "forest": 0.05,
@@ -157,6 +163,7 @@
     "walking_energy_drain_multiplier": 1.1,
     "carcass_food_value_modifier": 0.65,
     "health_regen": 2.5,
+    "hydration_drain": 2.5,
     "encounter_chance": {
       "plains": 0.04,
       "forest": 0.03,
@@ -181,6 +188,7 @@
     "walking_energy_drain_multiplier": 1.2,
     "carcass_food_value_modifier": 0.6,
     "health_regen": 2.5,
+    "hydration_drain": 2.5,
     "encounter_chance": {
       "plains": 0.03,
       "forest": 0.02,
