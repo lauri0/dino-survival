@@ -93,11 +93,17 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
 
     biome_var = tk.StringVar()
     biome_label = tk.Label(control_frame, textvariable=biome_var, font=("Helvetica", 16))
-    biome_label.pack(pady=(0, 10))
+    biome_label.pack(pady=(0, 2))
+
+    danger_var = tk.StringVar()
+    danger_label = tk.Label(control_frame, textvariable=danger_var, font=("Helvetica", 14))
+    danger_label.pack(pady=(0, 10))
 
     def update_biome() -> None:
         terrain = game.map.terrain_at(game.x, game.y)
         biome_var.set(f"Biome: {terrain.name}")
+        danger = game.map.danger_at(game.x, game.y)
+        danger_var.set(f"Danger: {danger:.0f}")
         update_drink_button()
 
     def update_drink_button() -> None:
