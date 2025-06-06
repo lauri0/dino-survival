@@ -77,7 +77,7 @@ class Map:
                         amt = 10.0
                     self.danger[ny][nx] = min(100.0, self.danger[ny][nx] + amt)
 
-    def decay_danger(self, amount: float = 2.0) -> None:
+    def decay_danger(self, amount: float = 1.0) -> None:
         for y in range(self.height):
             for x in range(self.width):
                 self.danger[y][x] = max(0.0, self.danger[y][x] - amount)
