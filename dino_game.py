@@ -134,13 +134,17 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     biome_image_label = tk.Label(biome_frame)
     biome_image_label.pack(pady=(0, 10))
 
+    # Biome name and danger value on the same row
+    biome_row = tk.Frame(biome_frame)
+    biome_row.pack(pady=(0, 2))
+
     biome_var = tk.StringVar()
-    biome_label = tk.Label(biome_frame, textvariable=biome_var, font=("Helvetica", 16))
-    biome_label.pack(pady=(0, 2))
+    biome_label = tk.Label(biome_row, textvariable=biome_var, font=("Helvetica", 16))
+    biome_label.pack(side="left")
 
     danger_var = tk.StringVar()
-    danger_label = tk.Label(biome_frame, textvariable=danger_var, font=("Helvetica", 14))
-    danger_label.pack(pady=(0, 2))
+    danger_label = tk.Label(biome_row, textvariable=danger_var, font=("Helvetica", 14))
+    danger_label.pack(side="left", padx=(5, 0))
 
     # Player dinosaur image in the top middle
     dino_frame = tk.Frame(main, width=200)
@@ -157,7 +161,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         terrain = game.map.terrain_at(game.x, game.y)
         biome_var.set(terrain.name.capitalize())
         danger = game.map.danger_at(game.x, game.y)
-        danger_var.set(f"Danger: {danger:.0f}")
+        danger_var.set(f"(Danger: {danger:.0f})")
         img = biome_images.get(terrain.name)
         if img:
             biome_image_label.configure(image=img)
@@ -219,7 +223,6 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     encounter_frame = tk.Frame(main, width=400)
     encounter_frame.grid(row=1, column=0, sticky="nsew", padx=10, pady=10)
     encounter_frame.grid_propagate(False)
-    tk.Label(encounter_frame, text="Encounters", font=("Helvetica", 16)).pack()
     encounter_list = tk.Frame(encounter_frame)
     encounter_list.pack(fill="both", expand=True)
     encounter_rows = []
@@ -227,14 +230,17 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     for _ in range(4):
         row = tk.Frame(encounter_list)
         img = tk.Label(row)
+        info_frame = tk.Frame(row)
+        name_lbl = tk.Label(info_frame, font=("Helvetica", 12), anchor="w")
+        stats_lbl = tk.Label(info_frame, font=("Helvetica", 10), anchor="w")
+        name_lbl.pack(anchor="w")
+        stats_lbl.pack(anchor="w")
         btn = tk.Button(row, text="Hunt", width=4, height=3)
-        info = tk.Label(row, font=("Helvetica", 12), anchor="w", width=30)
-        img.grid(row=0, column=0, sticky="w")
-        btn.grid(row=0, column=1, sticky="e")
-        info.grid(row=1, column=0, columnspan=2, sticky="w")
-        row.grid_columnconfigure(0, weight=0)
+        img.grid(row=0, column=0, rowspan=2, sticky="w")
+        info_frame.grid(row=0, column=1, sticky="w", padx=5)
+        btn.grid(row=0, column=2, rowspan=2, sticky="e")
         row.grid_columnconfigure(1, weight=1)
-        encounter_rows.append({"frame": row, "img": img, "btn": btn, "info": info})
+        encounter_rows.append({"frame": row, "img": img, "name": name_lbl, "stats": stats_lbl, "btn": btn})
 
     def do_hunt(target_name: str, juvenile: bool) -> None:
         result = game.hunt_dinosaur(target_name, juvenile)
@@ -282,7 +288,6 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
 
             rel_f = target_f / player_f
             rel_s = target_s / player_s
-            info = f"{disp_name}  F:{rel_f:.2f} S:{rel_s:.2f}"
 
             img_path = stats.get("image")
             img = None
@@ -298,7 +303,8 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
                 slot["img"].configure(image="")
                 slot["img"].image = None
 
-            slot["info"].configure(text=info)
+            slot["name"].configure(text=disp_name)
+            slot["stats"].configure(text=f"F:{rel_f:.2f} S:{rel_s:.2f}")
             slot["btn"].configure(command=lambda n=name, j=juvenile: do_hunt(n, j))
             slot["frame"].pack(fill="x", pady=2, expand=True)
 
