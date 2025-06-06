@@ -404,7 +404,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     stats_frame = tk.Frame(main)
     stats_frame.grid(row=1, column=1, sticky="nsew", padx=10, pady=10)
 
-    tk.Label(stats_frame, text=f"Dinosaur: {dinosaur_name}", font=("Helvetica", 16)).pack()
+    tk.Label(stats_frame, text=f"{dinosaur_name}", font=("Helvetica", 16)).pack()
     health_label = tk.Label(stats_frame, font=("Helvetica", 16))
     health_label.pack()
     energy_label = tk.Label(stats_frame, font=("Helvetica", 16))
