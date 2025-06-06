@@ -30,12 +30,4 @@ class DinosaurStats:
     def is_dehydrated(self) -> bool:
         return self.hydration <= 0
 
-    def grow(self):
-        if self.growth_stages > 0:
-            self.growth_stages -= 1
-            self.energy = 100.0
-            if self.growth_stages == 0:
-                self.weight = self.adult_weight
-                self.fierceness = self.adult_fierceness
-                self.speed = self.adult_speed
 
