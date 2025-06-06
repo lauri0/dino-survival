@@ -133,13 +133,17 @@ class Map:
         for y in range(height):
             fy = y / (height - 1) * (coarse_h - 1)
             y0 = int(fy)
-            y1 = min(y0 + 1, coarse_h - 1)
+            # Wrap the indices so edge cells blend with values from the opposite
+            # side. This avoids extreme values accumulating along the map
+            # borders which previously made lakes cluster near the corners.
+            y1 = (y0 + 1) % coarse_h
             ty = fy - y0
             row = []
             for x in range(width):
                 fx = x / (width - 1) * (coarse_w - 1)
                 x0 = int(fx)
-                x1 = min(x0 + 1, coarse_w - 1)
+                # Wrap horizontally for the same reason as above
+                x1 = (x0 + 1) % coarse_w
                 tx = fx - x0
 
                 n00 = coarse[y0][x0]
