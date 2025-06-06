@@ -9,7 +9,7 @@
     "adult_speed": 30,
     "adult_energy_drain": 5.0,
     "walking_energy_drain_multiplier": 1.2,
-    "carcass_food_value_modifier": 0.7,
+    "carcass_food_value_modifier": 0.5,
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "encounter_chance": {
@@ -18,7 +18,7 @@
       "swamp": 0.01,
       "woodlands": 0.03,
       "badlands": 0.02,
-      "lake": 0.50,
+      "lake": 0.01,
       "floodplain": 0.03
     }
   },
@@ -32,12 +32,12 @@
     "adult_speed": 35,
     "adult_energy_drain": 5.0,
     "walking_energy_drain_multiplier": 1.1,
-    "carcass_food_value_modifier": 0.2,
+    "carcass_food_value_modifier": 0.5,
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "encounter_chance": {
       "plains": 0.02,
-      "forest": 0.04,
+      "forest": 0.08,
       "swamp": 0.01,
       "woodlands": 0.02,
       "badlands": 0.01,
@@ -78,12 +78,12 @@
     "adult_speed": 60,
     "adult_energy_drain": 5.0,
     "walking_energy_drain_multiplier": 1.1,
-    "carcass_food_value_modifier": 0.2,
+    "carcass_food_value_modifier": 0.8,
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "encounter_chance": {
       "plains": 0.03,
-      "forest": 0.04,
+      "forest": 0.06,
       "swamp": 0.03,
       "woodlands": 0.03,
       "badlands": 0.01,
@@ -101,7 +101,7 @@
     "adult_speed": 50,
     "adult_energy_drain": 5.0,
     "walking_energy_drain_multiplier": 1.1,
-    "carcass_food_value_modifier": 0.2,
+    "carcass_food_value_modifier": 0.5,
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "encounter_chance": {
@@ -124,7 +124,7 @@
     "adult_speed": 55,
     "adult_energy_drain": 5.0,
     "walking_energy_drain_multiplier": 1.1,
-    "carcass_food_value_modifier": 0.2,
+    "carcass_food_value_modifier": 0.5,
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "encounter_chance": {
