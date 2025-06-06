@@ -270,6 +270,8 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         terrain = game.map.terrain_at(game.x, game.y).name
         player_f = game.player.fierceness or 1
         player_s = game.player.speed or 1
+        danger = game.map.danger_at(game.x, game.y)
+        spawn_mult = max(0.0, 1.0 - danger / 100.0)
         entries: list[tuple[str, bool]] = []
         nest_state = game.map.nest_state(game.x, game.y)
         if nest_state and nest_state != "none":
@@ -282,6 +284,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             if game.setting.formation not in formations:
                 continue
             chance = stats.get("encounter_chance", {}).get(terrain, 0)
+            chance *= spawn_mult
             if random.random() < chance:
                 found.append((name, random.random() < 0.5))
         entries.extend(found)

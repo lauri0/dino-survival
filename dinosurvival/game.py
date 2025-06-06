@@ -79,6 +79,13 @@ class Game:
 
     def hunt(self):
         terrain = self.map.terrain_at(self.x, self.y)
+        # Danger on the current tile reduces the likelihood of finding prey
+        danger = self.map.danger_at(self.x, self.y)
+        spawn_multiplier = max(0.0, 1.0 - danger / 100.0)
+        if random.random() > spawn_multiplier:
+            self._energy_multiplier = 1.0
+            return "No prey in the area."
+
         prey_type = random.choices(
             list(terrain.spawn_chance.keys()),
             weights=list(terrain.spawn_chance.values()),
@@ -176,7 +183,6 @@ class Game:
         weight_map = {"small": 4.0, "medium": 10.0, "large": 20.0}
         egg_weight = weight_map.get(state, 0.0)
         self.map.take_eggs(self.x, self.y)
-        self.map.increase_danger(self.x, self.y)
 
         energy_gain = 1000 * egg_weight / max(self.player.weight, 0.1)
         needed = 100.0 - self.player.energy
