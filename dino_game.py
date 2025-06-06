@@ -259,7 +259,9 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             chance = stats.get("encounter_chance", {}).get(terrain, 0)
             chance *= spawn_mult
             if random.random() < chance:
-                found.append((name, random.random() < 0.5))
+                allow_j = stats.get("can_be_juvenile", True)
+                juvenile = allow_j and random.random() < 0.5
+                found.append((name, juvenile))
         entries.extend(found)
         for slot, (name, juvenile) in zip(encounter_rows, entries):
             if name.startswith("eggs:"):

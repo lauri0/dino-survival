@@ -137,6 +137,9 @@ class Game:
         if not target:
             return f"Unknown target {target_name}."
 
+        if juvenile and not target.get("can_be_juvenile", True):
+            juvenile = False
+
         player_speed = max(self.player.speed, 0.1)
         if juvenile:
             target_speed = max(
