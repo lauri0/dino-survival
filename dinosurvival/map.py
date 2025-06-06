@@ -122,8 +122,13 @@ class Map:
 
     def _generate_noise(self, width: int, height: int, scale: int = 4) -> List[List[float]]:
         """Create a simple value noise map for distributing biomes."""
-        coarse_w = width // scale + 1
-        coarse_h = height // scale + 1
+        # Generate a noise grid larger than the map itself so that the
+        # noise used for the map comes from the interior of this grid.
+        # This avoids the edges of the map coinciding with the edges of
+        # the noise which previously biased lake placement towards map
+        # borders.
+        coarse_w = width // scale + 3
+        coarse_h = height // scale + 3
         coarse = [[random.random() for _ in range(coarse_w)] for _ in range(coarse_h)]
 
         def lerp(a: float, b: float, t: float) -> float:
@@ -131,19 +136,17 @@ class Map:
 
         noise = []
         for y in range(height):
-            fy = y / (height - 1) * (coarse_h - 1)
+            # Sample from the interior of the coarse grid so that map
+            # boundaries are not aligned with the noise boundaries.
+            fy = y / (height - 1) * (coarse_h - 3) + 1
             y0 = int(fy)
-            # Wrap the indices so edge cells blend with values from the opposite
-            # side. This avoids extreme values accumulating along the map
-            # borders which previously made lakes cluster near the corners.
-            y1 = (y0 + 1) % coarse_h
+            y1 = y0 + 1
             ty = fy - y0
             row = []
             for x in range(width):
-                fx = x / (width - 1) * (coarse_w - 1)
+                fx = x / (width - 1) * (coarse_w - 3) + 1
                 x0 = int(fx)
-                # Wrap horizontally for the same reason as above
-                x1 = (x0 + 1) % coarse_w
+                x1 = x0 + 1
                 tx = fx - x0
 
                 n00 = coarse[y0][x0]
