@@ -21,6 +21,28 @@
       "floodplain": 0.03
     }
   },
+  "Centipede": {
+    "name": "Centipede",
+    "image": "assets/dinosaurs/centipede.png",
+    "formations": ["Morrison"],
+    "adult_weight": 0.4,
+    "adult_fierceness": 0.0,
+    "adult_speed": 35,
+    "adult_energy_drain": 5.0,
+    "walking_energy_drain_multiplier": 1.1,
+    "carcass_food_value_modifier": 0.2,
+    "health_regen": 2.5,
+    "hydration_drain": 2.5,
+    "encounter_chance": {
+      "plains": 0.02,
+      "forest": 0.04,
+      "swamp": 0.01,
+      "woodlands": 0.02,
+      "badlands": 0.01,
+      "lake": 0.00,
+      "floodplain": 0.02
+    }
+  },
   "Ceratosaurus": {
     "name": "Ceratosaurus",
     "image": "assets/dinosaurs/ceratosaurus.png",
@@ -41,6 +63,72 @@
       "badlands": 0.50,
       "lake": 0.01,
       "floodplain": 0.03
+    }
+  },
+  "Fly": {
+    "name": "Fly",
+    "image": "assets/dinosaurs/fly.png",
+    "formations": ["Morrison"],
+    "adult_weight": 0.1,
+    "adult_fierceness": 0.0,
+    "adult_speed": 60,
+    "adult_energy_drain": 5.0,
+    "walking_energy_drain_multiplier": 1.1,
+    "carcass_food_value_modifier": 0.2,
+    "health_regen": 2.5,
+    "hydration_drain": 2.5,
+    "encounter_chance": {
+      "plains": 0.03,
+      "forest": 0.04,
+      "swamp": 0.03,
+      "woodlands": 0.03,
+      "badlands": 0.01,
+      "lake": 0.03,
+      "floodplain": 0.03
+    }
+  },
+  "Frog": {
+    "name": "Frog",
+    "image": "assets/dinosaurs/frog.png",
+    "formations": ["Morrison"],
+    "adult_weight": 1.0,
+    "adult_fierceness": 0.0,
+    "adult_speed": 50,
+    "adult_energy_drain": 5.0,
+    "walking_energy_drain_multiplier": 1.1,
+    "carcass_food_value_modifier": 0.2,
+    "health_regen": 2.5,
+    "hydration_drain": 2.5,
+    "encounter_chance": {
+      "plains": 0.00,
+      "forest": 0.005,
+      "swamp": 0.10,
+      "woodlands": 0.00,
+      "badlands": 0.00,
+      "lake": 0.05,
+      "floodplain": 0.1
+    }
+  },
+  "Lizard": {
+    "name": "Lizard",
+    "image": "assets/dinosaurs/lizard.png",
+    "formations": ["Morrison"],
+    "adult_weight": 2.0,
+    "adult_fierceness": 0.2,
+    "adult_speed": 55,
+    "adult_energy_drain": 5.0,
+    "walking_energy_drain_multiplier": 1.1,
+    "carcass_food_value_modifier": 0.2,
+    "health_regen": 2.5,
+    "hydration_drain": 2.5,
+    "encounter_chance": {
+      "plains": 0.01,
+      "forest": 0.04,
+      "swamp": 0.01,
+      "woodlands": 0.02,
+      "badlands": 0.02,
+      "lake": 0.02,
+      "floodplain": 0.02
     }
   },
   "Torvosaurus": {
