@@ -209,7 +209,15 @@ class Game:
         catch_chance = player_speed / (player_speed + target_speed)
         if random.random() > catch_chance:
             msg = f"The {target_name} escaped before you could catch it."
-            msg += self._apply_turn_costs(False, 5.0)
+            end_msg = self._apply_turn_costs(False, 5.0)
+            msg += end_msg
+            self.last_action = "hunt"
+            self._generate_encounters()
+            if "Game Over" in end_msg:
+                return msg
+            attack = self._aggressive_attack_check()
+            if attack:
+                msg += "\n" + attack
             return msg
 
         player_f = max(self.player.fierceness, 0.1)
