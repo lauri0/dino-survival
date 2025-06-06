@@ -222,6 +222,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     def do_hunt(target_name: str, juvenile: bool) -> None:
         result = game.hunt_dinosaur(target_name, juvenile)
         append_output(result)
+        update_biome()
         update_stats()
         update_drink_button()
         update_encounters()
