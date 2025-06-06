@@ -6,9 +6,30 @@ from .dinosaur import DinosaurStats
 from .map import Map
 from .settings import Setting
 
+# Constants used to derive hatchling values from adult stats
+HATCHLING_WEIGHT_DIVISOR = 300
+HATCHLING_FIERCENESS_DIVISOR = 300
+HATCHLING_SPEED_MULTIPLIER = 3
+HATCHLING_ENERGY_DRAIN_DIVISOR = 2
+
 STATS_FILE = os.path.join(os.path.dirname(__file__), "dino_stats.yaml")
 with open(STATS_FILE) as f:
     DINO_STATS = json.load(f)
+
+# Fill in derived hatchling stats if they were omitted from the YAML
+for stats in DINO_STATS.values():
+    aw = stats.get("adult_weight", 0)
+    if "hatchling_weight" not in stats:
+        stats["hatchling_weight"] = aw / HATCHLING_WEIGHT_DIVISOR
+    af = stats.get("adult_fierceness", 0)
+    if "hatchling_fierceness" not in stats:
+        stats["hatchling_fierceness"] = af / HATCHLING_FIERCENESS_DIVISOR
+    aspeed = stats.get("adult_speed", 0)
+    if "hatchling_speed" not in stats:
+        stats["hatchling_speed"] = aspeed * HATCHLING_SPEED_MULTIPLIER
+    adrain = stats.get("adult_energy_drain", 0)
+    if "hatchling_energy_drain" not in stats:
+        stats["hatchling_energy_drain"] = adrain / HATCHLING_ENERGY_DRAIN_DIVISOR
 
 
 class Game:
