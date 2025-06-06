@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict, Tuple, List
+from typing import Dict, Tuple, List, Optional
 import random
 
 @dataclass
@@ -7,6 +7,11 @@ class Terrain:
     name: str
     spawn_chance: Dict[str, float]
     abundance: float = 1.0
+
+
+@dataclass
+class Nest:
+    eggs: str  # 'none', 'small', 'medium', 'large'
 
 
 class Map:
@@ -51,6 +56,15 @@ class Map:
         
         self.revealed = [[False for _ in range(width)] for _ in range(height)]
         self.danger = [[0.0 for _ in range(width)] for _ in range(height)]
+        self.nests: Dict[Tuple[int, int], Nest] = {}
+
+        # Place 3-5 nests randomly across the map
+        num_nests = random.randint(3, 5)
+        all_coords = [(x, y) for y in range(height) for x in range(width)]
+        random.shuffle(all_coords)
+        for x, y in all_coords[:num_nests]:
+            state = random.choice(["none", "small", "medium", "large"])
+            self.nests[(x, y)] = Nest(state)
 
     def terrain_at(self, x: int, y: int) -> Terrain:
         return self.grid[y][x]
@@ -81,6 +95,30 @@ class Map:
         for y in range(self.height):
             for x in range(self.width):
                 self.danger[y][x] = max(0.0, self.danger[y][x] - amount)
+
+    def has_nest(self, x: int, y: int) -> bool:
+        return (x, y) in self.nests
+
+    def nest_state(self, x: int, y: int) -> Optional[str]:
+        nest = self.nests.get((x, y))
+        return nest.eggs if nest else None
+
+    def update_nests(self) -> None:
+        for nest in self.nests.values():
+            if nest.eggs == "none":
+                if random.random() < 0.01:
+                    nest.eggs = random.choice(["small", "medium", "large"])
+            else:
+                if random.random() < 0.01:
+                    nest.eggs = "none"
+
+    def take_eggs(self, x: int, y: int) -> Optional[str]:
+        nest = self.nests.get((x, y))
+        if nest and nest.eggs != "none":
+            eggs = nest.eggs
+            nest.eggs = "none"
+            return eggs
+        return None
 
     def _generate_noise(self, width: int, height: int, scale: int = 4) -> List[List[float]]:
         """Create a simple value noise map for distributing biomes."""

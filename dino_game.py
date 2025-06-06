@@ -58,7 +58,7 @@ def run_game(setting, dinosaur_name: str | None = None):
     else:
         dino_name = dinosaur_name
     game = Game(setting, dino_name)
-    print("Type commands: north, south, east, west, hunt, drink, quit")
+    print("Type commands: north, south, east, west, hunt, drink, eggs, quit")
     while True:
         action = input("> ").strip()
         if action == "quit":
@@ -159,7 +159,10 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
 
     def update_biome() -> None:
         terrain = game.map.terrain_at(game.x, game.y)
-        biome_var.set(terrain.name.capitalize())
+        label = terrain.name.capitalize()
+        if game.map.has_nest(game.x, game.y):
+            label += " (Nest)"
+        biome_var.set(label)
         danger = game.map.danger_at(game.x, game.y)
         danger_var.set(f"(Danger: {danger:.0f})")
         img = biome_images.get(terrain.name)
@@ -252,6 +255,14 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             for b in move_buttons.values():
                 b.config(state="disabled")
 
+    def do_collect_eggs() -> None:
+        result = game.collect_eggs()
+        append_output(result)
+        update_stats()
+        update_biome()
+        update_map()
+        update_encounters()
+
     def update_encounters() -> None:
         for slot in encounter_rows:
             slot["frame"].pack_forget()
@@ -259,6 +270,10 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         terrain = game.map.terrain_at(game.x, game.y).name
         player_f = game.player.fierceness or 1
         player_s = game.player.speed or 1
+        entries: list[tuple[str, bool]] = []
+        nest_state = game.map.nest_state(game.x, game.y)
+        if nest_state and nest_state != "none":
+            entries.append((f"eggs:{nest_state}", False))
         found: list[tuple[str, bool]] = []
         for name, stats in DINO_STATS.items():
             if len(found) >= 4:
@@ -269,7 +284,19 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             chance = stats.get("encounter_chance", {}).get(terrain, 0)
             if random.random() < chance:
                 found.append((name, random.random() < 0.5))
-        for slot, (name, juvenile) in zip(encounter_rows, found):
+        entries.extend(found)
+        for slot, (name, juvenile) in zip(encounter_rows, entries):
+            if name.startswith("eggs:"):
+                state = name.split(":", 1)[1]
+                weight_map = {"small": 4, "medium": 10, "large": 20}
+                slot["img"].configure(image="")
+                slot["img"].image = None
+                slot["name"].configure(text=f"Eggs ({state.capitalize()})")
+                slot["stats"].configure(text=f"W:{weight_map.get(state, 0)}kg")
+                slot["btn"].configure(command=do_collect_eggs)
+                slot["frame"].pack(fill="x", pady=2, expand=True)
+                continue
+
             stats = DINO_STATS[name]
             if juvenile:
                 target_f = (
@@ -352,6 +379,15 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
                     fill=color,
                     outline="black",
                 )
+                if revealed and game.map.has_nest(x, y):
+                    canvas.create_oval(
+                        tile_size / 2 - 3,
+                        tile_size / 2 - 3,
+                        tile_size / 2 + 3,
+                        tile_size / 2 + 3,
+                        fill="black",
+                        outline="black",
+                    )
                 if (x, y) == (game.x, game.y):
                     canvas.create_rectangle(
                         2,

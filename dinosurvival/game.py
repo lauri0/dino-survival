@@ -55,6 +55,7 @@ class Game:
 
     def _start_turn(self) -> str:
         self.map.decay_danger()
+        self.map.update_nests()
         self.player.hydration = max(
             0.0, self.player.hydration - self.player.hydration_drain
         )
@@ -167,6 +168,46 @@ class Game:
         msg += self._apply_turn_costs(False)
         return msg
 
+    def collect_eggs(self) -> str:
+        state = self.map.nest_state(self.x, self.y)
+        if state in (None, "none"):
+            return "There are no eggs here."
+
+        weight_map = {"small": 4.0, "medium": 10.0, "large": 20.0}
+        egg_weight = weight_map.get(state, 0.0)
+        self.map.take_eggs(self.x, self.y)
+        self.map.increase_danger(self.x, self.y)
+
+        energy_gain = 1000 * egg_weight / max(self.player.weight, 0.1)
+        needed = 100.0 - self.player.energy
+        actual_energy_gain = min(energy_gain, needed)
+        self.player.energy = min(100.0, self.player.energy + actual_energy_gain)
+
+        meat_used = actual_energy_gain * self.player.weight / 1000
+        leftover_meat = max(0.0, egg_weight - meat_used)
+
+        weight_gain = min(leftover_meat, self.player.growth_speed)
+        self.player.weight = min(
+            self.player.weight + weight_gain,
+            self.player.adult_weight,
+        )
+
+        growth_range = self.player.adult_weight - self.player.hatchling_weight
+        if growth_range > 0:
+            pct = (self.player.weight - self.player.hatchling_weight) / growth_range
+            self.player.fierceness = (
+                self.player.hatchling_fierceness
+                + pct * (self.player.adult_fierceness - self.player.hatchling_fierceness)
+            )
+            self.player.speed = (
+                self.player.hatchling_speed
+                + pct * (self.player.adult_speed - self.player.hatchling_speed)
+            )
+
+        msg = f"You eat a {state} pile of eggs."
+        msg += self._apply_turn_costs(False)
+        return msg
+
     def move(self, dx: int, dy: int):
         nx = max(0, min(self.map.width - 1, self.x + dx))
         ny = max(0, min(self.map.height - 1, self.y + dy))
@@ -204,6 +245,8 @@ class Game:
                 result = "You drink from the lake."
             else:
                 result = "There is no water source here."
+        elif action == "eggs":
+            result = self.collect_eggs()
         else:
             result = "Unknown action"
 
