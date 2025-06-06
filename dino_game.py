@@ -11,15 +11,6 @@ SETTINGS = {
 }
 
 
-def choose_dinosaur(setting) -> str:
-    """Prompt the user to pick a dinosaur for the chosen setting."""
-    print("Choose a dinosaur:")
-    for idx, d in enumerate(setting.playable_dinos.keys(), start=1):
-        print(f"{idx}. {d}")
-    didx = int(input("> ")) - 1
-    return list(setting.playable_dinos.keys())[didx]
-
-
 def choose_dinosaur_gui(root: tk.Tk, setting, on_select) -> None:
     """Display a dinosaur selection menu inside an existing root window."""
 
@@ -49,24 +40,6 @@ def choose_dinosaur_gui(root: tk.Tk, setting, on_select) -> None:
 
     # This function does not start a new main loop; the provided root must already
     # be running. The window will be destroyed when a dinosaur is chosen.
-
-
-def run_game(setting, dinosaur_name: str | None = None):
-    """Run the text-based portion of the game for the given setting."""
-    if dinosaur_name is None:
-        dino_name = choose_dinosaur(setting)
-    else:
-        dino_name = dinosaur_name
-    game = Game(setting, dino_name)
-    print("Type commands: north, south, east, west, hunt, drink, eggs, quit")
-    while True:
-        action = input("> ").strip()
-        if action == "quit":
-            break
-        result = game.turn(action)
-        print(result)
-        if "Game Over" in result:
-            break
 
 
 def run_game_gui(setting, dinosaur_name: str) -> None:

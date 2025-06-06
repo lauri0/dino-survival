@@ -77,28 +77,6 @@ class Game:
             self.player.health = min(100.0, self.player.health + regen)
         return message
 
-    def hunt(self):
-        terrain = self.map.terrain_at(self.x, self.y)
-        # Danger on the current tile reduces the likelihood of finding prey
-        danger = self.map.danger_at(self.x, self.y)
-        spawn_multiplier = max(0.0, 1.0 - danger / 100.0)
-        if random.random() > spawn_multiplier:
-            self._energy_multiplier = 1.0
-            return "No prey in the area."
-
-        prey_type = random.choices(
-            list(terrain.spawn_chance.keys()),
-            weights=list(terrain.spawn_chance.values()),
-        )[0]
-        success = random.random() < 0.6  # simple success rate
-        if success:
-            self.player.energy = 100.0
-            self.map.increase_danger(self.x, self.y)
-            self._energy_multiplier = 1.0
-            return f"Caught {prey_type}!"
-        self._energy_multiplier = 5.0
-        return f"Failed to catch {prey_type}."
-
     def hunt_dinosaur(self, target_name: str, juvenile: bool = False) -> str:
         """Hunt a specific dinosaur encountered on the map."""
         target = DINO_STATS.get(target_name)
@@ -225,9 +203,7 @@ class Game:
         if pre:
             return pre
         moved = False
-        if action == "hunt":
-            result = self.hunt()
-        elif action == "north":
+        if action == "north":
             self.move(0, -1)
             moved = True
             result = "Moved north"
@@ -251,8 +227,6 @@ class Game:
                 result = "You drink from the lake."
             else:
                 result = "There is no water source here."
-        elif action == "eggs":
-            result = self.collect_eggs()
         else:
             result = "Unknown action"
 
