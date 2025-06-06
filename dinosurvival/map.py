@@ -31,12 +31,14 @@ class Map:
                 cumulative += a
                 thresholds.append(cumulative / total_abundance)
 
-        # Keep generating maps until at least one lake tile is present
-        has_lake = False
-        while not has_lake:
+        # Keep generating maps until at least one lake tile is present and the
+        # majority of lakes are not sitting on the outermost rows or columns.
+        while True:
             noise = self._generate_noise(width, height)
             grid: List[List[Terrain]] = []
-            has_lake = False
+            lake_count = 0
+            edge_lake_count = 0
+            edge_margin = 2
             for y in range(height):
                 row: List[Terrain] = []
                 for x in range(width):
@@ -48,11 +50,24 @@ class Map:
                     else:
                         terrain = terrain_list[-1]
                     if terrain.name == "lake":
-                        has_lake = True
+                        lake_count += 1
+                        if (
+                            x < edge_margin
+                            or x >= width - edge_margin
+                            or y < edge_margin
+                            or y >= height - edge_margin
+                        ):
+                            edge_lake_count += 1
                     row.append(terrain)
                 grid.append(row)
-            if has_lake:
-                self.grid = grid
+
+            if lake_count > 0:
+                # Require at least one interior lake and limit the fraction of
+                # lakes that appear near the map border.
+                interior_lakes = lake_count - edge_lake_count
+                if interior_lakes > 0 and edge_lake_count / lake_count <= 0.6:
+                    self.grid = grid
+                    break
         
         self.revealed = [[False for _ in range(width)] for _ in range(height)]
         self.danger = [[0.0 for _ in range(width)] for _ in range(height)]
