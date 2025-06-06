@@ -77,6 +77,39 @@ class Game:
             self.player.health = min(100.0, self.player.health + regen)
         return message
 
+    def _max_growth_gain(self) -> float:
+        """Return the biological limit on weight gain for this turn."""
+        weight = self.player.weight
+        adult = self.player.adult_weight
+        if weight >= adult:
+            return 0.0
+        r = 0.35
+        gain = r * weight * (1 - weight / adult)
+        return min(gain, adult - weight)
+
+    def _apply_growth(self, available_meat: float) -> tuple[float, float]:
+        """Grow the player using available meat.
+
+        Returns a tuple of (actual_gain, max_possible_gain).
+        """
+        max_gain = self._max_growth_gain()
+        weight_gain = min(available_meat, max_gain)
+        self.player.weight = min(self.player.weight + weight_gain, self.player.adult_weight)
+
+        growth_range = self.player.adult_weight - self.player.hatchling_weight
+        if growth_range > 0:
+            pct = (self.player.weight - self.player.hatchling_weight) / growth_range
+            self.player.fierceness = (
+                self.player.hatchling_fierceness
+                + pct * (self.player.adult_fierceness - self.player.hatchling_fierceness)
+            )
+            self.player.speed = (
+                self.player.hatchling_speed
+                + pct * (self.player.adult_speed - self.player.hatchling_speed)
+            )
+
+        return weight_gain, max_gain
+
     def hunt_dinosaur(self, target_name: str, juvenile: bool = False) -> str:
         """Hunt a specific dinosaur encountered on the map."""
         target = DINO_STATS.get(target_name)
@@ -127,28 +160,12 @@ class Game:
         meat_used = actual_energy_gain * self.player.weight / 1000
         leftover_meat = max(0.0, prey_meat - meat_used)
 
-        weight_gain = min(leftover_meat, self.player.growth_speed)
-        self.player.weight = min(
-            self.player.weight + weight_gain,
-            self.player.adult_weight,
-        )
-
-        growth_range = self.player.adult_weight - self.player.hatchling_weight
-        if growth_range > 0:
-            pct = (
-                self.player.weight - self.player.hatchling_weight
-            ) / growth_range
-            self.player.fierceness = (
-                self.player.hatchling_fierceness
-                + pct * (self.player.adult_fierceness - self.player.hatchling_fierceness)
-            )
-            self.player.speed = (
-                self.player.hatchling_speed
-                + pct * (self.player.adult_speed - self.player.hatchling_speed)
-            )
+        weight_gain, max_gain = self._apply_growth(leftover_meat)
 
         msg = (
-            f"You caught and defeated the {target_name} but lost {damage:.0f}% health."
+            f"You caught and defeated the {target_name} but lost {damage:.0f}% health. "
+            f"Energy +{actual_energy_gain:.1f}%, "
+            f"Weight +{weight_gain:.1f}kg (max {max_gain:.1f}kg)."
         )
         msg += self._apply_turn_costs(False)
         return msg
@@ -170,23 +187,8 @@ class Game:
         meat_used = actual_energy_gain * self.player.weight / 1000
         leftover_meat = max(0.0, egg_weight - meat_used)
 
-        weight_gain = min(leftover_meat, self.player.growth_speed)
-        self.player.weight = min(
-            self.player.weight + weight_gain,
-            self.player.adult_weight,
-        )
+        weight_gain, _ = self._apply_growth(leftover_meat)
 
-        growth_range = self.player.adult_weight - self.player.hatchling_weight
-        if growth_range > 0:
-            pct = (self.player.weight - self.player.hatchling_weight) / growth_range
-            self.player.fierceness = (
-                self.player.hatchling_fierceness
-                + pct * (self.player.adult_fierceness - self.player.hatchling_fierceness)
-            )
-            self.player.speed = (
-                self.player.hatchling_speed
-                + pct * (self.player.adult_speed - self.player.hatchling_speed)
-            )
 
         msg = f"You eat a {state} pile of eggs."
         msg += self._apply_turn_costs(False)

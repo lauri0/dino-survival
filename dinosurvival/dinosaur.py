@@ -4,7 +4,6 @@ from dataclasses import dataclass
 class DinosaurStats:
     name: str
     growth_stages: int
-    growth_speed: float = 0.0
     hatchling_weight: float = 0.0
     adult_weight: float = 0.0
     hatchling_fierceness: float = 0.0
