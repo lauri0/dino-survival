@@ -58,8 +58,8 @@ class Map:
         self.danger = [[0.0 for _ in range(width)] for _ in range(height)]
         self.nests: Dict[Tuple[int, int], Nest] = {}
 
-        # Place 3-5 nests randomly across the map
-        num_nests = random.randint(3, 5)
+        # Place 5 nests randomly across the map
+        num_nests = 5
         all_coords = [(x, y) for y in range(height) for x in range(width)]
         random.shuffle(all_coords)
         for x, y in all_coords[:num_nests]:
