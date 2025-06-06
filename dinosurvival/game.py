@@ -66,6 +66,54 @@ class Game:
             self.y = height // 2
         self.map.reveal(self.x, self.y)
         self._energy_multiplier = 1.0
+        self.current_encounters: list[tuple[str, bool]] = []
+        self.last_action: Optional[str] = None
+
+    def _generate_encounters(self) -> None:
+        terrain = self.map.terrain_at(self.x, self.y).name
+        danger = self.map.danger_at(self.x, self.y)
+        spawn_mult = max(0.0, 1.0 - danger / 100.0)
+        found: list[tuple[str, bool]] = []
+        for name, stats in DINO_STATS.items():
+            if len(found) >= 4:
+                break
+            formations = stats.get("formations", [])
+            if self.setting.formation not in formations:
+                continue
+            chance = stats.get("encounter_chance", {}).get(terrain, 0)
+            chance *= spawn_mult
+            if random.random() < chance:
+                allow_j = stats.get("can_be_juvenile", True)
+                juvenile = allow_j and random.random() < 0.5
+                found.append((name, juvenile))
+        entries: list[tuple[str, bool]] = []
+        nest_state = self.map.nest_state(self.x, self.y)
+        if nest_state and nest_state != "none":
+            entries.append((f"eggs:{nest_state}", False))
+        entries.extend(found)
+        self.current_encounters = entries
+
+    def _aggressive_attack_check(self) -> Optional[str]:
+        player_f = max(self.player.fierceness, 0.1)
+        for name, juvenile in self.current_encounters:
+            if name.startswith("eggs:"):
+                continue
+            stats = DINO_STATS.get(name, {})
+            if not stats.get("aggressive"):
+                continue
+            if juvenile:
+                target_f = (
+                    stats.get("hatchling_fierceness", 0)
+                    + stats.get("adult_fierceness", 0)
+                ) / 2
+            else:
+                target_f = stats.get("adult_fierceness", 0)
+            rel_f = target_f / player_f
+            if rel_f > 2.0:
+                if random.random() < 0.5:
+                    self.player.health = 0
+                    return f"A fierce {name} attacks and kills you! Game Over."
+        return None
 
     def _base_energy_drain(self) -> float:
         return (
@@ -191,7 +239,15 @@ class Game:
             f"Energy +{actual_energy_gain:.1f}%, "
             f"Weight +{weight_gain:.1f}kg (max {max_gain:.1f}kg)."
         )
-        msg += self._apply_turn_costs(False)
+        end_msg = self._apply_turn_costs(False)
+        msg += end_msg
+        self.last_action = "hunt"
+        self._generate_encounters()
+        if "Game Over" in end_msg:
+            return msg
+        attack = self._aggressive_attack_check()
+        if attack:
+            msg += "\n" + attack
         return msg
 
     def collect_eggs(self) -> str:
@@ -216,6 +272,8 @@ class Game:
 
         msg = f"You eat a {state} pile of eggs."
         msg += self._apply_turn_costs(False)
+        self.last_action = "eggs"
+        self._generate_encounters()
         return msg
 
     def move(self, dx: int, dy: int):
@@ -256,6 +314,15 @@ class Game:
         else:
             result = "Unknown action"
 
-        result += self._apply_turn_costs(moved, self._energy_multiplier)
+        end_msg = self._apply_turn_costs(moved, self._energy_multiplier)
+        result += end_msg
         self._energy_multiplier = 1.0
+        self.last_action = action
+        self._generate_encounters()
+        if "Game Over" in end_msg:
+            return result
+        if action == "stay":
+            attack = self._aggressive_attack_check()
+            if attack:
+                result += "\n" + attack
         return result

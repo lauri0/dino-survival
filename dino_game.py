@@ -45,6 +45,7 @@ def choose_dinosaur_gui(root: tk.Tk, setting, on_select) -> None:
 def run_game_gui(setting, dinosaur_name: str) -> None:
     """Run the game using a graphical interface."""
     game = Game(setting, dinosaur_name)
+    game._generate_encounters()
 
     root = tk.Tk()
     root.title("Dinosaur Survival")
@@ -239,30 +240,9 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     def update_encounters() -> None:
         for slot in encounter_rows:
             slot["frame"].pack_forget()
-
-        terrain = game.map.terrain_at(game.x, game.y).name
         player_f = game.player.fierceness or 1
         player_s = game.player.speed or 1
-        danger = game.map.danger_at(game.x, game.y)
-        spawn_mult = max(0.0, 1.0 - danger / 100.0)
-        entries: list[tuple[str, bool]] = []
-        nest_state = game.map.nest_state(game.x, game.y)
-        if nest_state and nest_state != "none":
-            entries.append((f"eggs:{nest_state}", False))
-        found: list[tuple[str, bool]] = []
-        for name, stats in DINO_STATS.items():
-            if len(found) >= 4:
-                break
-            formations = stats.get("formations", [])
-            if game.setting.formation not in formations:
-                continue
-            chance = stats.get("encounter_chance", {}).get(terrain, 0)
-            chance *= spawn_mult
-            if random.random() < chance:
-                allow_j = stats.get("can_be_juvenile", True)
-                juvenile = allow_j and random.random() < 0.5
-                found.append((name, juvenile))
-        entries.extend(found)
+        entries = game.current_encounters
         for slot, (name, juvenile) in zip(encounter_rows, entries):
             if name.startswith("eggs:"):
                 state = name.split(":", 1)[1]
