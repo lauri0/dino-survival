@@ -326,11 +326,11 @@ class Game:
         result += end_msg
         self._energy_multiplier = 1.0
         self.last_action = action
-        self._generate_encounters()
-        if "Game Over" in end_msg:
-            return result
         if action == "stay":
             attack = self._aggressive_attack_check()
             if attack:
                 result += "\n" + attack
+        self._generate_encounters()
+        if "Game Over" in end_msg:
+            return result
         return result
