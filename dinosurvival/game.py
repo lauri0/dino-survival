@@ -213,7 +213,7 @@ class Game:
             return msg
 
         player_f = max(self.player.fierceness, 0.1)
-        target_f = max(target_f, 0.1)
+        target_f = max(target_f, 0.0)
         rel_f = target_f / player_f
         damage = (rel_f ** 2) * 100
         self.player.health = max(0.0, self.player.health - damage)
