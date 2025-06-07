@@ -326,7 +326,7 @@ class Game:
         result += end_msg
         self._energy_multiplier = 1.0
         self.last_action = action
-        if action == "stay":
+        if action in ("stay", "drink"):
             attack = self._aggressive_attack_check()
             if attack:
                 result += "\n" + attack
