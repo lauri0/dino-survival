@@ -181,6 +181,10 @@ class Game:
 
     def hunt_dinosaur(self, target_name: str, juvenile: bool = False) -> str:
         """Hunt a specific dinosaur encountered on the map."""
+        pre = self._start_turn()
+        if pre:
+            return pre
+
         target = DINO_STATS.get(target_name)
         if not target:
             return f"Unknown target {target_name}."
@@ -212,12 +216,12 @@ class Game:
             end_msg = self._apply_turn_costs(False, 5.0)
             msg += end_msg
             self.last_action = "hunt"
-            self._generate_encounters()
             if "Game Over" in end_msg:
                 return msg
             attack = self._aggressive_attack_check()
             if attack:
                 msg += "\n" + attack
+            self._generate_encounters()
             return msg
 
         player_f = max(self.player.fierceness, 0.1)
@@ -250,15 +254,19 @@ class Game:
         end_msg = self._apply_turn_costs(False)
         msg += end_msg
         self.last_action = "hunt"
-        self._generate_encounters()
         if "Game Over" in end_msg:
             return msg
         attack = self._aggressive_attack_check()
         if attack:
             msg += "\n" + attack
+        self._generate_encounters()
         return msg
 
     def collect_eggs(self) -> str:
+        pre = self._start_turn()
+        if pre:
+            return pre
+
         state = self.map.nest_state(self.x, self.y)
         if state in (None, "none"):
             return "There are no eggs here."
@@ -275,12 +283,18 @@ class Game:
         meat_used = actual_energy_gain * self.player.weight / 1000
         leftover_meat = max(0.0, egg_weight - meat_used)
 
-        weight_gain, _ = self._apply_growth(leftover_meat)
+        weight_gain, max_gain = self._apply_growth(leftover_meat)
 
-
-        msg = f"You eat a {state} pile of eggs."
-        msg += self._apply_turn_costs(False)
+        msg = (
+            f"You eat a {state} pile of eggs. "
+            f"Energy +{actual_energy_gain:.1f}%, "
+            f"Weight +{weight_gain:.1f}kg (max {max_gain:.1f}kg)."
+        )
+        end_msg = self._apply_turn_costs(False)
+        msg += end_msg
         self.last_action = "eggs"
+        if "Game Over" in end_msg:
+            return msg
         self._generate_encounters()
         return msg
 
