@@ -7,8 +7,8 @@ from .map import Map
 from .settings import Setting
 
 # Constants used to derive hatchling values from adult stats
-HATCHLING_WEIGHT_DIVISOR = 600
-HATCHLING_FIERCENESS_DIVISOR = 600
+HATCHLING_WEIGHT_DIVISOR = 1000
+HATCHLING_FIERCENESS_DIVISOR = 1000
 HATCHLING_SPEED_MULTIPLIER = 3
 HATCHLING_ENERGY_DRAIN_DIVISOR = 2
 
