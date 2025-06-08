@@ -13,6 +13,7 @@
     "carcass_food_value_modifier": 0.20,
     "health_regen": 2.5,
     "hydration_drain": 2.5,
+    "aquatic_boost": 0.0,
     "encounter_chance": {
       "plains": 0.01,
       "forest": 0.01,
@@ -37,6 +38,7 @@
     "carcass_food_value_modifier": 0.2,
     "health_regen": 2.5,
     "hydration_drain": 2.5,
+    "aquatic_boost": 0.0,
     "encounter_chance": {
       "plains": 0.05,
       "forest": 0.01,
@@ -61,6 +63,7 @@
     "carcass_food_value_modifier": 1.0,
     "health_regen": 2.5,
     "hydration_drain": 2.5,
+    "aquatic_boost": 0.0,
     "encounter_chance": {
       "plains": 0.02,
       "forest": 0.20,
@@ -85,6 +88,7 @@
     "carcass_food_value_modifier": 0.8,
     "health_regen": 2.5,
     "hydration_drain": 2.5,
+    "aquatic_boost": 0.0,
     "encounter_chance": {
       "plains": 0.00,
       "forest": 0.00,
@@ -109,6 +113,7 @@
     "carcass_food_value_modifier": 0.25,
     "health_regen": 2.5,
     "hydration_drain": 2.5,
+    "aquatic_boost": 40.0,
     "encounter_chance": {
       "plains": 0.01,
       "forest": 0.03,
@@ -133,6 +138,7 @@
     "carcass_food_value_modifier": 1.0,
     "health_regen": 2.5,
     "hydration_drain": 2.5,
+    "aquatic_boost": 0.0,
     "encounter_chance": {
       "plains": 0.03,
       "forest": 0.09,
@@ -157,6 +163,7 @@
     "carcass_food_value_modifier": 0.9,
     "health_regen": 2.5,
     "hydration_drain": 2.5,
+    "aquatic_boost": 0.0,
     "encounter_chance": {
       "plains": 0.00,
       "forest": 0.005,
@@ -181,6 +188,7 @@
     "carcass_food_value_modifier": 0.8,
     "health_regen": 2.5,
     "hydration_drain": 2.5,
+    "aquatic_boost": 0.0,
     "encounter_chance": {
       "plains": 0.00,
       "forest": 0.03,
@@ -205,6 +213,7 @@
     "carcass_food_value_modifier": 0.2,
     "health_regen": 2.5,
     "hydration_drain": 2.5,
+    "aquatic_boost": 0.0,
     "encounter_chance": {
       "plains": 0.005,
       "forest": 0.02,
@@ -229,6 +238,7 @@
     "carcass_food_value_modifier": 0.8,
     "health_regen": 2.5,
     "hydration_drain": 2.5,
+    "aquatic_boost": 0.0,
     "encounter_chance": {
       "plains": 0.01,
       "forest": 0.06,
@@ -253,6 +263,7 @@
     "carcass_food_value_modifier": 0.2,
     "health_regen": 2.5,
     "hydration_drain": 2.5,
+    "aquatic_boost": 0.0,
     "encounter_chance": {
       "plains": 0.01,
       "forest": 0.005,
@@ -277,6 +288,7 @@
     "carcass_food_value_modifier": 0.6,
     "health_regen": 2.5,
     "hydration_drain": 2.5,
+    "aquatic_boost": 0.0,
     "encounter_chance": {
       "plains": 0.00,
       "forest": 0.00,
@@ -301,6 +313,7 @@
     "carcass_food_value_modifier": 0.2,
     "health_regen": 2.5,
     "hydration_drain": 2.5,
+    "aquatic_boost": 0.0,
     "encounter_chance": {
       "plains": 0.01,
       "forest": 0.01,
@@ -325,6 +338,7 @@
     "carcass_food_value_modifier": 0.5,
     "health_regen": 2.5,
     "hydration_drain": 2.5,
+    "aquatic_boost": 0.0,
     "encounter_chance": {
       "plains": 0.00,
       "forest": 0.03,
@@ -349,6 +363,7 @@
     "carcass_food_value_modifier": 0.6,
     "health_regen": 2.5,
     "hydration_drain": 2.5,
+    "aquatic_boost": 0.0,
     "encounter_chance": {
       "plains": 0.03,
       "forest": 0.14,
@@ -373,6 +388,7 @@
     "carcass_food_value_modifier": 0.5,
     "health_regen": 2.5,
     "hydration_drain": 2.5,
+    "aquatic_boost": 0.0,
     "encounter_chance": {
       "plains": 0.05,
       "forest": 0.12,
@@ -397,6 +413,7 @@
     "carcass_food_value_modifier": 0.35,
     "health_regen": 2.5,
     "hydration_drain": 2.5,
+    "aquatic_boost": 0.0,
     "encounter_chance": {
       "plains": 0.04,
       "forest": 0.03,
@@ -421,6 +438,7 @@
     "carcass_food_value_modifier": 0.25,
     "health_regen": 2.5,
     "hydration_drain": 2.5,
+    "aquatic_boost": 0.0,
     "encounter_chance": {
       "plains": 0.03,
       "forest": 0.01,
