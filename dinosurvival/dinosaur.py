@@ -22,6 +22,7 @@ class DinosaurStats:
     health_regen: float = 0.0
     hydration: float = 100.0
     hydration_drain: float = 0.0
+    aquatic_boost: float = 0.0
 
     def is_exhausted(self) -> bool:
         return self.energy <= 0

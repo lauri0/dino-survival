@@ -192,7 +192,13 @@ class Game:
         if juvenile and not target.get("can_be_juvenile", True):
             juvenile = False
 
-        player_speed = max(self.player.speed, 0.1)
+        terrain = self.map.terrain_at(self.x, self.y).name
+        boost = 0.0
+        if terrain == "lake":
+            boost = self.player.aquatic_boost
+        elif terrain == "swamp":
+            boost = self.player.aquatic_boost / 2
+        player_speed = max(self.player.speed * (1 + boost / 100.0), 0.1)
         if juvenile:
             target_speed = max(
                 (target.get("hatchling_speed", 0) + target.get("adult_speed", 0))
