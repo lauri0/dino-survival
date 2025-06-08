@@ -243,6 +243,13 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             slot["frame"].pack_forget()
         player_f = game.player.fierceness or 1
         player_s = game.player.speed or 1
+        terrain = game.map.terrain_at(game.x, game.y).name
+        boost = 0.0
+        if terrain == "lake":
+            boost = game.player.aquatic_boost
+        elif terrain == "swamp":
+            boost = game.player.aquatic_boost / 2
+        player_s *= 1 + boost / 100.0
         entries = game.current_encounters
         for slot, (name, juvenile) in zip(encounter_rows, entries):
             if name.startswith("eggs:"):
