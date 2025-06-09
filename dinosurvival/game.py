@@ -2,6 +2,22 @@ import random
 import json
 import os
 from typing import Optional
+
+
+def calculate_catch_chance(rel_speed: float) -> float:
+    """Return the chance to catch prey based on relative speed.
+
+    ``rel_speed`` is the target's speed divided by the player's speed.
+    If the value is below 0.5 the catch is guaranteed. Between 0.5 and 1.0 the
+    chance linearly decreases from 1.0 to 0.5. Above 1.0 the player cannot
+    catch the prey.
+    """
+
+    if rel_speed < 0.5:
+        return 1.0
+    if rel_speed <= 1.0:
+        return 1.0 - (rel_speed - 0.5)
+    return 0.0
 from .dinosaur import DinosaurStats
 from .map import Map
 from .settings import Setting
@@ -216,7 +232,8 @@ class Game:
             target_speed = max(target.get("adult_speed", 0.1), 0.1)
             target_f = target.get("adult_fierceness", 0.1)
             target_weight = target.get("adult_weight", 0.0)
-        catch_chance = player_speed / (player_speed + target_speed)
+        rel_speed = target_speed / max(player_speed, 0.1)
+        catch_chance = calculate_catch_chance(rel_speed)
         if random.random() > catch_chance:
             msg = f"The {target_name} escaped before you could catch it."
             end_msg = self._apply_turn_costs(False, 5.0)
