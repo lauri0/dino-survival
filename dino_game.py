@@ -307,8 +307,8 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             slot["name"].configure(text=disp_name)
             slot["stats"].configure(
                 text=(
-                    f"FRC:{rel_f:.2f} SPD:{rel_s:.2f}"
-                    f"({int(round(catch * 100))}%) MEAT:{meat:.1f}kg"
+                    f"F:{rel_f:.2f} S:{rel_s:.2f}"
+                    f"({int(round(catch * 100))}%) M:{meat:.1f}kg"
                 )
             )
             slot["btn"].configure(command=lambda n=name, j=juvenile: do_hunt(n, j))
