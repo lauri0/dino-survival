@@ -84,6 +84,11 @@ class Game:
         self._energy_multiplier = 1.0
         self.current_encounters: list[tuple[str, bool]] = []
         self.last_action: Optional[str] = None
+        # Tracking and win state
+        self.turn_count = 0
+        self.biome_turns: dict[str, int] = {}
+        self.hunt_stats: dict[str, list[int]] = {}
+        self.won = False
 
     def _generate_encounters(self) -> None:
         terrain = self.map.terrain_at(self.x, self.y).name
@@ -139,6 +144,9 @@ class Game:
         )
 
     def _start_turn(self) -> str:
+        self.turn_count += 1
+        terrain = self.map.terrain_at(self.x, self.y).name
+        self.biome_turns[terrain] = self.biome_turns.get(terrain, 0) + 1
         self.map.decay_danger()
         self.map.update_nests()
         self.player.hydration = max(
@@ -162,14 +170,25 @@ class Game:
             self.player.health = min(100.0, self.player.health + regen)
         return message
 
+    def _check_victory(self) -> Optional[str]:
+        """Check if the player has reached adult weight."""
+        if not self.won and self.player.weight >= self.player.adult_weight:
+            self.won = True
+            return "\nYou have grown to full size! You win!"
+        return None
+
     def _max_growth_gain(self) -> float:
         """Return the biological limit on weight gain for this turn."""
         weight = self.player.weight
         adult = self.player.adult_weight
         if weight >= adult:
             return 0.0
+        # Allow the growth curve to asymptotically approach 5% above the
+        # target adult weight so that the player can realistically reach the
+        # goal weight.
+        max_weight = adult * 1.05
         r = 0.35
-        gain = r * weight * (1 - weight / adult)
+        gain = r * weight * (1 - weight / max_weight)
         return min(gain, adult - weight)
 
     def _apply_growth(self, available_meat: float) -> tuple[float, float]:
@@ -205,6 +224,9 @@ class Game:
         if not target:
             return f"Unknown target {target_name}."
 
+        hunt = self.hunt_stats.setdefault(target_name, [0, 0])
+        hunt[0] += 1
+
         if juvenile and not target.get("can_be_juvenile", True):
             juvenile = False
 
@@ -238,6 +260,9 @@ class Game:
             msg = f"The {target_name} escaped before you could catch it."
             end_msg = self._apply_turn_costs(False, 5.0)
             msg += end_msg
+            win = self._check_victory()
+            if win:
+                msg += win
             self.last_action = "hunt"
             if "Game Over" in end_msg:
                 return msg
@@ -268,6 +293,7 @@ class Game:
         leftover_meat = max(0.0, prey_meat - meat_used)
 
         weight_gain, max_gain = self._apply_growth(leftover_meat)
+        hunt[1] += 1
 
         msg = (
             f"You caught and defeated the {target_name} but lost {damage:.0f}% health. "
@@ -276,6 +302,9 @@ class Game:
         )
         end_msg = self._apply_turn_costs(False)
         msg += end_msg
+        win = self._check_victory()
+        if win:
+            msg += win
         self.last_action = "hunt"
         if "Game Over" in end_msg:
             return msg
@@ -315,6 +344,9 @@ class Game:
         )
         end_msg = self._apply_turn_costs(False)
         msg += end_msg
+        win = self._check_victory()
+        if win:
+            msg += win
         self.last_action = "eggs"
         if "Game Over" in end_msg:
             return msg
@@ -361,6 +393,9 @@ class Game:
 
         end_msg = self._apply_turn_costs(moved, self._energy_multiplier)
         result += end_msg
+        win = self._check_victory()
+        if win:
+            result += win
         self._energy_multiplier = 1.0
         self.last_action = action
         if action in ("stay", "drink"):

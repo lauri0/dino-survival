@@ -168,6 +168,10 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         if "Game Over" in result:
             for b in move_buttons.values():
                 b.config(state="disabled")
+        if game.won:
+            for b in move_buttons.values():
+                b.config(state="disabled")
+            show_victory_stats()
 
     move_buttons = {}
     move_buttons["north"] = tk.Button(
@@ -229,6 +233,10 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         if "Game Over" in result:
             for b in move_buttons.values():
                 b.config(state="disabled")
+        if game.won:
+            for b in move_buttons.values():
+                b.config(state="disabled")
+            show_victory_stats()
 
     def do_collect_eggs() -> None:
         result = game.collect_eggs()
@@ -237,6 +245,13 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         update_biome()
         update_map()
         update_encounters()
+        if "Game Over" in result:
+            for b in move_buttons.values():
+                b.config(state="disabled")
+        if game.won:
+            for b in move_buttons.values():
+                b.config(state="disabled")
+            show_victory_stats()
 
     def update_encounters() -> None:
         for slot in encounter_rows:
@@ -414,6 +429,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         )
         fierce_label.config(text=f"Fierceness: {game.player.fierceness:.1f}")
         speed_label.config(text=f"Speed: {game.player.speed:.1f}")
+        turn_label.config(text=f"Turn: {game.turn_count}")
 
     # Bottom middle stats
     stats_frame = tk.Frame(main)
@@ -432,6 +448,8 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     fierce_label.pack()
     speed_label = tk.Label(stats_frame, font=("Helvetica", 16))
     speed_label.pack()
+    turn_label = tk.Label(stats_frame, font=("Helvetica", 16))
+    turn_label.pack()
     tk.Button(stats_frame, text="Quit", width=10, command=root.destroy).pack(pady=10)
 
     # Bottom text output
@@ -451,6 +469,27 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         output.insert(tk.END, text + "\n")
         output.see(tk.END)
         output.configure(state="disabled")
+
+    shown_win = False
+
+    def show_victory_stats() -> None:
+        nonlocal shown_win
+        if shown_win:
+            return
+        shown_win = True
+        lines = [
+            "Congratulations! You reached adult size!",
+            f"Turns: {game.turn_count}",
+            "",
+            "Biome Visits:",
+        ]
+        for b, c in game.biome_turns.items():
+            lines.append(f"- {b.capitalize()}: {c}")
+        lines.append("")
+        lines.append("Hunts:")
+        for a, (att, kill) in game.hunt_stats.items():
+            lines.append(f"- {a}: {kill}/{att}")
+        messagebox.showinfo("Victory", "\n".join(lines))
 
     update_biome()
     update_map()
