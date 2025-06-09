@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 import random
 import os
-from dinosurvival.game import Game, DINO_STATS
+from dinosurvival.game import Game, DINO_STATS, calculate_catch_chance
 from dinosurvival.settings import MORRISON, HELL_CREEK
 
 SETTINGS = {
@@ -281,6 +281,14 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
 
             rel_f = target_f / player_f
             rel_s = target_s / player_s
+            catch = calculate_catch_chance(rel_s)
+            if juvenile:
+                target_weight = (
+                    stats.get("hatchling_weight", 0) + stats.get("adult_weight", 0)
+                ) / 2
+            else:
+                target_weight = stats.get("adult_weight", 0)
+            meat = target_weight * stats.get("carcass_food_value_modifier", 1.0)
 
             img_path = stats.get("image")
             img = None
@@ -297,7 +305,12 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
                 slot["img"].image = None
 
             slot["name"].configure(text=disp_name)
-            slot["stats"].configure(text=f"F:{rel_f:.2f} S:{rel_s:.2f}")
+            slot["stats"].configure(
+                text=(
+                    f"FRC:{rel_f:.2f} SPD:{rel_s:.2f}"
+                    f"({int(round(catch * 100))}%) MEAT:{meat:.1f}kg"
+                )
+            )
             slot["btn"].configure(command=lambda n=name, j=juvenile: do_hunt(n, j))
             slot["frame"].pack(fill="x", pady=2, expand=True)
 
