@@ -365,7 +365,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
                 if (
                     game.player.forms_packs
                     and name == game.player.name
-                    and game.player.weight >= game.player.adult_weight / 3
+                    and game.player.weight >= game.player.adult_weight / 100
                 ):
                     slot["btn"].configure(command=lambda j=juvenile: do_pack_up(j), text="Pack")
                 else:
