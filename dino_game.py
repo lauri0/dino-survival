@@ -353,7 +353,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             if in_pack:
                 slot["name"].configure(text=f"{disp_name} (Pack)")
                 slot["stats"].configure(text="")
-                slot["btn"].configure(command=do_leave_pack, text="Leave Pack")
+                slot["btn"].configure(command=do_leave_pack, text="Leave")
             else:
                 slot["name"].configure(text=disp_name)
                 slot["stats"].configure(
@@ -367,7 +367,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
                     and name == game.player.name
                     and game.player.weight >= game.player.adult_weight / 3
                 ):
-                    slot["btn"].configure(command=lambda j=juvenile: do_pack_up(j), text="Pack Up")
+                    slot["btn"].configure(command=lambda j=juvenile: do_pack_up(j), text="Pack")
                 else:
                     slot["btn"].configure(command=lambda n=name, j=juvenile: do_hunt(n, j), text="Hunt")
             slot["frame"].pack(fill="x", pady=2, expand=True)
