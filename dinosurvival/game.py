@@ -82,7 +82,8 @@ class Game:
             self.y = height // 2
         self.map.reveal(self.x, self.y)
         self._energy_multiplier = 1.0
-        self.current_encounters: list[tuple[str, bool]] = []
+        self.current_encounters: list[tuple[str, bool, bool]] = []
+        self.pack: list[bool] = []  # store juvenile status of packmates
         self.last_action: Optional[str] = None
         # Tracking and win state
         self.turn_count = 0
@@ -107,17 +108,22 @@ class Game:
                 allow_j = stats.get("can_be_juvenile", True)
                 juvenile = allow_j and random.random() < 0.5
                 found.append((name, juvenile))
-        entries: list[tuple[str, bool]] = []
+        entries: list[tuple[str, bool, bool]] = []
         nest_state = self.map.nest_state(self.x, self.y)
         if nest_state and nest_state != "none":
-            entries.append((f"eggs:{nest_state}", False))
-        entries.extend(found)
-        self.current_encounters = entries
+            entries.append((f"eggs:{nest_state}", False, False))
+        for j in self.pack:
+            entries.append((self.player.name, j, True))
+        for name, juvenile in found:
+            entries.append((name, juvenile, False))
+        self.current_encounters = entries[:4]
 
     def _aggressive_attack_check(self) -> Optional[str]:
-        player_f = max(self.player.fierceness, 0.1)
-        for name, juvenile in self.current_encounters:
+        player_f = max(self.effective_fierceness(), 0.1)
+        for name, juvenile, in_pack in self.current_encounters:
             if name.startswith("eggs:"):
+                continue
+            if in_pack:
                 continue
             stats = DINO_STATS.get(name, {})
             if not stats.get("aggressive"):
@@ -142,6 +148,20 @@ class Game:
             if self.player.growth_stages > 0
             else self.player.adult_energy_drain
         )
+
+    def effective_fierceness(self) -> float:
+        total = self.player.fierceness
+        stats = DINO_STATS.get(self.player.name, {})
+        for j in self.pack:
+            if j:
+                f = (
+                    stats.get("hatchling_fierceness", 0)
+                    + stats.get("adult_fierceness", 0)
+                ) / 2
+            else:
+                f = stats.get("adult_fierceness", 0)
+            total += f
+        return total
 
     def _start_turn(self) -> str:
         self.turn_count += 1
@@ -272,7 +292,7 @@ class Game:
             self._generate_encounters()
             return msg
 
-        player_f = max(self.player.fierceness, 0.1)
+        player_f = max(self.effective_fierceness(), 0.1)
         target_f = max(target_f, 0.0)
         rel_f = target_f / player_f
         damage = (rel_f ** 2) * 100
@@ -283,6 +303,7 @@ class Game:
             )
 
         prey_meat = target_weight * target.get("carcass_food_value_modifier", 1.0)
+        prey_meat /= max(1, len(self.pack) + 1)
         self.map.increase_danger(self.x, self.y)
         energy_gain = 1000 * prey_meat / max(self.player.weight, 0.1)
         needed = 100.0 - self.player.energy
@@ -306,6 +327,46 @@ class Game:
         if win:
             msg += win
         self.last_action = "hunt"
+        if "Game Over" in end_msg:
+            return msg
+        attack = self._aggressive_attack_check()
+        if attack:
+            msg += "\n" + attack
+        self._generate_encounters()
+        return msg
+
+    def pack_up(self, juvenile: bool) -> str:
+        pre = self._start_turn()
+        if pre:
+            return pre
+        self.pack.append(juvenile)
+        msg = f"A {self.player.name} joins your pack."
+        end_msg = self._apply_turn_costs(False)
+        msg += end_msg
+        win = self._check_victory()
+        if win:
+            msg += win
+        self.last_action = "pack"
+        if "Game Over" in end_msg:
+            return msg
+        attack = self._aggressive_attack_check()
+        if attack:
+            msg += "\n" + attack
+        self._generate_encounters()
+        return msg
+
+    def leave_pack(self) -> str:
+        pre = self._start_turn()
+        if pre:
+            return pre
+        self.pack.clear()
+        msg = "You leave your pack behind."
+        end_msg = self._apply_turn_costs(False)
+        msg += end_msg
+        win = self._check_victory()
+        if win:
+            msg += win
+        self.last_action = "pack"
         if "Game Over" in end_msg:
             return msg
         attack = self._aggressive_attack_check()

@@ -238,6 +238,36 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
                 b.config(state="disabled")
             show_victory_stats()
 
+    def do_pack_up(juvenile: bool) -> None:
+        result = game.pack_up(juvenile)
+        append_output(result)
+        update_biome()
+        update_stats()
+        update_drink_button()
+        update_encounters()
+        if "Game Over" in result:
+            for b in move_buttons.values():
+                b.config(state="disabled")
+        if game.won:
+            for b in move_buttons.values():
+                b.config(state="disabled")
+            show_victory_stats()
+
+    def do_leave_pack() -> None:
+        result = game.leave_pack()
+        append_output(result)
+        update_biome()
+        update_stats()
+        update_drink_button()
+        update_encounters()
+        if "Game Over" in result:
+            for b in move_buttons.values():
+                b.config(state="disabled")
+        if game.won:
+            for b in move_buttons.values():
+                b.config(state="disabled")
+            show_victory_stats()
+
     def do_collect_eggs() -> None:
         result = game.collect_eggs()
         append_output(result)
@@ -256,7 +286,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     def update_encounters() -> None:
         for slot in encounter_rows:
             slot["frame"].pack_forget()
-        player_f = game.player.fierceness or 1
+        player_f = game.effective_fierceness() or 1
         player_s = game.player.speed or 1
         terrain = game.map.terrain_at(game.x, game.y).name
         boost = 0.0
@@ -266,7 +296,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             boost = game.player.aquatic_boost / 2
         player_s *= 1 + boost / 100.0
         entries = game.current_encounters
-        for slot, (name, juvenile) in zip(encounter_rows, entries):
+        for slot, (name, juvenile, in_pack) in zip(encounter_rows, entries):
             if name.startswith("eggs:"):
                 state = name.split(":", 1)[1]
                 weight_map = {"small": 4, "medium": 10, "large": 20}
@@ -304,6 +334,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             else:
                 target_weight = stats.get("adult_weight", 0)
             meat = target_weight * stats.get("carcass_food_value_modifier", 1.0)
+            meat /= max(1, len(game.pack) + 1)
 
             img_path = stats.get("image")
             img = None
@@ -319,14 +350,26 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
                 slot["img"].configure(image="")
                 slot["img"].image = None
 
-            slot["name"].configure(text=disp_name)
-            slot["stats"].configure(
-                text=(
-                    f"F:{rel_f:.2f} S:{rel_s:.2f}"
-                    f"({int(round(catch * 100))}%) M:{meat:.1f}kg"
+            if in_pack:
+                slot["name"].configure(text=f"{disp_name} (Pack)")
+                slot["stats"].configure(text="")
+                slot["btn"].configure(command=do_leave_pack, text="Leave Pack")
+            else:
+                slot["name"].configure(text=disp_name)
+                slot["stats"].configure(
+                    text=(
+                        f"F:{rel_f:.2f} S:{rel_s:.2f}"
+                        f"({int(round(catch * 100))}%) M:{meat:.1f}kg"
+                    )
                 )
-            )
-            slot["btn"].configure(command=lambda n=name, j=juvenile: do_hunt(n, j))
+                if (
+                    game.player.forms_packs
+                    and name == game.player.name
+                    and game.player.weight >= game.player.adult_weight / 3
+                ):
+                    slot["btn"].configure(command=lambda j=juvenile: do_pack_up(j), text="Pack Up")
+                else:
+                    slot["btn"].configure(command=lambda n=name, j=juvenile: do_hunt(n, j), text="Hunt")
             slot["frame"].pack(fill="x", pady=2, expand=True)
 
     # Top-right map
