@@ -51,6 +51,32 @@
       "floodplain": 0.03
     }
   },
+  "Brachiosaurus": {
+    "name": "Brachiosaurus",
+    "formations": ["Morrison"],
+    "image": "assets/dinosaurs/brachiosaurus.png",
+    "can_be_juvenile": true,
+    "aggressive": false,
+    "forms_packs": false,
+    "adult_weight": 45000.0,
+    "adult_fierceness": 12000,
+    "adult_speed": 13,
+    "adult_energy_drain": 3.6,
+    "walking_energy_drain_multiplier": 1.1,
+    "carcass_food_value_modifier": 0.1,
+    "health_regen": 2.5,
+    "hydration_drain": 2.5,
+    "aquatic_boost": 0.0,
+    "encounter_chance": {
+      "plains": 0.01,
+      "forest": 0.00,
+      "swamp": 0.00,
+      "woodlands": 0.01,
+      "badlands": 0.00,
+      "lake": 0.00,
+      "floodplain": 0.00
+    }
+  },  
   "Camarasaurus": {
     "name": "Camarasaurus",
     "formations": ["Morrison"],
@@ -162,7 +188,7 @@
     "can_be_juvenile": true,
     "aggressive": false,
     "forms_packs": false,
-    "adult_weight": 21000.0,
+    "adult_weight": 25000.0,
     "adult_fierceness": 8000,
     "adult_speed": 12,
     "adult_energy_drain": 3.6,
