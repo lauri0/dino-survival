@@ -309,7 +309,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
                 slot["img"].image = None
                 slot["name"].configure(text=f"Eggs ({state.capitalize()})")
                 slot["stats"].configure(text=f"W:{weight_map.get(state, 0)}kg")
-                slot["btn"].configure(command=do_collect_eggs)
+                slot["btn"].configure(command=do_collect_eggs, text="Hunt")
                 slot["frame"].pack(fill="x", pady=2, expand=True)
                 continue
 
