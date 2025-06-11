@@ -168,10 +168,11 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         if "Game Over" in result:
             for b in move_buttons.values():
                 b.config(state="disabled")
+            show_final_stats("Game Over", "You have perished!")
         if game.won:
             for b in move_buttons.values():
                 b.config(state="disabled")
-            show_victory_stats()
+            show_final_stats("Victory", "Congratulations! You reached adult size!")
 
     move_buttons = {}
     move_buttons["north"] = tk.Button(
@@ -233,10 +234,11 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         if "Game Over" in result:
             for b in move_buttons.values():
                 b.config(state="disabled")
+            show_final_stats("Game Over", "You have perished!")
         if game.won:
             for b in move_buttons.values():
                 b.config(state="disabled")
-            show_victory_stats()
+            show_final_stats("Victory", "Congratulations! You reached adult size!")
 
     def do_pack_up(juvenile: bool) -> None:
         result = game.pack_up(juvenile)
@@ -248,10 +250,11 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         if "Game Over" in result:
             for b in move_buttons.values():
                 b.config(state="disabled")
+            show_final_stats("Game Over", "You have perished!")
         if game.won:
             for b in move_buttons.values():
                 b.config(state="disabled")
-            show_victory_stats()
+            show_final_stats("Victory", "Congratulations! You reached adult size!")
 
     def do_leave_pack() -> None:
         result = game.leave_pack()
@@ -263,10 +266,11 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         if "Game Over" in result:
             for b in move_buttons.values():
                 b.config(state="disabled")
+            show_final_stats("Game Over", "You have perished!")
         if game.won:
             for b in move_buttons.values():
                 b.config(state="disabled")
-            show_victory_stats()
+            show_final_stats("Victory", "Congratulations! You reached adult size!")
 
     def do_collect_eggs() -> None:
         result = game.collect_eggs()
@@ -278,10 +282,11 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         if "Game Over" in result:
             for b in move_buttons.values():
                 b.config(state="disabled")
+            show_final_stats("Game Over", "You have perished!")
         if game.won:
             for b in move_buttons.values():
                 b.config(state="disabled")
-            show_victory_stats()
+            show_final_stats("Victory", "Congratulations! You reached adult size!")
 
     def update_encounters() -> None:
         for slot in encounter_rows:
@@ -513,15 +518,15 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         output.see(tk.END)
         output.configure(state="disabled")
 
-    shown_win = False
+    shown_stats = False
 
-    def show_victory_stats() -> None:
-        nonlocal shown_win
-        if shown_win:
+    def show_final_stats(title: str, header: str) -> None:
+        nonlocal shown_stats
+        if shown_stats:
             return
-        shown_win = True
+        shown_stats = True
         lines = [
-            "Congratulations! You reached adult size!",
+            header,
             f"Turns: {game.turn_count}",
             "",
             "Biome Visits:",
@@ -532,7 +537,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         lines.append("Hunts:")
         for a, (att, kill) in game.hunt_stats.items():
             lines.append(f"- {a}: {kill}/{att}")
-        messagebox.showinfo("Victory", "\n".join(lines))
+        messagebox.showinfo(title, "\n".join(lines))
 
     update_biome()
     update_map()
