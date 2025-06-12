@@ -32,14 +32,61 @@ def choose_dinosaur_gui(root: tk.Tk, setting, on_select) -> None:
         on_select(d)
         root.destroy()
 
+    try:
+        from PIL import Image, ImageTk  # type: ignore
+    except Exception:
+        Image = None  # type: ignore
+        ImageTk = None  # type: ignore
+
+    def load_scaled_image(path: str, width: int, height: int) -> tk.PhotoImage | None:
+        if not os.path.exists(path):
+            return None
+        if Image and ImageTk:
+            img = Image.open(path)
+            scale = width / img.width
+            resample = getattr(getattr(Image, "Resampling", Image), "LANCZOS")
+            resized = img.resize((width, int(img.height * scale)), resample)
+            if resized.height > height:
+                top = int((resized.height - height) / 2)
+                resized = resized.crop((0, top, width, top + height))
+            return ImageTk.PhotoImage(resized, master=root)
+        return tk.PhotoImage(master=root, file=path)
+
+    images: dict[str, tk.PhotoImage] = {}
+
+    def show_legacy(dname: str) -> None:
+        data = load_hunter_stats()
+        form = data.get(setting.formation, {})
+        dsection = form.get(dname, {})
+        pairs = sorted(dsection.items(), key=lambda i: i[1], reverse=True)
+        lines = [f"{p}: {c}" for p, c in pairs if c > 0]
+        if not lines:
+            messagebox.showinfo("Legacy Stats", "No recorded hunts.")
+        else:
+            messagebox.showinfo("Legacy Stats", "\n".join(lines))
+
     for dino in setting.playable_dinos.keys():
-        tk.Button(
-            frame,
+        row = tk.Frame(frame)
+        img = None
+        img_path = DINO_STATS.get(dino, {}).get("image")
+        if img_path:
+            abs_path = os.path.join(os.path.dirname(__file__), img_path)
+            images[dino] = load_scaled_image(abs_path, 100, 63) or None
+            img = images[dino]
+        btn = tk.Button(
+            row,
             text=dino,
             width=20,
             height=2,
+            compound="left",
             command=lambda d=dino: choose(d),
-        ).pack(pady=10)
+        )
+        if img:
+            btn.configure(image=img)
+            btn.image = img
+        btn.pack(side="left", padx=5)
+        tk.Button(row, text="Legacy Stats", command=lambda d=dino: show_legacy(d)).pack(side="left")
+        row.pack(pady=5)
 
     tk.Button(frame, text="Quit", width=20, height=2, command=root.destroy).pack(pady=10)
 
@@ -172,7 +219,9 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
 
     def show_game_stats() -> None:
         lines = []
-        for prey, (att, kill) in game.hunt_stats.items():
+        for prey, (att, kill) in sorted(
+            game.hunt_stats.items(), key=lambda i: i[1][1], reverse=True
+        ):
             if kill > 0:
                 lines.append(f"{prey}: {kill}")
         if not lines:
@@ -184,7 +233,8 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         data = load_hunter_stats()
         form = data.get(game.setting.formation, {})
         dsection = form.get(dinosaur_name, {})
-        lines = [f"{p}: {c}" for p, c in dsection.items() if c > 0]
+        pairs = sorted(dsection.items(), key=lambda i: i[1], reverse=True)
+        lines = [f"{p}: {c}" for p, c in pairs if c > 0]
         if not lines:
             messagebox.showinfo("Legacy Stats", "No recorded hunts.")
         else:
@@ -557,20 +607,20 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     stats_frame.grid(row=1, column=0, sticky="nsew", padx=10, pady=10)
 
     tk.Label(stats_frame, text=f"{dinosaur_name}", font=("Helvetica", 16)).pack()
-    health_label = tk.Label(stats_frame, font=("Helvetica", 16))
-    health_label.pack()
-    energy_label = tk.Label(stats_frame, font=("Helvetica", 16))
-    energy_label.pack()
-    hydration_label = tk.Label(stats_frame, font=("Helvetica", 16))
-    hydration_label.pack()
-    weight_label = tk.Label(stats_frame, font=("Helvetica", 16))
-    weight_label.pack()
-    fierce_label = tk.Label(stats_frame, font=("Helvetica", 16))
-    fierce_label.pack()
-    speed_label = tk.Label(stats_frame, font=("Helvetica", 16))
-    speed_label.pack()
-    turn_label = tk.Label(stats_frame, font=("Helvetica", 16))
-    turn_label.pack()
+    health_label = tk.Label(stats_frame, font=("Helvetica", 14), anchor="w")
+    health_label.pack(anchor="w")
+    energy_label = tk.Label(stats_frame, font=("Helvetica", 14), anchor="w")
+    energy_label.pack(anchor="w")
+    hydration_label = tk.Label(stats_frame, font=("Helvetica", 14), anchor="w")
+    hydration_label.pack(anchor="w")
+    weight_label = tk.Label(stats_frame, font=("Helvetica", 14), anchor="w")
+    weight_label.pack(anchor="w")
+    fierce_label = tk.Label(stats_frame, font=("Helvetica", 14), anchor="w")
+    fierce_label.pack(anchor="w")
+    speed_label = tk.Label(stats_frame, font=("Helvetica", 14), anchor="w")
+    speed_label.pack(anchor="w")
+    turn_label = tk.Label(stats_frame, font=("Helvetica", 14), anchor="w")
+    turn_label.pack(anchor="w")
     tk.Button(stats_frame, text="Quit", width=10, command=root.destroy).pack(pady=10)
 
     # Bottom text output
@@ -610,7 +660,9 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             lines.append(f"- {b.capitalize()}: {c}")
         lines.append("")
         lines.append("Hunts:")
-        for a, (att, kill) in game.hunt_stats.items():
+        for a, (att, kill) in sorted(
+            game.hunt_stats.items(), key=lambda i: i[1][1], reverse=True
+        ):
             lines.append(f"- {a}: {kill}/{att}")
         messagebox.showinfo(title, "\n".join(lines))
 
