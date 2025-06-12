@@ -4,7 +4,11 @@ import random
 import os
 from dinosurvival.game import Game, DINO_STATS, calculate_catch_chance
 from dinosurvival.settings import MORRISON, HELL_CREEK
-from dinosurvival.logging_utils import append_game_log, update_hunter_log
+from dinosurvival.logging_utils import (
+    append_game_log,
+    update_hunter_log,
+    load_hunter_stats,
+)
 
 SETTINGS = {
     "morrison": MORRISON,
@@ -101,9 +105,9 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     main.grid_columnconfigure(1, weight=0, minsize=200)
     main.grid_columnconfigure(2, weight=1)
 
-    # Biome information on the left
+    # Biome information (middle column after layout swap)
     biome_frame = tk.Frame(main, width=200)
-    biome_frame.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
+    biome_frame.grid(row=0, column=1, sticky="nsew", padx=10, pady=10)
     biome_frame.grid_propagate(False)
 
     biome_image_label = tk.Label(biome_frame)
@@ -121,9 +125,9 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     danger_label = tk.Label(biome_row, textvariable=danger_var, font=("Helvetica", 14))
     danger_label.pack(side="left", padx=(5, 0))
 
-    # Player dinosaur image in the top middle
+    # Player dinosaur image on the left after swap
     dino_frame = tk.Frame(main, width=200)
-    dino_frame.grid(row=0, column=1, sticky="nsew", padx=10, pady=10)
+    dino_frame.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
     dino_frame.grid_propagate(False)
 
     dino_image_label = tk.Label(dino_frame)
@@ -166,7 +170,31 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             tk.Label(win, text=line, font=("Helvetica", 12), anchor="w", justify="left").pack(anchor="w")
         tk.Button(win, text="Close", command=win.destroy).pack(pady=5)
 
-    tk.Button(dino_frame, text="Info", command=show_dino_facts).pack(pady=5)
+    def show_game_stats() -> None:
+        lines = []
+        for prey, (att, kill) in game.hunt_stats.items():
+            if kill > 0:
+                lines.append(f"{prey}: {kill}")
+        if not lines:
+            messagebox.showinfo("Game Stats", "No successful hunts yet.")
+        else:
+            messagebox.showinfo("Game Stats", "\n".join(lines))
+
+    def show_legacy_stats() -> None:
+        data = load_hunter_stats()
+        form = data.get(game.setting.formation, {})
+        dsection = form.get(dinosaur_name, {})
+        lines = [f"{p}: {c}" for p, c in dsection.items() if c > 0]
+        if not lines:
+            messagebox.showinfo("Legacy Stats", "No recorded hunts.")
+        else:
+            messagebox.showinfo("Legacy Stats", "\n".join(lines))
+
+    button_row = tk.Frame(dino_frame)
+    tk.Button(button_row, text="Info", command=show_dino_facts).pack(side="left", padx=2)
+    tk.Button(button_row, text="Game Stats", command=show_game_stats).pack(side="left", padx=2)
+    tk.Button(button_row, text="Legacy Stats", command=show_legacy_stats).pack(side="left", padx=2)
+    button_row.pack(pady=5)
 
     def update_biome() -> None:
         terrain = game.map.terrain_at(game.x, game.y)
@@ -190,10 +218,17 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         state = "normal" if terrain.name == "lake" else "disabled"
         move_buttons["drink"].config(state=state)
 
-    # Movement buttons on the bottom right
+    # Movement buttons (middle column after swap)
     btn_frame = tk.Frame(main, width=200)
-    btn_frame.grid(row=1, column=2, sticky="nsew", padx=10, pady=10)
+    btn_frame.grid(row=1, column=1, sticky="nsew", padx=10, pady=10)
     btn_frame.grid_propagate(False)
+    # Center contents within this frame
+    btn_container = tk.Frame(btn_frame)
+    btn_container.place(relx=0.5, rely=0.5, anchor="center")
+    for i in range(3):
+        btn_container.grid_columnconfigure(i, weight=1)
+    for i in range(3):
+        btn_container.grid_rowconfigure(i, weight=1)
 
     def perform(action: str) -> None:
         result = game.turn(action)
@@ -213,22 +248,22 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
 
     move_buttons = {}
     move_buttons["north"] = tk.Button(
-        btn_frame, text="North", width=12, height=2, command=lambda: perform("north")
+        btn_container, text="North", width=12, height=2, command=lambda: perform("north")
     )
     move_buttons["south"] = tk.Button(
-        btn_frame, text="South", width=12, height=2, command=lambda: perform("south")
+        btn_container, text="South", width=12, height=2, command=lambda: perform("south")
     )
     move_buttons["east"] = tk.Button(
-        btn_frame, text="East", width=12, height=2, command=lambda: perform("east")
+        btn_container, text="East", width=12, height=2, command=lambda: perform("east")
     )
     move_buttons["west"] = tk.Button(
-        btn_frame, text="West", width=12, height=2, command=lambda: perform("west")
+        btn_container, text="West", width=12, height=2, command=lambda: perform("west")
     )
     move_buttons["stay"] = tk.Button(
-        btn_frame, text="Stay", width=12, height=2, command=lambda: perform("stay")
+        btn_container, text="Stay", width=12, height=2, command=lambda: perform("stay")
     )
     move_buttons["drink"] = tk.Button(
-        btn_frame, text="Drink", width=12, height=2, command=lambda: perform("drink")
+        btn_container, text="Drink", width=12, height=2, command=lambda: perform("drink")
     )
 
     move_buttons["north"].grid(row=0, column=1)
@@ -240,7 +275,8 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
 
     # Bottom-left encounter display
     encounter_frame = tk.Frame(main, width=400)
-    encounter_frame.grid(row=1, column=0, sticky="nsew", padx=10, pady=10)
+    # After swaps this frame moves to the right column
+    encounter_frame.grid(row=1, column=2, sticky="nsew", padx=10, pady=10)
     encounter_frame.grid_propagate(False)
     encounter_list = tk.Frame(encounter_frame)
     encounter_list.pack(fill="both", expand=True)
@@ -518,7 +554,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
 
     # Bottom middle stats
     stats_frame = tk.Frame(main)
-    stats_frame.grid(row=1, column=1, sticky="nsew", padx=10, pady=10)
+    stats_frame.grid(row=1, column=0, sticky="nsew", padx=10, pady=10)
 
     tk.Label(stats_frame, text=f"{dinosaur_name}", font=("Helvetica", 16)).pack()
     health_label = tk.Label(stats_frame, font=("Helvetica", 16))
