@@ -32,27 +32,32 @@ def choose_dinosaur_gui(root: tk.Tk, setting, on_select) -> None:
         on_select(d)
         root.destroy()
 
-    try:
-        from PIL import Image, ImageTk  # type: ignore
-    except Exception:
-        Image = None  # type: ignore
-        ImageTk = None  # type: ignore
+    # Images were previously shown on the dinosaur selection buttons, but these
+    # buttons now only display text. The image loading logic is retained here in
+    # comments for reference should graphical buttons be reintroduced in the
+    # future.
 
-    def load_scaled_image(path: str, width: int, height: int) -> tk.PhotoImage | None:
-        if not os.path.exists(path):
-            return None
-        if Image and ImageTk:
-            img = Image.open(path)
-            scale = width / img.width
-            resample = getattr(getattr(Image, "Resampling", Image), "LANCZOS")
-            resized = img.resize((width, int(img.height * scale)), resample)
-            if resized.height > height:
-                top = int((resized.height - height) / 2)
-                resized = resized.crop((0, top, width, top + height))
-            return ImageTk.PhotoImage(resized, master=root)
-        return tk.PhotoImage(master=root, file=path)
+    # try:
+    #     from PIL import Image, ImageTk  # type: ignore
+    # except Exception:
+    #     Image = None  # type: ignore
+    #     ImageTk = None  # type: ignore
 
-    images: dict[str, tk.PhotoImage] = {}
+    # def load_scaled_image(path: str, width: int, height: int) -> tk.PhotoImage | None:
+    #     if not os.path.exists(path):
+    #         return None
+    #     if Image and ImageTk:
+    #         img = Image.open(path)
+    #         scale = width / img.width
+    #         resample = getattr(getattr(Image, "Resampling", Image), "LANCZOS")
+    #         resized = img.resize((width, int(img.height * scale)), resample)
+    #         if resized.height > height:
+    #             top = int((resized.height - height) / 2)
+    #             resized = resized.crop((0, top, width, top + height))
+    #         return ImageTk.PhotoImage(resized, master=root)
+    #     return tk.PhotoImage(master=root, file=path)
+
+    # images: dict[str, tk.PhotoImage] = {}
 
     def show_legacy(dname: str) -> None:
         data = load_hunter_stats()
@@ -67,23 +72,13 @@ def choose_dinosaur_gui(root: tk.Tk, setting, on_select) -> None:
 
     for dino in setting.playable_dinos.keys():
         row = tk.Frame(frame)
-        img = None
-        img_path = DINO_STATS.get(dino, {}).get("image")
-        if img_path:
-            abs_path = os.path.join(os.path.dirname(__file__), img_path)
-            images[dino] = load_scaled_image(abs_path, 100, 63) or None
-            img = images[dino]
         btn = tk.Button(
             row,
             text=dino,
             width=20,
             height=2,
-            compound="left",
             command=lambda d=dino: choose(d),
         )
-        if img:
-            btn.configure(image=img)
-            btn.image = img
         btn.pack(side="left", padx=5)
         tk.Button(row, text="Legacy Stats", command=lambda d=dino: show_legacy(d)).pack(side="left")
         row.pack(pady=5)
