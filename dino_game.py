@@ -4,6 +4,7 @@ import random
 import os
 from dinosurvival.game import Game, DINO_STATS, calculate_catch_chance
 from dinosurvival.settings import MORRISON, HELL_CREEK
+from dinosurvival.logging_utils import append_game_log, update_hunter_log
 
 SETTINGS = {
     "morrison": MORRISON,
@@ -130,6 +131,42 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         dino_image_label.configure(image=dino_image)
         dino_image_label.image = dino_image
     dino_image_label.pack()
+
+    def show_dino_facts() -> None:
+        info = DINO_STATS.get(dinosaur_name, {})
+        win = tk.Toplevel(root)
+        win.title(f"{dinosaur_name} Facts")
+        if dino_image:
+            lbl = tk.Label(win, image=dino_image)
+            lbl.image = dino_image
+            lbl.pack()
+        tk.Label(win, text=dinosaur_name, font=("Helvetica", 18)).pack(pady=5)
+        lines = []
+        forms = ", ".join(info.get("formations", []))
+        lines.append(f"Formations: {forms}")
+        lines.append(f"Weight: {info.get('adult_weight', 0)} kg")
+        lines.append(f"Fierceness: {info.get('adult_fierceness', 0)}")
+        lines.append(f"Speed: {info.get('adult_speed', 0)}")
+        lines.append(f"Energy drain per turn: {info.get('adult_energy_drain', 0)}")
+        lines.append(
+            f"Walking energy drain multiplier: {info.get('walking_energy_drain_multiplier', 1.0)}"
+        )
+        lines.append(f"Health regen: {info.get('health_regen', 0)}")
+        lines.append(f"Hydration drain: {info.get('hydration_drain', 0)}")
+        lines.append(f"Aquatic speed boost: {info.get('aquatic_boost', 0)}")
+        chances = info.get('encounter_chance', {})
+        total = 0.0
+        for env, val in chances.items():
+            if env == 'floodplain':
+                continue
+            lines.append(f"{env.capitalize()} chance: {val * 100:.1f}%")
+            total += val * 100
+        lines.append(f"Total encounter chance: {total:.1f}%")
+        for line in lines:
+            tk.Label(win, text=line, font=("Helvetica", 12), anchor="w", justify="left").pack(anchor="w")
+        tk.Button(win, text="Close", command=win.destroy).pack(pady=5)
+
+    tk.Button(dino_frame, text="Info", command=show_dino_facts).pack(pady=5)
 
     def update_biome() -> None:
         terrain = game.map.terrain_at(game.x, game.y)
@@ -525,6 +562,8 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         if shown_stats:
             return
         shown_stats = True
+        append_game_log(game.setting.formation, dinosaur_name, game.turn_count, game.player.weight, game.won)
+        update_hunter_log(game.setting.formation, dinosaur_name, game.hunt_stats)
         lines = [
             header,
             f"Turns: {game.turn_count}",
