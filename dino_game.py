@@ -50,7 +50,7 @@ def display_legacy_stats(parent: tk.Widget, formation: str, dname: str) -> None:
     win_rate = (wins / total_games * 100) if total_games else 0.0
 
     win = tk.Toplevel(parent)
-    win.title("Legacy Stats")
+    win.title("Dinosaur Stats")
 
     info = DINO_STATS.get(dname, {})
     img = None
@@ -168,7 +168,7 @@ def choose_dinosaur_gui(root: tk.Tk, setting, on_select) -> None:
         )
         btn.pack(side="left", padx=5)
         tk.Button(row, text="Info", command=lambda d=dino: show_info(d)).pack(side="left")
-        tk.Button(row, text="Legacy Stats", command=lambda d=dino: show_legacy(d)).pack(side="left")
+        tk.Button(row, text="Dinosaur Stats", command=lambda d=dino: show_legacy(d)).pack(side="left")
         row.pack(pady=5)
 
     tk.Button(frame, text="Quit", width=20, height=2, command=root.destroy).pack(pady=10)
@@ -295,33 +295,6 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             tk.Label(win, text=line, font=("Helvetica", 12), anchor="w", justify="left").pack(anchor="w")
         tk.Button(win, text="Close", command=win.destroy).pack(pady=5)
 
-    def show_game_stats() -> None:
-        lines = []
-        for prey, (att, kill) in sorted(
-            game.hunt_stats.items(), key=lambda i: i[1][1], reverse=True
-        ):
-            if kill > 0:
-                lines.append(f"{prey}: {kill}")
-        win = tk.Toplevel(root)
-        win.title("Game Stats")
-        info = DINO_STATS.get(dinosaur_name, {})
-        img = None
-        img_path = info.get("image")
-        if img_path:
-            abs_path = os.path.join(os.path.dirname(__file__), img_path)
-            img = load_scaled_image(abs_path, 400, 250, master=win)
-        if img:
-            lbl = tk.Label(win, image=img)
-            lbl.image = img
-            lbl.pack()
-        tk.Label(win, text=dinosaur_name + " \u2642", font=("Helvetica", 18)).pack(pady=5)
-        if lines:
-            for l in lines:
-                tk.Label(win, text=l, font=("Helvetica", 12), anchor="w").pack(anchor="w")
-        else:
-            tk.Label(win, text="No successful hunts.", font=("Helvetica", 12)).pack()
-        tk.Button(win, text="Close", command=win.destroy).pack(pady=5)
-
     def show_legacy_stats() -> None:
         display_legacy_stats(root, game.setting.formation, dinosaur_name)
 
@@ -342,8 +315,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
 
     button_row = tk.Frame(dino_frame)
     tk.Button(button_row, text="Info", command=show_dino_facts).pack(side="left", padx=2)
-    tk.Button(button_row, text="Game Stats", command=show_game_stats).pack(side="left", padx=2)
-    tk.Button(button_row, text="Legacy Stats", command=show_legacy_stats).pack(side="left", padx=2)
+    tk.Button(button_row, text="Dinosaur Stats", command=show_legacy_stats).pack(side="left", padx=2)
     tk.Button(button_row, text="Player Stats", command=show_player_stats).pack(side="left", padx=2)
     button_row.pack(pady=5)
 
