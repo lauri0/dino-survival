@@ -8,12 +8,75 @@ from dinosurvival.logging_utils import (
     append_game_log,
     update_hunter_log,
     load_hunter_stats,
+    get_dino_game_stats,
 )
+
+try:
+    from PIL import Image, ImageTk  # type: ignore
+except Exception:
+    Image = None  # type: ignore
+    ImageTk = None  # type: ignore
+
+
+def load_scaled_image(path: str, width: int, height: int, master=None) -> tk.PhotoImage | None:
+    if not os.path.exists(path):
+        return None
+    if Image and ImageTk:
+        img = Image.open(path)
+        scale = width / img.width
+        resample = getattr(getattr(Image, "Resampling", Image), "LANCZOS")
+        resized = img.resize((width, int(img.height * scale)), resample)
+        if resized.height > height:
+            top = int((resized.height - height) / 2)
+            resized = resized.crop((0, top, width, top + height))
+        return ImageTk.PhotoImage(resized, master=master)
+    return tk.PhotoImage(master=master, file=path)
 
 SETTINGS = {
     "morrison": MORRISON,
     "hell_creek": HELL_CREEK,
 }
+
+
+def display_legacy_stats(parent: tk.Widget, formation: str, dname: str) -> None:
+    """Show legacy hunt stats with image and win rate."""
+    data = load_hunter_stats()
+    form = data.get(formation, {})
+    dsection = form.get(dname, {})
+    pairs = sorted(dsection.items(), key=lambda i: i[1], reverse=True)
+    wins, losses = get_dino_game_stats(formation, dname)
+    total_games = wins + losses
+    win_rate = (wins / total_games * 100) if total_games else 0.0
+
+    win = tk.Toplevel(parent)
+    win.title("Legacy Stats")
+
+    info = DINO_STATS.get(dname, {})
+    img = None
+    img_path = info.get("image")
+    if img_path:
+        abs_path = os.path.join(os.path.dirname(__file__), img_path)
+        img = load_scaled_image(abs_path, 400, 250, master=win)
+    if img:
+        lbl = tk.Label(win, image=img)
+        lbl.image = img
+        lbl.pack()
+
+    tk.Label(win, text=dname, font=("Helvetica", 18)).pack(pady=5)
+    tk.Label(
+        win,
+        text=f"Games played: {total_games} ({win_rate:.0f}% win rate)",
+        font=("Helvetica", 12),
+    ).pack()
+
+    if pairs:
+        for prey, count in pairs:
+            if count > 0:
+                tk.Label(win, text=f"{prey}: {count}", font=("Helvetica", 12), anchor="w").pack(anchor="w")
+    else:
+        tk.Label(win, text="No recorded hunts.", font=("Helvetica", 12)).pack()
+
+    tk.Button(win, text="Close", command=win.destroy).pack(pady=5)
 
 
 def choose_dinosaur_gui(root: tk.Tk, setting, on_select) -> None:
@@ -60,15 +123,38 @@ def choose_dinosaur_gui(root: tk.Tk, setting, on_select) -> None:
     # images: dict[str, tk.PhotoImage] = {}
 
     def show_legacy(dname: str) -> None:
-        data = load_hunter_stats()
-        form = data.get(setting.formation, {})
-        dsection = form.get(dname, {})
-        pairs = sorted(dsection.items(), key=lambda i: i[1], reverse=True)
-        lines = [f"{p}: {c}" for p, c in pairs if c > 0]
-        if not lines:
-            messagebox.showinfo("Legacy Stats", "No recorded hunts.")
-        else:
-            messagebox.showinfo("Legacy Stats", "\n".join(lines))
+        display_legacy_stats(root, setting.formation, dname)
+
+    def show_info(dname: str) -> None:
+        info = DINO_STATS.get(dname, {})
+        win = tk.Toplevel(root)
+        win.title(f"{dname} Facts")
+        img = None
+        img_path = info.get("image")
+        if img_path:
+            abs_path = os.path.join(os.path.dirname(__file__), img_path)
+            img = load_scaled_image(abs_path, 400, 250, master=win)
+        if img:
+            lbl = tk.Label(win, image=img)
+            lbl.image = img
+            lbl.pack()
+        tk.Label(win, text=dname, font=("Helvetica", 18)).pack(pady=5)
+        lines = []
+        forms = ", ".join(info.get("formations", []))
+        lines.append(f"Formations: {forms}")
+        lines.append(f"Weight: {info.get('adult_weight', 0)} kg")
+        lines.append(f"Fierceness: {info.get('adult_fierceness', 0)}")
+        lines.append(f"Speed: {info.get('adult_speed', 0)}")
+        lines.append(f"Energy drain per turn: {info.get('adult_energy_drain', 0)}")
+        lines.append(
+            f"Walking energy drain multiplier: {info.get('walking_energy_drain_multiplier', 1.0)}"
+        )
+        lines.append(f"Health regen: {info.get('health_regen', 0)}")
+        lines.append(f"Hydration drain: {info.get('hydration_drain', 0)}")
+        lines.append(f"Aquatic speed boost: {info.get('aquatic_boost', 0)}")
+        for line in lines:
+            tk.Label(win, text=line, font=("Helvetica", 12), anchor="w", justify="left").pack(anchor="w")
+        tk.Button(win, text="Close", command=win.destroy).pack(pady=5)
 
     for dino in setting.playable_dinos.keys():
         row = tk.Frame(frame)
@@ -80,6 +166,7 @@ def choose_dinosaur_gui(root: tk.Tk, setting, on_select) -> None:
             command=lambda d=dino: choose(d),
         )
         btn.pack(side="left", padx=5)
+        tk.Button(row, text="Info", command=lambda d=dino: show_info(d)).pack(side="left")
         tk.Button(row, text="Legacy Stats", command=lambda d=dino: show_legacy(d)).pack(side="left")
         row.pack(pady=5)
 
@@ -103,25 +190,6 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     assets_dir = os.path.join(os.path.dirname(__file__), "assets", "biomes")
     biome_images: dict[str, tk.PhotoImage] = {}
 
-    try:
-        from PIL import Image, ImageTk  # type: ignore
-    except Exception:
-        Image = None  # type: ignore
-        ImageTk = None  # type: ignore
-
-    def load_scaled_image(path: str, width: int, height: int) -> tk.PhotoImage | None:
-        if not os.path.exists(path):
-            return None
-        if Image and ImageTk:
-            img = Image.open(path)
-            scale = width / img.width
-            resample = getattr(getattr(Image, "Resampling", Image), "LANCZOS")
-            resized = img.resize((width, int(img.height * scale)), resample)
-            if resized.height > height:
-                top = int((resized.height - height) / 2)
-                resized = resized.crop((0, top, width, top + height))
-            return ImageTk.PhotoImage(resized, master=root)
-        return tk.PhotoImage(master=root, file=path)
 
     for tname in game.setting.terrains.keys():
         fname = f"{game.setting.formation.lower()}_{tname}.png"
@@ -178,15 +246,23 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         dino_image_label.image = dino_image
     dino_image_label.pack()
 
-    def show_dino_facts() -> None:
-        info = DINO_STATS.get(dinosaur_name, {})
+    info_images: dict[str, tk.PhotoImage] = {}
+
+    def show_dino_facts(name: str = dinosaur_name) -> None:
+        info = DINO_STATS.get(name, {})
         win = tk.Toplevel(root)
-        win.title(f"{dinosaur_name} Facts")
-        if dino_image:
-            lbl = tk.Label(win, image=dino_image)
-            lbl.image = dino_image
+        win.title(f"{name} Facts")
+        img = info_images.get(name)
+        img_path = info.get("image")
+        if img_path and img is None:
+            abs_path = os.path.join(os.path.dirname(__file__), img_path)
+            info_images[name] = load_scaled_image(abs_path, 400, 250, master=win)
+            img = info_images.get(name)
+        if img:
+            lbl = tk.Label(win, image=img)
+            lbl.image = img
             lbl.pack()
-        tk.Label(win, text=dinosaur_name, font=("Helvetica", 18)).pack(pady=5)
+        tk.Label(win, text=name, font=("Helvetica", 18)).pack(pady=5)
         lines = []
         forms = ", ".join(info.get("formations", []))
         lines.append(f"Formations: {forms}")
@@ -225,15 +301,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             messagebox.showinfo("Game Stats", "\n".join(lines))
 
     def show_legacy_stats() -> None:
-        data = load_hunter_stats()
-        form = data.get(game.setting.formation, {})
-        dsection = form.get(dinosaur_name, {})
-        pairs = sorted(dsection.items(), key=lambda i: i[1], reverse=True)
-        lines = [f"{p}: {c}" for p, c in pairs if c > 0]
-        if not lines:
-            messagebox.showinfo("Legacy Stats", "No recorded hunts.")
-        else:
-            messagebox.showinfo("Legacy Stats", "\n".join(lines))
+        display_legacy_stats(root, game.setting.formation, dinosaur_name)
 
     button_row = tk.Frame(dino_frame)
     tk.Button(button_row, text="Info", command=show_dino_facts).pack(side="left", padx=2)
@@ -335,12 +403,14 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         stats_lbl = tk.Label(info_frame, font=("Helvetica", 10), anchor="w")
         name_lbl.pack(anchor="w")
         stats_lbl.pack(anchor="w")
+        info_btn = tk.Button(row, text="Info", width=4, height=3)
         btn = tk.Button(row, text="Hunt", width=4, height=3)
         img.grid(row=0, column=0, rowspan=2, sticky="w")
         info_frame.grid(row=0, column=1, sticky="w", padx=5)
-        btn.grid(row=0, column=2, rowspan=2, sticky="e")
+        info_btn.grid(row=0, column=2, rowspan=2, sticky="e")
+        btn.grid(row=0, column=3, rowspan=2, sticky="e")
         row.grid_columnconfigure(1, weight=1)
-        encounter_rows.append({"frame": row, "img": img, "name": name_lbl, "stats": stats_lbl, "btn": btn})
+        encounter_rows.append({"frame": row, "img": img, "name": name_lbl, "stats": stats_lbl, "btn": btn, "info": info_btn})
 
     def do_hunt(target_name: str, juvenile: bool) -> None:
         result = game.hunt_dinosaur(target_name, juvenile)
@@ -428,6 +498,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
                 slot["name"].configure(text=f"Eggs ({state.capitalize()})")
                 slot["stats"].configure(text=f"W:{weight_map.get(state, 0)}kg")
                 slot["btn"].configure(command=do_collect_eggs, text="Hunt")
+                slot["info"].grid_remove()
                 slot["frame"].pack(fill="x", pady=2, expand=True)
                 continue
 
@@ -472,11 +543,13 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             else:
                 slot["img"].configure(image="")
                 slot["img"].image = None
-
+            
             if in_pack:
                 slot["name"].configure(text=f"{disp_name} (Pack)")
                 slot["stats"].configure(text="")
                 slot["btn"].configure(command=do_leave_pack, text="Leave")
+                slot["info"].configure(command=lambda n=name: show_dino_facts(n))
+                slot["info"].grid()
             else:
                 slot["name"].configure(text=disp_name)
                 slot["stats"].configure(
@@ -493,6 +566,8 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
                     slot["btn"].configure(command=lambda j=juvenile: do_pack_up(j), text="Pack")
                 else:
                     slot["btn"].configure(command=lambda n=name, j=juvenile: do_hunt(n, j), text="Hunt")
+                slot["info"].configure(command=lambda n=name: show_dino_facts(n))
+                slot["info"].grid()
             slot["frame"].pack(fill="x", pady=2, expand=True)
 
     # Top-right map
