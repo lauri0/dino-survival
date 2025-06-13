@@ -107,10 +107,19 @@ class Game:
             if random.random() < chance:
                 allow_j = stats.get("can_be_juvenile", True)
                 juvenile = allow_j and random.random() < 0.5
-                sex: str | None = None
-                if name == self.player.name:
-                    sex = random.choice(["M", "F"])
-                found.append((name, juvenile, sex))
+                # Skip extremely small encounters compared to the player
+                if juvenile:
+                    weight = (
+                        stats.get("hatchling_weight", 0)
+                        + stats.get("adult_weight", 0)
+                    ) / 2
+                else:
+                    weight = stats.get("adult_weight", 0)
+                if weight >= self.player.weight / 100:
+                    sex: str | None = None
+                    if name == self.player.name:
+                        sex = random.choice(["M", "F"])
+                    found.append((name, juvenile, sex))
         entries: list[tuple[str, bool, bool, str | None]] = []
         nest_state = self.map.nest_state(self.x, self.y)
         if nest_state and nest_state != "none":
