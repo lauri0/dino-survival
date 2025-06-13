@@ -97,7 +97,7 @@ class Game:
         spawn_mult = max(0.0, 1.0 - danger / 100.0)
         found: list[tuple[str, bool, str | None]] = []
         for name, stats in DINO_STATS.items():
-            if len(found) >= 4:
+            if len(found) >= 5:
                 break
             formations = stats.get("formations", [])
             if self.setting.formation not in formations:
@@ -128,7 +128,7 @@ class Game:
             entries.append((self.player.name, j, True, None))
         for name, juvenile, sex in found:
             entries.append((name, juvenile, False, sex))
-        self.current_encounters = entries[:4]
+        self.current_encounters = entries[:5]
 
     def _aggressive_attack_check(self) -> Optional[str]:
         player_f = max(self.effective_fierceness(), 0.1)

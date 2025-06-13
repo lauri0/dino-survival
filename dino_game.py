@@ -9,6 +9,7 @@ from dinosurvival.logging_utils import (
     update_hunter_log,
     load_hunter_stats,
     get_dino_game_stats,
+    get_player_stats,
 )
 
 try:
@@ -324,10 +325,40 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     def show_legacy_stats() -> None:
         display_legacy_stats(root, game.setting.formation, dinosaur_name)
 
+    def show_player_stats() -> None:
+        games, wins, hunts, turns = get_player_stats(
+            game.setting.formation, dinosaur_name
+        )
+        win_rate = (wins / games * 100) if games else 0.0
+        win = tk.Toplevel(root)
+        win.title("Player Stats")
+        info = DINO_STATS.get(dinosaur_name, {})
+        img = None
+        img_path = info.get("image")
+        if img_path:
+            abs_path = os.path.join(os.path.dirname(__file__), img_path)
+            img = load_scaled_image(abs_path, 400, 250, master=win)
+        if img:
+            lbl = tk.Label(win, image=img)
+            lbl.image = img
+            lbl.pack()
+        tk.Label(win, text=dinosaur_name + " \u2642", font=("Helvetica", 18)).pack(
+            pady=5
+        )
+        lines = [
+            f"Games played: {games} ({win_rate:.0f}% win rate)",
+            f"Successful hunts: {hunts}",
+            f"Lifetime turns: {turns}",
+        ]
+        for l in lines:
+            tk.Label(win, text=l, font=("Helvetica", 12), anchor="w").pack(anchor="w")
+        tk.Button(win, text="Close", command=win.destroy).pack(pady=5)
+
     button_row = tk.Frame(dino_frame)
     tk.Button(button_row, text="Info", command=show_dino_facts).pack(side="left", padx=2)
     tk.Button(button_row, text="Game Stats", command=show_game_stats).pack(side="left", padx=2)
     tk.Button(button_row, text="Legacy Stats", command=show_legacy_stats).pack(side="left", padx=2)
+    tk.Button(button_row, text="Player Stats", command=show_player_stats).pack(side="left", padx=2)
     button_row.pack(pady=5)
 
     def update_biome() -> None:
@@ -416,7 +447,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     encounter_list.pack(fill="both", expand=True)
     encounter_rows = []
     encounter_images: dict[str, tk.PhotoImage] = {}
-    for _ in range(4):
+    for _ in range(5):
         row = tk.Frame(encounter_list)
         img = tk.Label(row)
         info_frame = tk.Frame(row)
