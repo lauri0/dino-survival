@@ -73,3 +73,23 @@ def update_hunter_log(formation: str, dino: str, hunts: dict) -> None:
         if kill > 0:
             dsection[prey] = dsection.get(prey, 0) + kill
     save_hunter_stats(data)
+
+
+def get_dino_game_stats(formation: str, dino: str) -> tuple[int, int]:
+    """Return the number of wins and losses recorded for a dinosaur."""
+    wins = 0
+    losses = 0
+    if not os.path.exists(GAME_LOG_PATH):
+        return wins, losses
+    with open(GAME_LOG_PATH) as f:
+        for line in f:
+            parts = line.strip().split("|")
+            if len(parts) < 5:
+                continue
+            form, name, *_rest, result = parts
+            if form == formation and name == dino:
+                if result == "Win":
+                    wins += 1
+                else:
+                    losses += 1
+    return wins, losses
