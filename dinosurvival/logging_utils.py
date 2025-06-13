@@ -95,34 +95,35 @@ def get_dino_game_stats(formation: str, dino: str) -> tuple[int, int]:
     return wins, losses
 
 
-def get_player_stats(formation: str, dino: str) -> tuple[int, int, int, int]:
-    """Return total games, wins, successful hunts and turns for a dinosaur."""
+def get_player_stats() -> tuple[int, int, int, int]:
+    """Return total games, wins, successful hunts and turns across all dinosaurs."""
     games = 0
     wins = 0
     turns = 0
+
     if os.path.exists(GAME_LOG_PATH):
         with open(GAME_LOG_PATH) as f:
             for line in f:
                 parts = line.strip().split("|")
                 if len(parts) < 5:
                     continue
-                form, name, turn_str, *_rest, result = parts
-                if form == formation and name == dino:
-                    games += 1
-                    if result == "Win":
-                        wins += 1
-                    try:
-                        turns += int(turn_str)
-                    except ValueError:
-                        pass
+                _form, _name, turn_str, *_rest, result = parts
+                games += 1
+                if result == "Win":
+                    wins += 1
+                try:
+                    turns += int(turn_str)
+                except ValueError:
+                    pass
 
     hunts = 0
     data = load_hunter_stats()
-    section = data.get(formation, {}).get(dino, {})
-    for val in section.values():
-        try:
-            hunts += int(val)
-        except (TypeError, ValueError):
-            pass
+    for form in data.values():
+        for dsection in form.values():
+            for val in dsection.values():
+                try:
+                    hunts += int(val)
+                except (TypeError, ValueError):
+                    pass
 
     return games, wins, hunts, turns
