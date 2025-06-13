@@ -82,7 +82,7 @@ class Game:
             self.y = height // 2
         self.map.reveal(self.x, self.y)
         self._energy_multiplier = 1.0
-        self.current_encounters: list[tuple[str, bool, bool]] = []
+        self.current_encounters: list[tuple[str, bool, bool, str | None]] = []
         self.pack: list[bool] = []  # store juvenile status of packmates
         self.last_action: Optional[str] = None
         # Tracking and win state
@@ -95,7 +95,7 @@ class Game:
         terrain = self.map.terrain_at(self.x, self.y).name
         danger = self.map.danger_at(self.x, self.y)
         spawn_mult = max(0.0, 1.0 - danger / 100.0)
-        found: list[tuple[str, bool]] = []
+        found: list[tuple[str, bool, str | None]] = []
         for name, stats in DINO_STATS.items():
             if len(found) >= 4:
                 break
@@ -107,20 +107,23 @@ class Game:
             if random.random() < chance:
                 allow_j = stats.get("can_be_juvenile", True)
                 juvenile = allow_j and random.random() < 0.5
-                found.append((name, juvenile))
-        entries: list[tuple[str, bool, bool]] = []
+                sex: str | None = None
+                if name == self.player.name:
+                    sex = random.choice(["M", "F"])
+                found.append((name, juvenile, sex))
+        entries: list[tuple[str, bool, bool, str | None]] = []
         nest_state = self.map.nest_state(self.x, self.y)
         if nest_state and nest_state != "none":
-            entries.append((f"eggs:{nest_state}", False, False))
+            entries.append((f"eggs:{nest_state}", False, False, None))
         for j in self.pack:
-            entries.append((self.player.name, j, True))
-        for name, juvenile in found:
-            entries.append((name, juvenile, False))
+            entries.append((self.player.name, j, True, None))
+        for name, juvenile, sex in found:
+            entries.append((name, juvenile, False, sex))
         self.current_encounters = entries[:4]
 
     def _aggressive_attack_check(self) -> Optional[str]:
         player_f = max(self.effective_fierceness(), 0.1)
-        for name, juvenile, in_pack in self.current_encounters:
+        for name, juvenile, in_pack, _ in self.current_encounters:
             if name.startswith("eggs:"):
                 continue
             if in_pack:
@@ -191,10 +194,14 @@ class Game:
         return message
 
     def _check_victory(self) -> Optional[str]:
-        """Check if the player has reached adult weight."""
-        if not self.won and self.player.weight >= self.player.adult_weight:
+        """Check if the player has reached adult weight and mated."""
+        if (
+            not self.won
+            and self.player.weight >= self.player.adult_weight
+            and self.player.mated
+        ):
             self.won = True
-            return "\nYou have grown to full size! You win!"
+            return "\nYou have grown to full size and mated! You win!"
         return None
 
     def player_growth_stage(self) -> str:
@@ -380,6 +387,26 @@ class Game:
         if win:
             msg += win
         self.last_action = "pack"
+        if "Game Over" in end_msg:
+            return msg
+        attack = self._aggressive_attack_check()
+        if attack:
+            msg += "\n" + attack
+        self._generate_encounters()
+        return msg
+
+    def mate(self) -> str:
+        pre = self._start_turn()
+        if pre:
+            return pre
+        self.player.mated = True
+        msg = "You mate successfully."
+        end_msg = self._apply_turn_costs(False)
+        msg += end_msg
+        win = self._check_victory()
+        if win:
+            msg += win
+        self.last_action = "mate"
         if "Game Over" in end_msg:
             return msg
         attack = self._aggressive_attack_check()
