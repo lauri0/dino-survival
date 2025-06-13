@@ -326,25 +326,11 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         display_legacy_stats(root, game.setting.formation, dinosaur_name)
 
     def show_player_stats() -> None:
-        games, wins, hunts, turns = get_player_stats(
-            game.setting.formation, dinosaur_name
-        )
+        games, wins, hunts, turns = get_player_stats()
         win_rate = (wins / games * 100) if games else 0.0
         win = tk.Toplevel(root)
         win.title("Player Stats")
-        info = DINO_STATS.get(dinosaur_name, {})
-        img = None
-        img_path = info.get("image")
-        if img_path:
-            abs_path = os.path.join(os.path.dirname(__file__), img_path)
-            img = load_scaled_image(abs_path, 400, 250, master=win)
-        if img:
-            lbl = tk.Label(win, image=img)
-            lbl.image = img
-            lbl.pack()
-        tk.Label(win, text=dinosaur_name + " \u2642", font=("Helvetica", 18)).pack(
-            pady=5
-        )
+        tk.Label(win, text="Player Stats", font=("Helvetica", 18)).pack(pady=5)
         lines = [
             f"Games played: {games} ({win_rate:.0f}% win rate)",
             f"Successful hunts: {hunts}",

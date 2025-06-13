@@ -27,7 +27,7 @@ window clears and a new interface appears. Use the direction buttons to move
 between squares or stay put and watch the text box at the bottom for game
 updates. The **Quit** button in the stats panel exits the program.
 The stats panel also includes **Player Stats** alongside **Info**, **Game Stats**
-and **Legacy Stats**. This shows your cumulative games played, win rate,
-successful hunts and total turns across all sessions.
+and **Legacy Stats**. Player Stats show your cumulative games played, win rate,
+successful hunts and total turns across every dinosaur you've played.
 
 Each dinosaur's base attributes are defined in `dinosurvival/dino_stats.yaml`.
