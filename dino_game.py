@@ -301,10 +301,25 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         ):
             if kill > 0:
                 lines.append(f"{prey}: {kill}")
-        if not lines:
-            messagebox.showinfo("Game Stats", "No successful hunts yet.")
+        win = tk.Toplevel(root)
+        win.title("Game Stats")
+        info = DINO_STATS.get(dinosaur_name, {})
+        img = None
+        img_path = info.get("image")
+        if img_path:
+            abs_path = os.path.join(os.path.dirname(__file__), img_path)
+            img = load_scaled_image(abs_path, 400, 250, master=win)
+        if img:
+            lbl = tk.Label(win, image=img)
+            lbl.image = img
+            lbl.pack()
+        tk.Label(win, text=dinosaur_name + " \u2642", font=("Helvetica", 18)).pack(pady=5)
+        if lines:
+            for l in lines:
+                tk.Label(win, text=l, font=("Helvetica", 12), anchor="w").pack(anchor="w")
         else:
-            messagebox.showinfo("Game Stats", "\n".join(lines))
+            tk.Label(win, text="No successful hunts.", font=("Helvetica", 12)).pack()
+        tk.Button(win, text="Close", command=win.destroy).pack(pady=5)
 
     def show_legacy_stats() -> None:
         display_legacy_stats(root, game.setting.formation, dinosaur_name)
@@ -434,6 +449,22 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
                 b.config(state="disabled")
             show_final_stats("Victory", "Congratulations! You reached adult size!")
 
+    def do_mate() -> None:
+        result = game.mate()
+        append_output(result)
+        update_biome()
+        update_stats()
+        update_drink_button()
+        update_encounters()
+        if "Game Over" in result:
+            for b in move_buttons.values():
+                b.config(state="disabled")
+            show_final_stats("Game Over", "You have perished!")
+        if game.won:
+            for b in move_buttons.values():
+                b.config(state="disabled")
+            show_final_stats("Victory", "Congratulations! You reached adult size!")
+
     def do_pack_up(juvenile: bool) -> None:
         result = game.pack_up(juvenile)
         append_output(result)
@@ -495,7 +526,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             boost = game.player.aquatic_boost / 2
         player_s *= 1 + boost / 100.0
         entries = game.current_encounters
-        for slot, (name, juvenile, in_pack) in zip(encounter_rows, entries):
+        for slot, (name, juvenile, in_pack, sex) in zip(encounter_rows, entries):
             if name.startswith("eggs:"):
                 state = name.split(":", 1)[1]
                 weight_map = {"small": 4, "medium": 10, "large": 20}
@@ -523,6 +554,9 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
                 target_f = stats.get("adult_fierceness", 0)
                 target_s = stats.get("adult_speed", 0)
                 disp_name = name
+            if sex:
+                symbol = "♂" if sex == "M" else "♀"
+                disp_name = f"{disp_name} {symbol}"
 
             rel_f = target_f / player_f
             rel_s = target_s / player_s
@@ -565,6 +599,12 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
                     )
                 )
                 if (
+                    name == game.player.name
+                    and sex == "F"
+                    and game.player_growth_stage() == "Adult"
+                ):
+                    slot["btn"].configure(command=do_mate, text="Mate")
+                elif (
                     game.player.forms_packs
                     and name == game.player.name
                     and game.player.weight >= game.player.adult_weight / 100
@@ -650,7 +690,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
 
     def update_stats() -> None:
         stage = game.player_growth_stage()
-        name_var.set(f"{dinosaur_name} ({stage})")
+        name_var.set(f"{dinosaur_name} \u2642 ({stage})")
         img_key = stage.lower() if stage.lower() in ("hatchling", "juvenile") else "adult"
         img = player_images.get(img_key)
         if img:
@@ -686,6 +726,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         )
         fierce_label.config(text=f"Fierceness: {game.player.fierceness:.1f}")
         speed_label.config(text=f"Speed: {game.player.speed:.1f}")
+        mated_label.config(text=f"Mated: {'Yes' if game.player.mated else 'No'}")
         turn_label.config(text=f"Turn: {game.turn_count}")
 
     # Bottom middle stats
@@ -706,6 +747,8 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     fierce_label.pack(anchor="w")
     speed_label = tk.Label(stats_frame, font=("Helvetica", 14), anchor="w")
     speed_label.pack(anchor="w")
+    mated_label = tk.Label(stats_frame, font=("Helvetica", 14), anchor="w")
+    mated_label.pack(anchor="w")
     turn_label = tk.Label(stats_frame, font=("Helvetica", 14), anchor="w")
     turn_label.pack(anchor="w")
     tk.Button(stats_frame, text="Quit", width=10, command=root.destroy).pack(pady=10)

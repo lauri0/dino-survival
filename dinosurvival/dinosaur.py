@@ -24,6 +24,7 @@ class DinosaurStats:
     hydration_drain: float = 0.0
     aquatic_boost: float = 0.0
     forms_packs: bool = False
+    mated: bool = False
 
     def is_exhausted(self) -> bool:
         return self.energy <= 0
