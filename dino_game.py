@@ -198,12 +198,15 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         if img:
             biome_images[tname] = img
 
-    # Load player dinosaur image if available
-    dino_image = None
+    # Load player dinosaur images for different growth stages if available
+    player_images: dict[str, tk.PhotoImage | None] = {"adult": None, "hatchling": None, "juvenile": None}
     dino_image_path = DINO_STATS.get(dinosaur_name, {}).get("image")
     if dino_image_path:
         abs_path = os.path.join(os.path.dirname(__file__), dino_image_path)
-        dino_image = load_scaled_image(abs_path, 400, 250)
+        base, ext = os.path.splitext(abs_path)
+        player_images["adult"] = load_scaled_image(abs_path, 400, 250)
+        player_images["hatchling"] = load_scaled_image(f"{base}_hatchling{ext}", 400, 250)
+        player_images["juvenile"] = load_scaled_image(f"{base}_juvenile{ext}", 400, 250)
 
     main = tk.Frame(root)
     main.pack(fill="both", expand=True)
@@ -241,9 +244,12 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     dino_frame.grid_propagate(False)
 
     dino_image_label = tk.Label(dino_frame)
-    if dino_image:
-        dino_image_label.configure(image=dino_image)
-        dino_image_label.image = dino_image
+    initial_stage = game.player_growth_stage().lower()
+    key = initial_stage if initial_stage in ("hatchling", "juvenile") else "adult"
+    img = player_images.get(key)
+    if img:
+        dino_image_label.configure(image=img)
+        dino_image_label.image = img
     dino_image_label.pack()
 
     info_images: dict[str, tk.PhotoImage] = {}
@@ -643,6 +649,16 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         return "green"
 
     def update_stats() -> None:
+        stage = game.player_growth_stage()
+        name_var.set(f"{dinosaur_name} ({stage})")
+        img_key = stage.lower() if stage.lower() in ("hatchling", "juvenile") else "adult"
+        img = player_images.get(img_key)
+        if img:
+            dino_image_label.configure(image=img)
+            dino_image_label.image = img
+        elif player_images.get("adult"):
+            dino_image_label.configure(image=player_images["adult"])
+            dino_image_label.image = player_images["adult"]
         health_label.config(
             text=f"Health: {game.player.health:.0f}%",
             fg=color_for(game.player.health),
@@ -676,7 +692,8 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     stats_frame = tk.Frame(main)
     stats_frame.grid(row=1, column=0, sticky="nsew", padx=10, pady=10)
 
-    tk.Label(stats_frame, text=f"{dinosaur_name}", font=("Helvetica", 16)).pack()
+    name_var = tk.StringVar()
+    tk.Label(stats_frame, textvariable=name_var, font=("Helvetica", 16)).pack()
     health_label = tk.Label(stats_frame, font=("Helvetica", 14), anchor="w")
     health_label.pack(anchor="w")
     energy_label = tk.Label(stats_frame, font=("Helvetica", 14), anchor="w")

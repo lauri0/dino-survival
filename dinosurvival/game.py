@@ -197,6 +197,19 @@ class Game:
             return "\nYou have grown to full size! You win!"
         return None
 
+    def player_growth_stage(self) -> str:
+        """Return the descriptive growth stage of the player."""
+        if self.player.adult_weight <= 0:
+            return "Adult"
+        pct = self.player.weight / self.player.adult_weight
+        if pct <= 0.10:
+            return "Hatchling"
+        if pct <= 1 / 3:
+            return "Juvenile"
+        if pct <= 2 / 3:
+            return "Sub-Adult"
+        return "Adult"
+
     def _max_growth_gain(self) -> float:
         """Return the biological limit on weight gain for this turn."""
         weight = self.player.weight
