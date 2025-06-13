@@ -115,7 +115,7 @@ class Game:
                     ) / 2
                 else:
                     weight = stats.get("adult_weight", 0)
-                if weight >= self.player.weight / 100:
+                if weight >= self.player.weight / 1000:
                     sex: str | None = None
                     if name == self.player.name:
                         sex = random.choice(["M", "F"])
