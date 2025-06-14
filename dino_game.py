@@ -775,7 +775,8 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             "",
             "Biome Visits:",
         ]
-        for b, c in game.biome_turns.items():
+        for b in game.setting.terrains.keys():
+            c = game.biome_turns.get(b, 0)
             lines.append(f"- {b.capitalize()}: {c}")
         lines.append("")
         lines.append("Hunts:")
