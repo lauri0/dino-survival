@@ -22,7 +22,7 @@
       "woodlands": 0.00,
       "badlands": 0.00,
       "lake": 0.03,
-      "floodplain": 0.00
+      "mountain": 0.0
     }
   },
   "Alcovasaurus": {
@@ -48,7 +48,7 @@
       "woodlands": 0.02,
       "badlands": 0.02,
       "lake": 0.01,
-      "floodplain": 0.01
+      "mountain": 0.0
     }
   },
   "Allosaurus": {
@@ -74,7 +74,7 @@
       "woodlands": 0.03,
       "badlands": 0.01,
       "lake": 0.01,
-      "floodplain": 0.03
+      "mountain": 0.0
     }
   },
   "Brachiosaurus": {
@@ -100,7 +100,7 @@
       "woodlands": 0.01,
       "badlands": 0.00,
       "lake": 0.00,
-      "floodplain": 0.00
+      "mountain": 0.0
     }
   },  
   "Camarasaurus": {
@@ -126,7 +126,7 @@
       "woodlands": 0.03,
       "badlands": 0.09,
       "lake": 0.01,
-      "floodplain": 0.03
+      "mountain": 0.0
     }
   },
   "Centipede": {
@@ -152,7 +152,7 @@
       "woodlands": 0.05,
       "badlands": 0.03,
       "lake": 0.00,
-      "floodplain": 0.02
+      "mountain": 0.0
     }
   },
   "Ceratodus": {
@@ -178,7 +178,7 @@
       "woodlands": 0.00,
       "badlands": 0.00,
       "lake": 0.08,
-      "floodplain": 0.00
+      "mountain": 0.0
     }
   },
   "Ceratosaurus": {
@@ -204,7 +204,7 @@
       "woodlands": 0.01,
       "badlands": 0.01,
       "lake": 0.02,
-      "floodplain": 0.03
+      "mountain": 0.0
     }
   },
   "Diplodocus": {
@@ -230,7 +230,7 @@
       "woodlands": 0.02,
       "badlands": 0.02,
       "lake": 0.01,
-      "floodplain": 0.03
+      "mountain": 0.0
     }
   },  
   "Dragonfly": {
@@ -256,7 +256,7 @@
       "woodlands": 0.03,
       "badlands": 0.01,
       "lake": 0.03,
-      "floodplain": 0.03
+      "mountain": 0.0
     }
   },
   "Frog": {
@@ -282,7 +282,7 @@
       "woodlands": 0.00,
       "badlands": 0.00,
       "lake": 0.06,
-      "floodplain": 0.1
+      "mountain": 0.0
     }
   },
   "Fruitadens": {
@@ -308,7 +308,7 @@
       "woodlands": 0.00,
       "badlands": 0.00,
       "lake": 0.02,
-      "floodplain": 0.04
+      "mountain": 0.0
     }
   },
   "Gargoyleosaurus": {
@@ -334,7 +334,7 @@
       "woodlands": 0.01,
       "badlands": 0.005,
       "lake": 0.01,
-      "floodplain": 0.01
+      "mountain": 0.0
     }
   },
   "Glyptops": {
@@ -360,7 +360,7 @@
       "woodlands": 0.0,
       "badlands": 0.0,
       "lake": 0.01,
-      "floodplain": 0.00
+      "mountain": 0.0
     }
   },  
   "Lizard": {
@@ -386,7 +386,7 @@
       "woodlands": 0.03,
       "badlands": 0.03,
       "lake": 0.04,
-      "floodplain": 0.02
+      "mountain": 0.0
     }
   },
   "Morrolepis": {
@@ -412,7 +412,7 @@
       "woodlands": 0.00,
       "badlands": 0.00,
       "lake": 0.08,
-      "floodplain": 0.00
+      "mountain": 0.0
     }
   }, 
   "Mymoorapelta": {
@@ -438,7 +438,7 @@
       "woodlands": 0.01,
       "badlands": 0.005,
       "lake": 0.005,
-      "floodplain": 0.005
+      "mountain": 0.0
     }
   },
   "Scorpion": {
@@ -464,7 +464,7 @@
       "woodlands": 0.00,
       "badlands": 0.04,
       "lake": 0.00,
-      "floodplain": 0.00
+      "mountain": 0.0
     }
   },
   "Torvosaurus": {
@@ -490,7 +490,7 @@
       "woodlands": 0.02,
       "badlands": 0.005,
       "lake": 0.005,
-      "floodplain": 0.02
+      "mountain": 0.0
     }
   },
   "Ornitholestes": {
@@ -516,7 +516,7 @@
       "woodlands": 0.02,
       "badlands": 0.00,
       "lake": 0.01,
-      "floodplain": 0.00
+      "mountain": 0.0
     }
   },
   "Nanosaurus": {
@@ -542,7 +542,7 @@
       "woodlands": 0.08,
       "badlands": 0.01,
       "lake": 0.02,
-      "floodplain": 0.05
+      "mountain": 0.0
     }
   },
   "Dryosaurus": {
@@ -568,7 +568,7 @@
       "woodlands": 0.12,
       "badlands": 0.01,
       "lake": 0.02,
-      "floodplain": 0.04
+      "mountain": 0.0
     }
   },
   "Camptosaurus": {
@@ -594,7 +594,7 @@
       "woodlands": 0.15,
       "badlands": 0.01,
       "lake": 0.02,
-      "floodplain": 0.03
+      "mountain": 0.0
     }
   },
   "Stegosaurus": {
@@ -620,7 +620,7 @@
       "woodlands": 0.04,
       "badlands": 0.01,
       "lake": 0.01,
-      "floodplain": 0.01
+      "mountain": 0.0
     }
   }
 }
