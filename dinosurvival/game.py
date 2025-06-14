@@ -94,7 +94,10 @@ class Game:
         self.last_action: Optional[str] = None
         # Tracking and win state
         self.turn_count = 0
-        self.biome_turns: dict[str, int] = {}
+        # Track how many turns the player spends in each biome
+        self.biome_turns: dict[str, int] = {
+            name: 0 for name in setting.terrains.keys()
+        }
         self.hunt_stats: dict[str, list[int]] = {}
         self.won = False
 
