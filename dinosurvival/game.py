@@ -60,7 +60,13 @@ class Game:
         self.player.weight = self.player.hatchling_weight
         self.player.fierceness = self.player.hatchling_fierceness
         self.player.speed = self.player.hatchling_speed
-        self.map = Map(width, height, setting.terrains)
+        self.map = Map(
+            width,
+            height,
+            setting.terrains,
+            setting.height_levels,
+            setting.humidity_levels,
+        )
 
         # Pick a random starting location that is within two tiles of a lake but
         # not on a lake tile itself
@@ -81,6 +87,7 @@ class Game:
             self.x = width // 2
             self.y = height // 2
         self.map.reveal(self.x, self.y)
+        self._reveal_adjacent_mountains()
         self._energy_multiplier = 1.0
         self.current_encounters: list[tuple[str, bool, bool, str | None]] = []
         self.pack: list[bool] = []  # store juvenile status of packmates
@@ -202,6 +209,23 @@ class Game:
             self.player.health = min(100.0, self.player.health + regen)
         return message
 
+    def _reveal_adjacent_mountains(self) -> None:
+        for dy in (-1, 0, 1):
+            for dx in (-1, 0, 1):
+                if dx == 0 and dy == 0:
+                    continue
+                nx, ny = self.x + dx, self.y + dy
+                if 0 <= nx < self.map.width and 0 <= ny < self.map.height:
+                    if self.map.terrain_at(nx, ny).name == "mountain":
+                        self.map.reveal(nx, ny)
+
+    def _reveal_surrounding(self, x: int, y: int) -> None:
+        for dy in (-1, 0, 1):
+            for dx in (-1, 0, 1):
+                nx, ny = x + dx, y + dy
+                if 0 <= nx < self.map.width and 0 <= ny < self.map.height:
+                    self.map.reveal(nx, ny)
+
     def _check_victory(self) -> Optional[str]:
         """Check if the player has reached adult weight and mated."""
         if (
@@ -319,6 +343,7 @@ class Game:
             if attack:
                 msg += "\n" + attack
             self._generate_encounters()
+            self._reveal_adjacent_mountains()
             return msg
 
         player_f = max(self.effective_fierceness(), 0.1)
@@ -362,6 +387,7 @@ class Game:
         if attack:
             msg += "\n" + attack
         self._generate_encounters()
+        self._reveal_adjacent_mountains()
         return msg
 
     def pack_up(self, juvenile: bool) -> str:
@@ -382,6 +408,7 @@ class Game:
         if attack:
             msg += "\n" + attack
         self._generate_encounters()
+        self._reveal_adjacent_mountains()
         return msg
 
     def leave_pack(self) -> str:
@@ -402,6 +429,7 @@ class Game:
         if attack:
             msg += "\n" + attack
         self._generate_encounters()
+        self._reveal_adjacent_mountains()
         return msg
 
     def mate(self) -> str:
@@ -422,6 +450,7 @@ class Game:
         if attack:
             msg += "\n" + attack
         self._generate_encounters()
+        self._reveal_adjacent_mountains()
         return msg
 
     def collect_eggs(self) -> str:
@@ -461,6 +490,7 @@ class Game:
         if "Game Over" in end_msg:
             return msg
         self._generate_encounters()
+        self._reveal_adjacent_mountains()
         return msg
 
     def move(self, dx: int, dy: int):
@@ -468,6 +498,8 @@ class Game:
         ny = max(0, min(self.map.height - 1, self.y + dy))
         self.x, self.y = nx, ny
         self.map.reveal(self.x, self.y)
+        if self.map.terrain_at(self.x, self.y).name == "mountain":
+            self._reveal_surrounding(self.x, self.y)
 
     def turn(self, action: str) -> str:
         pre = self._start_turn()
@@ -501,7 +533,10 @@ class Game:
         else:
             result = "Unknown action"
 
-        end_msg = self._apply_turn_costs(moved, self._energy_multiplier)
+        multiplier = self._energy_multiplier
+        if moved and self.map.terrain_at(self.x, self.y).name == "mountain":
+            multiplier *= 3
+        end_msg = self._apply_turn_costs(moved, multiplier)
         result += end_msg
         win = self._check_victory()
         if win:
@@ -513,6 +548,7 @@ class Game:
             if attack:
                 result += "\n" + attack
         self._generate_encounters()
+        self._reveal_adjacent_mountains()
         if "Game Over" in end_msg:
             return result
         return result

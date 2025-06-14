@@ -286,7 +286,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         chances = info.get('encounter_chance', {})
         total = 0.0
         for env, val in chances.items():
-            if env == 'floodplain':
+            if env == 'mountain':
                 continue
             lines.append(f"{env.capitalize()} chance: {val * 100:.1f}%")
             total += val * 100
@@ -629,11 +629,11 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         color_map = {
             "forest": "green",
             "plains": "yellowgreen",
-            "floodplain": "tan",
             "swamp": "olivedrab",
             "woodlands": "palegreen",
             "badlands": "yellow",
             "lake": "blue",
+            "mountain": "darkgray",
         }
         for y, r in enumerate(map_tiles):
             for x, canvas in enumerate(r):
