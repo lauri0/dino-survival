@@ -19,7 +19,7 @@ def calculate_catch_chance(rel_speed: float) -> float:
         return 1.0 - (rel_speed - 0.5)
     return 0.0
 from .dinosaur import DinosaurStats
-from .map import Map
+from .map import Map, map_reveal
 from .settings import Setting
 
 # Constants used to derive hatchling values from adult stats
@@ -67,6 +67,7 @@ class Game:
             setting.height_levels,
             setting.humidity_levels,
         )
+        map_reveal(self.map)
 
         # Pick a random starting location that is within two tiles of a lake but
         # not on a lake tile itself

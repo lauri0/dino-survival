@@ -214,3 +214,10 @@ class Map:
                 row.append(val)
             noise.append(row)
         return noise
+
+
+def map_reveal(m: "Map") -> None:
+    """Reveal the entire map for debugging purposes."""
+    for y in range(m.height):
+        for x in range(m.width):
+            m.reveal(x, y)
