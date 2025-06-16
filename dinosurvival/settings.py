@@ -31,7 +31,7 @@ MORRISON = Setting(
         "lake": Terrain("lake", {"small_prey": 0.9, "large_prey": 0.1}),
         "mountain": Terrain("mountain", {"small_prey": 0.4, "large_prey": 0.6}),
     },
-    height_levels={"low": 0.3, "normal": 0.5, "mountain": 0.2},
+    height_levels={"low": 0.3, "normal": 0.45, "mountain": 0.25},
     humidity_levels={"arid": 0.3, "normal": 0.4, "humid": 0.3},
 )
 
