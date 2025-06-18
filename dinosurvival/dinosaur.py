@@ -12,6 +12,7 @@ class DinosaurStats:
     adult_speed: float = 0.0
     hatchling_energy_drain: float = 0.0
     adult_energy_drain: float = 0.0
+    growth_rate: float = 0.35
     walking_energy_drain_multiplier: float = 1.0
     carcass_food_value_modifier: float = 1.0
     fierceness: float = 0.0
