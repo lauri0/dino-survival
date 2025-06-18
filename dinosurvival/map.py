@@ -174,8 +174,15 @@ class Map:
             return eggs
         return None
 
-    def _generate_noise(self, width: int, height: int, scale: int = 4) -> List[List[float]]:
-        """Create a simple value noise map for distributing biomes."""
+    def _generate_noise(self, width: int, height: int, scale: int = 3) -> List[List[float]]:
+        """Create a simple value noise map for distributing biomes.
+
+        The ``scale`` parameter controls the granularity of the generated
+        noise. Lower values result in more, smaller features across the map.
+        A value of ``3`` gives slightly more detail compared to the previous
+        value of ``4`` so that additional landscape features can fit within
+        typical map sizes.
+        """
         # Generate a noise grid larger than the map itself so that the
         # noise used for the map comes from the interior of this grid.
         # This avoids the edges of the map coinciding with the edges of
