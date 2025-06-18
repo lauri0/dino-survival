@@ -598,7 +598,8 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
                     and name == game.player.name
                     and game.player.weight >= game.player.adult_weight / 100
                 ):
-                    slot["btn"].configure(command=lambda j=juvenile: do_pack_up(j), text="Pack")
+                    # Pack functionality disabled for now
+                    slot["btn"].configure(command=lambda n=name, j=juvenile: do_hunt(n, j), text="Hunt")
                 else:
                     slot["btn"].configure(command=lambda n=name, j=juvenile: do_hunt(n, j), text="Hunt")
                 slot["info"].configure(command=lambda n=name: show_dino_facts(n))

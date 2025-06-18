@@ -111,6 +111,11 @@ class Map:
         self.revealed = [[False for _ in range(width)] for _ in range(height)]
         self.danger = [[0.0 for _ in range(width)] for _ in range(height)]
         self.nests: Dict[Tuple[int, int], Nest] = {}
+        # List of animals present in each cell. Each entry is a list of
+        # tuples ``(name, juvenile, sex)`` where ``sex`` may be ``None``.
+        self.animals: List[List[List[tuple[str, bool, str | None]]]] = [
+            [[] for _ in range(width)] for _ in range(height)
+        ]
 
         # Place 5 nests randomly across the map
         num_nests = 5
@@ -173,6 +178,30 @@ class Map:
             nest.eggs = "none"
             return eggs
         return None
+
+    def remove_animal(
+        self,
+        x: int,
+        y: int,
+        name: str,
+        juvenile: Optional[bool] = None,
+        sex: Optional[str] = None,
+    ) -> bool:
+        """Remove an animal from the specified cell.
+
+        Returns ``True`` if an animal was removed.
+        """
+        cell = self.animals[y][x]
+        for idx, (n, j, s) in enumerate(cell):
+            if n != name:
+                continue
+            if juvenile is not None and j != juvenile:
+                continue
+            if sex is not None and s != sex:
+                continue
+            del cell[idx]
+            return True
+        return False
 
     def _generate_noise(self, width: int, height: int, scale: int = 3) -> List[List[float]]:
         """Create a simple value noise map for distributing biomes.
