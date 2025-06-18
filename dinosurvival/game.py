@@ -263,7 +263,7 @@ class Game:
         # target adult weight so that the player can realistically reach the
         # goal weight.
         max_weight = adult * 1.05
-        r = 0.35
+        r = getattr(self.player, "growth_rate", 0.35)
         gain = r * weight * (1 - weight / max_weight)
         return min(gain, adult - weight)
 
