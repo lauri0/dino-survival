@@ -67,6 +67,7 @@ class Game:
             setting.height_levels,
             setting.humidity_levels,
         )
+        self._populate_animals()
 
         # Pick a random starting location that is within two tiles of a lake but
         # not on a lake tile itself
@@ -101,42 +102,47 @@ class Game:
         self.hunt_stats: dict[str, list[int]] = {}
         self.won = False
 
+    def _populate_animals(self) -> None:
+        """Populate the map with NPC animals."""
+        for y in range(self.map.height):
+            for x in range(self.map.width):
+                terrain = self.map.terrain_at(x, y).name
+                animals: list[tuple[str, bool, str | None]] = []
+                for name, stats in DINO_STATS.items():
+                    if len(animals) >= 5:
+                        break
+                    if self.setting.formation not in stats.get("formations", []):
+                        continue
+                    chance = stats.get("encounter_chance", {}).get(terrain, 0)
+                    if random.random() < chance:
+                        allow_j = stats.get("can_be_juvenile", True)
+                        juvenile = allow_j and random.random() < 0.5
+                        if juvenile:
+                            weight = (
+                                stats.get("hatchling_weight", 0)
+                                + stats.get("adult_weight", 0)
+                            ) / 2
+                        else:
+                            weight = stats.get("adult_weight", 0)
+                        if weight >= self.player.weight / 1000:
+                            sex: str | None = None
+                            if name == self.player.name:
+                                sex = random.choice(["M", "F"])
+                            animals.append((name, juvenile, sex))
+                self.map.animals[y][x] = animals
+
     def _generate_encounters(self) -> None:
-        terrain = self.map.terrain_at(self.x, self.y).name
-        danger = self.map.danger_at(self.x, self.y)
-        spawn_mult = max(0.0, 1.0 - danger / 100.0)
-        found: list[tuple[str, bool, str | None]] = []
-        for name, stats in DINO_STATS.items():
-            if len(found) >= 5:
-                break
-            formations = stats.get("formations", [])
-            if self.setting.formation not in formations:
-                continue
-            chance = stats.get("encounter_chance", {}).get(terrain, 0)
-            chance *= spawn_mult
-            if random.random() < chance:
-                allow_j = stats.get("can_be_juvenile", True)
-                juvenile = allow_j and random.random() < 0.5
-                # Skip extremely small encounters compared to the player
-                if juvenile:
-                    weight = (
-                        stats.get("hatchling_weight", 0)
-                        + stats.get("adult_weight", 0)
-                    ) / 2
-                else:
-                    weight = stats.get("adult_weight", 0)
-                if weight >= self.player.weight / 1000:
-                    sex: str | None = None
-                    if name == self.player.name:
-                        sex = random.choice(["M", "F"])
-                    found.append((name, juvenile, sex))
+        """Load encounter information from the current cell."""
         entries: list[tuple[str, bool, bool, str | None]] = []
+        cell_animals = self.map.animals[self.y][self.x]
         nest_state = self.map.nest_state(self.x, self.y)
         if nest_state and nest_state != "none":
             entries.append((f"eggs:{nest_state}", False, False, None))
         for j in self.pack:
             entries.append((self.player.name, j, True, None))
-        for name, juvenile, sex in found:
+        for name, juvenile, sex in cell_animals:
+            if len(entries) >= 5:
+                break
             entries.append((name, juvenile, False, sex))
         self.current_encounters = entries[:5]
 
@@ -300,6 +306,9 @@ class Game:
         if not target:
             return f"Unknown target {target_name}."
 
+        # Remove the target from the current cell regardless of hunt outcome
+        self.map.remove_animal(self.x, self.y, target_name, juvenile)
+
         hunt = self.hunt_stats.setdefault(target_name, [0, 0])
         hunt[0] += 1
 
@@ -398,6 +407,8 @@ class Game:
         if pre:
             return pre
         self.pack.append(juvenile)
+        # Remove the recruited dinosaur from the cell
+        self.map.remove_animal(self.x, self.y, self.player.name, juvenile)
         msg = f"A {self.player.name} joins your pack."
         end_msg = self._apply_turn_costs(False)
         msg += end_msg
@@ -439,6 +450,8 @@ class Game:
         pre = self._start_turn()
         if pre:
             return pre
+        # Remove the mating partner from the cell
+        self.map.remove_animal(self.x, self.y, self.player.name, sex="F")
         self.player.mated = True
         msg = "You mate successfully."
         end_msg = self._apply_turn_costs(False)
