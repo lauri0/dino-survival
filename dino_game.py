@@ -746,7 +746,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             if img_path:
                 abs_path = os.path.join(os.path.dirname(__file__), img_path)
                 if name not in population_images:
-                    population_images[name] = load_scaled_image(abs_path, 80, 50)
+                    population_images[name] = load_scaled_image(abs_path, 40, 25)
                 img = population_images.get(name)
             if img:
                 img_lbl.configure(image=img)
