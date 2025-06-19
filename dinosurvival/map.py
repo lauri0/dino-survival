@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import Dict, Tuple, List, Optional
-from .plant import PlantStats
+from .plant import PlantStats, Plant
 import random
 
 @dataclass
@@ -110,7 +110,7 @@ class Map:
                     break
         
         self.revealed = [[False for _ in range(width)] for _ in range(height)]
-        self.plants: List[List[List[str]]] = [
+        self.plants: List[List[List[Plant]]] = [
             [[] for _ in range(width)] for _ in range(height)
         ]
         self.nests: Dict[Tuple[int, int], Nest] = {}
@@ -175,7 +175,7 @@ class Map:
                         continue
                     chance = stats.growth_chance.get(terrain, 0)
                     if random.random() < chance:
-                        cell_plants.append(name)
+                        cell_plants.append(Plant(name=name, weight=stats.weight))
                         if len(cell_plants) + len(cell_animals) >= 5:
                             break
 

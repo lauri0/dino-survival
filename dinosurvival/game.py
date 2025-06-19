@@ -19,7 +19,7 @@ def calculate_catch_chance(rel_speed: float) -> float:
         return 1.0 - (rel_speed - 0.5)
     return 0.0
 from .dinosaur import DinosaurStats, Diet
-from .plant import PlantStats
+from .plant import PlantStats, Plant
 from .map import Map
 from .settings import Setting
 
@@ -102,6 +102,7 @@ class Game:
         self._reveal_adjacent_mountains()
         self._energy_multiplier = 1.0
         self.current_encounters: list[tuple[str, bool, bool, str | None]] = []
+        self.current_plants: list[Plant] = []
         self.pack: list[bool] = []  # store juvenile status of packmates
         self.last_action: Optional[str] = None
         # Tracking and win state
@@ -146,6 +147,7 @@ class Game:
         """Load encounter information from the current cell."""
         entries: list[tuple[str, bool, bool, str | None]] = []
         cell_animals = self.map.animals[self.y][self.x]
+        cell_plants = self.map.plants[self.y][self.x]
         nest_state = self.map.nest_state(self.x, self.y)
         if nest_state and nest_state != "none":
             entries.append((f"eggs:{nest_state}", False, False, None))
@@ -156,6 +158,7 @@ class Game:
                 break
             entries.append((name, juvenile, False, sex))
         self.current_encounters = entries[:5]
+        self.current_plants = list(cell_plants)[:5]
 
     def _aggressive_attack_check(self) -> Optional[str]:
         player_f = max(self.effective_fierceness(), 0.1)
