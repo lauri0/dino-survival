@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 import random
 import os
-from dinosurvival.game import Game, DINO_STATS, calculate_catch_chance
+from dinosurvival.game import Game, DINO_STATS, PLANT_STATS, calculate_catch_chance
 from dinosurvival.settings import MORRISON, HELL_CREEK
 from dinosurvival.logging_utils import (
     append_game_log,
@@ -355,6 +355,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         update_map()
         update_stats()
         update_encounters()
+        update_plants()
         if "Game Over" in result:
             for b in move_buttons.values():
                 b.config(state="disabled")
@@ -417,6 +418,24 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         row.grid_columnconfigure(1, weight=1)
         encounter_rows.append({"frame": row, "img": img, "name": name_lbl, "stats": stats_lbl, "btn": btn, "info": info_btn})
 
+    # Plant display below encounters
+    plant_list = tk.Frame(encounter_frame)
+    plant_list.pack(fill="both", expand=True)
+    plant_rows = []
+    plant_images: dict[str, tk.PhotoImage] = {}
+    for _ in range(5):
+        row = tk.Frame(plant_list)
+        img = tk.Label(row)
+        info_frame = tk.Frame(row)
+        name_lbl = tk.Label(info_frame, font=("Helvetica", 12), anchor="w")
+        weight_lbl = tk.Label(info_frame, font=("Helvetica", 10), anchor="w")
+        name_lbl.pack(anchor="w")
+        weight_lbl.pack(anchor="w")
+        img.grid(row=0, column=0, rowspan=2, sticky="w")
+        info_frame.grid(row=0, column=1, sticky="w", padx=5)
+        row.grid_columnconfigure(1, weight=1)
+        plant_rows.append({"frame": row, "img": img, "name": name_lbl, "weight": weight_lbl})
+
     # Population tracker to the right of map and encounters
     population_frame = tk.Frame(main, width=200)
     population_frame.grid(row=0, column=3, rowspan=2, sticky="nsew", padx=10, pady=10)
@@ -432,6 +451,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         update_stats()
         update_drink_button()
         update_encounters()
+        update_plants()
         if "Game Over" in result:
             for b in move_buttons.values():
                 b.config(state="disabled")
@@ -448,6 +468,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         update_stats()
         update_drink_button()
         update_encounters()
+        update_plants()
         if "Game Over" in result:
             for b in move_buttons.values():
                 b.config(state="disabled")
@@ -464,6 +485,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         update_stats()
         update_drink_button()
         update_encounters()
+        update_plants()
         if "Game Over" in result:
             for b in move_buttons.values():
                 b.config(state="disabled")
@@ -480,6 +502,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         update_stats()
         update_drink_button()
         update_encounters()
+        update_plants()
         if "Game Over" in result:
             for b in move_buttons.values():
                 b.config(state="disabled")
@@ -496,6 +519,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         update_biome()
         update_map()
         update_encounters()
+        update_plants()
         if "Game Over" in result:
             for b in move_buttons.values():
                 b.config(state="disabled")
@@ -610,7 +634,27 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             slot["frame"].pack(fill="x", pady=2, expand=True)
         update_population()
 
-        update_population()
+    def update_plants() -> None:
+        for slot in plant_rows:
+            slot["frame"].pack_forget()
+        for slot, plant in zip(plant_rows, game.current_plants):
+            stats = PLANT_STATS.get(plant.name, {})
+            img_path = stats.get("image")
+            img = None
+            if img_path:
+                abs_path = os.path.join(os.path.dirname(__file__), img_path)
+                if plant.name not in plant_images:
+                    plant_images[plant.name] = load_scaled_image(abs_path, 100, 63)
+                img = plant_images.get(plant.name)
+            if img:
+                slot["img"].configure(image=img)
+                slot["img"].image = img
+            else:
+                slot["img"].configure(image="")
+                slot["img"].image = None
+            slot["name"].configure(text=plant.name)
+            slot["weight"].configure(text=f"W:{plant.weight:.1f}kg")
+            slot["frame"].pack(fill="x", pady=2, expand=True)
 
     # Top-right map
     map_frame = tk.Frame(main)
@@ -824,6 +868,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     update_map()
     update_stats()
     update_encounters()
+    update_plants()
     update_population()
 
     root.mainloop()

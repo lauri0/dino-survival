@@ -10,3 +10,11 @@ class PlantStats:
     weight: float
     growth_chance: Dict[str, float]
 
+
+@dataclass
+class Plant:
+    """A plant instance present on the map."""
+
+    name: str
+    weight: float
+
