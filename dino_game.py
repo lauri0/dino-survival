@@ -184,8 +184,8 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
 
     root = tk.Tk()
     root.title("Dinosaur Survival")
-    root.geometry("1400x800")
-    root.minsize(1400, 800)
+    root.geometry("1600x800")
+    root.minsize(1600, 800)
 
     # Preload biome images if available
     assets_dir = os.path.join(os.path.dirname(__file__), "assets", "biomes")
@@ -218,6 +218,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     main.grid_columnconfigure(0, weight=0, minsize=200)
     main.grid_columnconfigure(1, weight=0, minsize=200)
     main.grid_columnconfigure(2, weight=1)
+    main.grid_columnconfigure(3, weight=0, minsize=200)
 
     # Biome information (middle column after layout swap)
     biome_frame = tk.Frame(main, width=200)
@@ -422,6 +423,14 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         row.grid_columnconfigure(1, weight=1)
         encounter_rows.append({"frame": row, "img": img, "name": name_lbl, "stats": stats_lbl, "btn": btn, "info": info_btn})
 
+    # Population tracker to the right of map and encounters
+    population_frame = tk.Frame(main, width=200)
+    population_frame.grid(row=0, column=3, rowspan=2, sticky="nsew", padx=10, pady=10)
+    population_frame.grid_propagate(False)
+    population_list = tk.Frame(population_frame)
+    population_list.pack(fill="both", expand=True)
+    population_images: dict[str, tk.PhotoImage] = {}
+
     def do_hunt(target_name: str, juvenile: bool) -> None:
         result = game.hunt_dinosaur(target_name, juvenile)
         append_output(result)
@@ -572,7 +581,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             else:
                 slot["img"].configure(image="")
                 slot["img"].image = None
-            
+
             if in_pack:
                 slot["name"].configure(text=f"{disp_name} (Pack)")
                 slot["stats"].configure(text="")
@@ -605,6 +614,9 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
                 slot["info"].configure(command=lambda n=name: show_dino_facts(n))
                 slot["info"].grid()
             slot["frame"].pack(fill="x", pady=2, expand=True)
+        update_population()
+
+        update_population()
 
     # Top-right map
     map_frame = tk.Frame(main)
@@ -719,6 +731,33 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         mated_label.config(text=f"Mated: {'Yes' if game.player.mated else 'No'}")
         turn_label.config(text=f"Turn: {game.turn_count}")
 
+    def update_population() -> None:
+        for child in population_list.winfo_children():
+            child.destroy()
+        counts, total = game.population_stats()
+        if total <= 0:
+            return
+        for name, count in sorted(counts.items()):
+            pct = count / total * 100
+            row = tk.Frame(population_list)
+            img_lbl = tk.Label(row)
+            img_path = DINO_STATS.get(name, {}).get("image")
+            img = None
+            if img_path:
+                abs_path = os.path.join(os.path.dirname(__file__), img_path)
+                if name not in population_images:
+                    population_images[name] = load_scaled_image(abs_path, 80, 50)
+                img = population_images.get(name)
+            if img:
+                img_lbl.configure(image=img)
+                img_lbl.image = img
+            img_lbl.grid(row=0, column=0, sticky="w")
+            tk.Label(row, text=f"{name}", font=("Helvetica", 10)).grid(row=0, column=1, sticky="w", padx=5)
+            tk.Label(row, text=f"{count} ({pct:.1f}%)", font=("Helvetica", 10)).grid(row=0, column=2, sticky="w")
+            tk.Button(row, text="Info", width=4, command=lambda n=name: show_dino_facts(n)).grid(row=0, column=3, sticky="e")
+            row.grid_columnconfigure(1, weight=1)
+            row.pack(fill="x", pady=2)
+
     # Bottom middle stats
     stats_frame = tk.Frame(main)
     stats_frame.grid(row=1, column=0, sticky="nsew", padx=10, pady=10)
@@ -745,7 +784,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
 
     # Bottom text output
     text_frame = tk.Frame(main)
-    text_frame.grid(row=2, column=0, columnspan=3, sticky="nsew")
+    text_frame.grid(row=2, column=0, columnspan=4, sticky="nsew")
     text_frame.grid_rowconfigure(0, weight=1)
     text_frame.grid_columnconfigure(0, weight=1)
 
@@ -791,6 +830,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     update_map()
     update_stats()
     update_encounters()
+    update_population()
 
     root.mainloop()
 

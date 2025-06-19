@@ -509,6 +509,20 @@ class Game:
         self._reveal_adjacent_mountains()
         return msg
 
+    def population_stats(self) -> tuple[dict[str, int], int]:
+        """Return a mapping of species to counts and the total population."""
+        counts: dict[str, int] = {}
+        total = 0
+        for row in self.map.animals:
+            for cell in row:
+                for name, _j, _s in cell:
+                    counts[name] = counts.get(name, 0) + 1
+                    total += 1
+        # Include the player and pack members
+        counts[self.player.name] = counts.get(self.player.name, 0) + 1 + len(self.pack)
+        total += 1 + len(self.pack)
+        return counts, total
+
     def move(self, dx: int, dy: int):
         nx = max(0, min(self.map.width - 1, self.x + dx))
         ny = max(0, min(self.map.height - 1, self.y + dy))
