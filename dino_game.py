@@ -420,7 +420,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
 
     # Plant display below encounters
     plant_list = tk.Frame(encounter_frame)
-    plant_list.pack(fill="both", expand=True)
+    plant_list.pack(fill="both", expand=True, side="bottom")
     plant_rows = []
     plant_images: dict[str, tk.PhotoImage] = {}
     for _ in range(5):
@@ -638,8 +638,8 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         for slot in plant_rows:
             slot["frame"].pack_forget()
         for slot, plant in zip(plant_rows, game.current_plants):
-            stats = PLANT_STATS.get(plant.name, {})
-            img_path = stats.get("image")
+            stats = PLANT_STATS.get(plant.name)
+            img_path = stats.image if stats else None
             img = None
             if img_path:
                 abs_path = os.path.join(os.path.dirname(__file__), img_path)
