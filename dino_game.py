@@ -228,17 +228,13 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     biome_image_label = tk.Label(biome_frame)
     biome_image_label.pack(pady=(0, 10))
 
-    # Biome name and danger value on the same row
+    # Biome name
     biome_row = tk.Frame(biome_frame)
     biome_row.pack(pady=(0, 2))
 
     biome_var = tk.StringVar()
     biome_label = tk.Label(biome_row, textvariable=biome_var, font=("Helvetica", 16))
     biome_label.pack(side="left")
-
-    danger_var = tk.StringVar()
-    danger_label = tk.Label(biome_row, textvariable=danger_var, font=("Helvetica", 14))
-    danger_label.pack(side="left", padx=(5, 0))
 
     # Player dinosaur image on the left after swap
     dino_frame = tk.Frame(main, width=200)
@@ -326,8 +322,6 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         if game.map.has_nest(game.x, game.y):
             label += " (Nest)"
         biome_var.set(label)
-        danger = game.map.danger_at(game.x, game.y)
-        danger_var.set(f"(Danger: {danger:.0f})")
         img = biome_images.get(terrain.name)
         if img:
             biome_image_label.configure(image=img)
@@ -737,7 +731,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         counts, total = game.population_stats()
         if total <= 0:
             return
-        for name, count in sorted(counts.items()):
+        for name, count in sorted(counts.items(), key=lambda x: x[1], reverse=True):
             pct = count / total * 100
             row = tk.Frame(population_list)
             img_lbl = tk.Label(row)
