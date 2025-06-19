@@ -1,4 +1,13 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from enum import Enum
+
+
+class Diet(Enum):
+    MEAT = "meat"
+    INSECTS = "insects"
+    FERNS = "ferns"
+    CYCADS = "cycads"
+    CONIFERS = "conifers"
 
 @dataclass
 class DinosaurStats:
@@ -26,6 +35,7 @@ class DinosaurStats:
     aquatic_boost: float = 0.0
     forms_packs: bool = False
     mated: bool = False
+    diet: list[Diet] = field(default_factory=list)
 
     def is_exhausted(self) -> bool:
         return self.energy <= 0

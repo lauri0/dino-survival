@@ -18,7 +18,8 @@ def calculate_catch_chance(rel_speed: float) -> float:
     if rel_speed <= 1.0:
         return 1.0 - (rel_speed - 0.5)
     return 0.0
-from .dinosaur import DinosaurStats
+from .dinosaur import DinosaurStats, Diet
+from .plant import PlantStats
 from .map import Map
 from .settings import Setting
 
@@ -32,8 +33,18 @@ STATS_FILE = os.path.join(os.path.dirname(__file__), "dino_stats.yaml")
 with open(STATS_FILE) as f:
     DINO_STATS = json.load(f)
 
+PLANT_STATS_FILE = os.path.join(os.path.dirname(__file__), "plant_stats.yaml")
+with open(PLANT_STATS_FILE) as f:
+    PLANT_STATS = json.load(f)
+
+# Convert plant dictionaries to dataclass instances
+for name, stats in list(PLANT_STATS.items()):
+    PLANT_STATS[name] = PlantStats(**stats)
+
 # Fill in derived hatchling stats if they were omitted from the YAML
 for stats in DINO_STATS.values():
+    if "diet" in stats:
+        stats["diet"] = [Diet(item) for item in stats.get("diet", [])]
     aw = stats.get("adult_weight", 0)
     if "hatchling_weight" not in stats:
         stats["hatchling_weight"] = aw / HATCHLING_WEIGHT_DIVISOR
@@ -195,8 +206,8 @@ class Game:
         self.turn_count += 1
         terrain = self.map.terrain_at(self.x, self.y).name
         self.biome_turns[terrain] = self.biome_turns.get(terrain, 0) + 1
-        self.map.decay_danger()
         self.map.update_nests()
+        self.map.grow_plants(PLANT_STATS, self.setting.formation)
         self.player.hydration = max(
             0.0, self.player.hydration - self.player.hydration_drain
         )
@@ -370,7 +381,6 @@ class Game:
 
         prey_meat = target_weight * target.get("carcass_food_value_modifier", 1.0)
         prey_meat /= max(1, len(self.pack) + 1)
-        self.map.increase_danger(self.x, self.y)
         energy_gain = 1000 * prey_meat / max(self.player.weight, 0.1)
         needed = 100.0 - self.player.energy
         actual_energy_gain = min(energy_gain, needed)

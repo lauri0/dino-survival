@@ -6,8 +6,6 @@ A simple text-based dinosaur survival game inspired by the BBC "Big Al" game. Th
 
 - Turn based actions: move or hunt on each turn.
 - Random terrain including forests, plains, swamps, woodlands, badlands and lakes that affects the type of prey encountered.
-- Danger increases with hunting and slowly decays, reducing animal encounters on highly hunted tiles.
-- Collecting eggs no longer raises danger, allowing opportunistic meals without scaring off prey.
 - Support for multiple settings such as the Morrison Formation or Hell Creek.
 
 ## Requirements

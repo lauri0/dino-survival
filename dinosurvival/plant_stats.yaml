@@ -1,0 +1,48 @@
+{
+  "Ferns": {
+    "name": "Ferns",
+    "formations": ["Morrison", "Hell Creek"],
+    "image": "assets/plants/ferns.png",
+    "weight": 100.0,
+    "growth_chance": {
+      "plains": 0.05,
+      "forest": 0.05,
+      "swamp": 0.05,
+      "woodlands": 0.05,
+      "badlands": 0.02,
+      "lake": 0.03,
+      "mountain": 0.0
+    }
+  },
+  "Cycads": {
+    "name": "Cycads",
+    "formations": ["Morrison", "Hell Creek"],
+    "image": "assets/plants/cycads.png",
+    "weight": 100.0,
+    "growth_chance": {
+      "plains": 0.04,
+      "forest": 0.03,
+      "swamp": 0.02,
+      "woodlands": 0.05,
+      "badlands": 0.01,
+      "lake": 0.02,
+      "mountain": 0.0
+    }
+  },
+  "Conifers": {
+    "name": "Conifers",
+    "formations": ["Morrison", "Hell Creek"],
+    "image": "assets/plants/conifers.png",
+    "weight": 100.0,
+    "growth_chance": {
+      "plains": 0.03,
+      "forest": 0.05,
+      "swamp": 0.01,
+      "woodlands": 0.05,
+      "badlands": 0.02,
+      "lake": 0.02,
+      "mountain": 0.02
+    }
+  }
+}
+

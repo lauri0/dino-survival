@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from typing import Dict, Tuple, List, Optional
+from .plant import PlantStats
 import random
 
 @dataclass
@@ -109,7 +110,9 @@ class Map:
                     break
         
         self.revealed = [[False for _ in range(width)] for _ in range(height)]
-        self.danger = [[0.0 for _ in range(width)] for _ in range(height)]
+        self.plants: List[List[List[str]]] = [
+            [[] for _ in range(width)] for _ in range(height)
+        ]
         self.nests: Dict[Tuple[int, int], Nest] = {}
         # List of animals present in each cell. Each entry is a list of
         # tuples ``(name, juvenile, sex)`` where ``sex`` may be ``None``.
@@ -134,26 +137,6 @@ class Map:
     def is_revealed(self, x: int, y: int) -> bool:
         return self.revealed[y][x]
 
-    def danger_at(self, x: int, y: int) -> float:
-        return self.danger[y][x]
-
-    def increase_danger(self, x: int, y: int) -> None:
-        for dy in (-1, 0, 1):
-            for dx in (-1, 0, 1):
-                nx, ny = x + dx, y + dy
-                if 0 <= nx < self.width and 0 <= ny < self.height:
-                    if dx == 0 and dy == 0:
-                        amt = 50.0
-                    elif abs(dx) + abs(dy) == 1:
-                        amt = 20.0
-                    else:
-                        amt = 10.0
-                    self.danger[ny][nx] = min(100.0, self.danger[ny][nx] + amt)
-
-    def decay_danger(self, amount: float = 1.0) -> None:
-        for y in range(self.height):
-            for x in range(self.width):
-                self.danger[y][x] = max(0.0, self.danger[y][x] - amount)
 
     def has_nest(self, x: int, y: int) -> bool:
         return (x, y) in self.nests
@@ -178,6 +161,23 @@ class Map:
             nest.eggs = "none"
             return eggs
         return None
+
+    def grow_plants(self, plant_stats: dict[str, "PlantStats"], formation: str) -> None:
+        for y in range(self.height):
+            for x in range(self.width):
+                cell_plants = self.plants[y][x]
+                cell_animals = self.animals[y][x]
+                if len(cell_plants) + len(cell_animals) >= 5:
+                    continue
+                terrain = self.terrain_at(x, y).name
+                for name, stats in plant_stats.items():
+                    if formation not in stats.formations:
+                        continue
+                    chance = stats.growth_chance.get(terrain, 0)
+                    if random.random() < chance:
+                        cell_plants.append(name)
+                        if len(cell_plants) + len(cell_animals) >= 5:
+                            break
 
     def remove_animal(
         self,
