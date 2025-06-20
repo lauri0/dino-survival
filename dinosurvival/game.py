@@ -2,6 +2,7 @@ import random
 import json
 import os
 from typing import Optional
+from dataclasses import dataclass
 
 
 def calculate_catch_chance(rel_speed: float) -> float:
@@ -28,6 +29,13 @@ HATCHLING_WEIGHT_DIVISOR = 1000
 HATCHLING_FIERCENESS_DIVISOR = 1000
 HATCHLING_SPEED_MULTIPLIER = 3
 HATCHLING_ENERGY_DRAIN_DIVISOR = 2
+
+
+@dataclass
+class EncounterEntry:
+    npc: NPCAnimal | None = None
+    in_pack: bool = False
+    eggs: str | None = None
 
 STATS_FILE = os.path.join(os.path.dirname(__file__), "dino_stats.yaml")
 with open(STATS_FILE) as f:
@@ -78,6 +86,7 @@ class Game:
             setting.height_levels,
             setting.humidity_levels,
         )
+        self.next_npc_id = 1
         self._populate_animals()
 
         # Pick a random starting location that is within two tiles of a lake but
@@ -101,7 +110,7 @@ class Game:
         self.map.reveal(self.x, self.y)
         self._reveal_adjacent_mountains()
         self._energy_multiplier = 1.0
-        self.current_encounters: list[tuple[str, bool, bool, str | None]] = []
+        self.current_encounters: list[EncounterEntry] = []
         self.current_plants: list[Plant] = []
         self.pack: list[bool] = []  # store juvenile status of packmates
         self.last_action: Optional[str] = None
@@ -127,65 +136,59 @@ class Game:
                         continue
                     chance = stats.get("encounter_chance", {}).get(terrain, 0)
                     if random.random() < chance:
-                        allow_j = stats.get("can_be_juvenile", True)
-                        juvenile = allow_j and random.random() < 0.5
                         sex: str | None = None
                         if name == self.player.name:
                             sex = random.choice(["M", "F"])
+                        allow_j = stats.get("can_be_juvenile", True)
                         if allow_j:
                             weight = random.uniform(3.0, stats.get("adult_weight", 0.0))
                         else:
                             weight = stats.get("adult_weight", 0.0)
-                        if weight >= self.player.weight / 1000:
-                            animals.append(
-                                NPCAnimal(
-                                    name=name,
-                                    juvenile=juvenile,
-                                    sex=sex,
-                                    weight=weight,
-                                )
+                        animals.append(
+                            NPCAnimal(
+                                id=self.next_npc_id,
+                                name=name,
+                                sex=sex,
+                                weight=weight,
                             )
+                        )
+                        self.next_npc_id += 1
                 self.map.animals[y][x] = animals
 
     def _generate_encounters(self) -> None:
         """Load encounter information from the current cell."""
-        entries: list[tuple[str, bool, bool, str | None]] = []
+        entries: list[EncounterEntry] = []
         cell_animals = self.map.animals[self.y][self.x]
         cell_plants = self.map.plants[self.y][self.x]
         nest_state = self.map.nest_state(self.x, self.y)
         if nest_state and nest_state != "none":
-            entries.append((f"eggs:{nest_state}", False, False, None))
-        for j in self.pack:
-            entries.append((self.player.name, j, True, None))
+            entries.append(EncounterEntry(npc=None, eggs=nest_state))
         for npc in cell_animals:
             if len(entries) >= 5:
                 break
-            entries.append((npc.name, npc.juvenile, False, npc.sex))
+            entries.append(EncounterEntry(npc=npc))
         self.current_encounters = entries[:5]
         self.current_plants = list(cell_plants)[:5]
 
     def _aggressive_attack_check(self) -> Optional[str]:
         player_f = max(self.effective_fierceness(), 0.1)
-        for name, juvenile, in_pack, _ in self.current_encounters:
-            if name.startswith("eggs:"):
+        for entry in self.current_encounters:
+            if entry.eggs or entry.in_pack or entry.npc is None:
                 continue
-            if in_pack:
-                continue
-            stats = DINO_STATS.get(name, {})
+            npc = entry.npc
+            stats = DINO_STATS.get(npc.name, {})
             if not stats.get("aggressive"):
                 continue
-            if juvenile:
-                target_f = (
-                    stats.get("hatchling_fierceness", 0)
-                    + stats.get("adult_fierceness", 0)
-                ) / 2
-            else:
-                target_f = stats.get("adult_fierceness", 0)
+            target_f = self._stat_from_weight(
+                npc.weight,
+                stats,
+                "hatchling_fierceness",
+                "adult_fierceness",
+            )
             rel_f = target_f / player_f
-            if rel_f > 2.0:
-                if random.random() < 0.5:
-                    self.player.health = 0
-                    return f"A fierce {name} attacks and kills you! Game Over."
+            if rel_f > 2.0 and random.random() < 0.5:
+                self.player.health = 0
+                return f"A fierce {npc.name} attacks and kills you! Game Over."
         return None
 
     def _base_energy_drain(self) -> float:
@@ -324,6 +327,24 @@ class Game:
         gain = r * weight * (1 - weight / max_weight)
         return min(gain, adult - weight)
 
+    def _stat_from_weight(
+        self,
+        weight: float,
+        stats: dict,
+        hatch_key: str,
+        adult_key: str,
+    ) -> float:
+        h_weight = stats.get("hatchling_weight", 0.0)
+        a_weight = stats.get("adult_weight", 0.0)
+        if a_weight <= h_weight:
+            pct = 1.0
+        else:
+            pct = (weight - h_weight) / (a_weight - h_weight)
+        pct = max(0.0, min(pct, 1.0))
+        h_val = stats.get(hatch_key, 0.0)
+        a_val = stats.get(adult_key, 0.0)
+        return h_val + pct * (a_val - h_val)
+
     def _npc_apply_growth(
         self, npc: NPCAnimal, available_food: float, stats: dict
     ) -> tuple[float, float]:
@@ -352,6 +373,7 @@ class Game:
                 animals = self.map.animals[y][x]
                 plants = self.map.plants[y][x]
                 for npc in animals:
+                    npc.age += 1
                     stats = DINO_STATS.get(npc.name, {})
                     npc.energy = max(0.0, npc.energy - stats.get("adult_energy_drain", 0.0))
                     regen = stats.get("health_regen", 0.0)
@@ -366,24 +388,23 @@ class Game:
                             if chosen.weight <= 0:
                                 plants.remove(chosen)
 
-    def hunt_dinosaur(self, target_name: str, juvenile: bool = False) -> str:
-        """Hunt a specific dinosaur encountered on the map."""
+    def hunt_npc(self, npc_id: int) -> str:
+        """Hunt a specific NPC animal by its ID."""
         pre = self._start_turn()
         if pre:
             return pre
 
-        target = DINO_STATS.get(target_name)
-        if not target:
-            return f"Unknown target {target_name}."
+        cell = self.map.animals[self.y][self.x]
+        target = next((n for n in cell if n.id == npc_id), None)
+        if target is None:
+            return "Unknown target."
 
-        # Remove the target from the current cell regardless of hunt outcome
-        self.map.remove_animal(self.x, self.y, target_name, juvenile)
+        self.map.remove_animal(self.x, self.y, npc_id=npc_id)
 
-        hunt = self.hunt_stats.setdefault(target_name, [0, 0])
+        hunt = self.hunt_stats.setdefault(target.name, [0, 0])
         hunt[0] += 1
 
-        if juvenile and not target.get("can_be_juvenile", True):
-            juvenile = False
+        stats = DINO_STATS.get(target.name, {})
 
         terrain = self.map.terrain_at(self.x, self.y).name
         boost = 0.0
@@ -392,27 +413,17 @@ class Game:
         elif terrain == "swamp":
             boost = self.player.aquatic_boost / 2
         player_speed = max(self.player.speed * (1 + boost / 100.0), 0.1)
-        if juvenile:
-            target_speed = max(
-                (target.get("hatchling_speed", 0) + target.get("adult_speed", 0))
-                / 2,
-                0.1,
-            )
-            target_f = (
-                target.get("hatchling_fierceness", 0)
-                + target.get("adult_fierceness", 0)
-            ) / 2
-            target_weight = (
-                target.get("hatchling_weight", 0) + target.get("adult_weight", 0)
-            ) / 2
-        else:
-            target_speed = max(target.get("adult_speed", 0.1), 0.1)
-            target_f = target.get("adult_fierceness", 0.1)
-            target_weight = target.get("adult_weight", 0.0)
+
+        target_speed = max(
+            self._stat_from_weight(target.weight, stats, "hatchling_speed", "adult_speed"),
+            0.1,
+        )
+        target_f = self._stat_from_weight(target.weight, stats, "hatchling_fierceness", "adult_fierceness")
+
         rel_speed = target_speed / max(player_speed, 0.1)
         catch_chance = calculate_catch_chance(rel_speed)
         if random.random() > catch_chance:
-            msg = f"The {target_name} escaped before you could catch it."
+            msg = f"The {target.name} escaped before you could catch it."
             end_msg = self._apply_turn_costs(False, 5.0)
             msg += end_msg
             win = self._check_victory()
@@ -435,10 +446,10 @@ class Game:
         self.player.health = max(0.0, self.player.health - damage)
         if self.player.health <= 0:
             return (
-                f"You fought the {target_name} but received fatal injuries. Game Over."
+                f"You fought the {target.name} but received fatal injuries. Game Over."
             )
 
-        prey_meat = target_weight * target.get("carcass_food_value_modifier", 1.0)
+        prey_meat = target.weight * stats.get("carcass_food_value_modifier", 1.0)
         prey_meat /= max(1, len(self.pack) + 1)
         energy_gain = 1000 * prey_meat / max(self.player.weight, 0.1)
         needed = 100.0 - self.player.energy
@@ -452,7 +463,7 @@ class Game:
         hunt[1] += 1
 
         msg = (
-            f"You caught and defeated the {target_name} but lost {damage:.0f}% health. "
+            f"You caught and defeated the {target.name} but lost {damage:.0f}% health. "
             f"Energy +{actual_energy_gain:.1f}%, "
             f"Weight +{weight_gain:.1f}kg (max {max_gain:.1f}kg)."
         )
@@ -477,7 +488,7 @@ class Game:
             return pre
         self.pack.append(juvenile)
         # Remove the recruited dinosaur from the cell
-        self.map.remove_animal(self.x, self.y, self.player.name, juvenile)
+        self.map.remove_animal(self.x, self.y, name=self.player.name)
         msg = f"A {self.player.name} joins your pack."
         end_msg = self._apply_turn_costs(False)
         msg += end_msg
@@ -515,12 +526,12 @@ class Game:
         self._reveal_adjacent_mountains()
         return msg
 
-    def mate(self) -> str:
+    def mate(self, partner_id: int) -> str:
         pre = self._start_turn()
         if pre:
             return pre
         # Remove the mating partner from the cell
-        self.map.remove_animal(self.x, self.y, self.player.name, sex="F")
+        self.map.remove_animal(self.x, self.y, npc_id=partner_id)
         self.player.mated = True
         msg = "You mate successfully."
         end_msg = self._apply_turn_costs(False)

@@ -54,7 +54,7 @@ def test_npc_state_and_feeding(monkeypatch):
     # clear existing
     game.map.animals = [[[] for _ in range(6)] for _ in range(6)]
     game.map.plants = [[[] for _ in range(6)] for _ in range(6)]
-    npc = NPCAnimal(name="Stegosaurus", juvenile=False, sex=None, energy=50.0, weight=10.0)
+    npc = NPCAnimal(id=1, name="Stegosaurus", sex=None, energy=50.0, weight=10.0)
     game.map.animals[0][0] = [npc]
     game.map.plants[0][0] = [Plant(name="Ferns", weight=20.0)]
     game._update_npcs()
