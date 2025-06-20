@@ -23,7 +23,6 @@ class DinosaurStats:
     adult_energy_drain: float = 0.0
     growth_rate: float = 0.35
     walking_energy_drain_multiplier: float = 1.0
-    carcass_food_value_modifier: float = 1.0
     fierceness: float = 0.0
     speed: float = 0.0
     health: float = 100.0
@@ -55,5 +54,6 @@ class NPCAnimal:
     age: int = 0
     energy: float = 100.0
     health: float = 100.0
+    alive: bool = True
 
 
