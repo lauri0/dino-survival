@@ -48,11 +48,12 @@ class DinosaurStats:
 class NPCAnimal:
     """State for a non-player animal present on the map."""
 
+    id: int
     name: str
-    juvenile: bool
     sex: str | None
+    weight: float = 0.0
+    age: int = 0
     energy: float = 100.0
     health: float = 100.0
-    weight: float = 0.0
 
 

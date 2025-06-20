@@ -186,9 +186,9 @@ class Map:
         self,
         x: int,
         y: int,
-        name: str,
-        juvenile: Optional[bool] = None,
+        name: Optional[str] = None,
         sex: Optional[str] = None,
+        npc_id: Optional[int] = None,
     ) -> bool:
         """Remove an animal from the specified cell.
 
@@ -196,9 +196,9 @@ class Map:
         """
         cell = self.animals[y][x]
         for idx, npc in enumerate(cell):
-            if npc.name != name:
+            if npc_id is not None and npc.id != npc_id:
                 continue
-            if juvenile is not None and npc.juvenile != juvenile:
+            if name is not None and npc.name != name:
                 continue
             if sex is not None and npc.sex != sex:
                 continue

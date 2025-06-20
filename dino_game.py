@@ -444,8 +444,8 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     population_list.pack(fill="both", expand=True)
     population_images: dict[str, tk.PhotoImage] = {}
 
-    def do_hunt(target_name: str, juvenile: bool) -> None:
-        result = game.hunt_dinosaur(target_name, juvenile)
+    def do_hunt(npc_id: int) -> None:
+        result = game.hunt_npc(npc_id)
         append_output(result)
         update_biome()
         update_stats()
@@ -461,8 +461,8 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
                 b.config(state="disabled")
             show_final_stats("Victory", "Congratulations! You reached adult size!")
 
-    def do_mate() -> None:
-        result = game.mate()
+    def do_mate(npc_id: int) -> None:
+        result = game.mate(npc_id)
         append_output(result)
         update_biome()
         update_stats()
@@ -542,9 +542,9 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             boost = game.player.aquatic_boost / 2
         player_s *= 1 + boost / 100.0
         entries = game.current_encounters
-        for slot, (name, juvenile, in_pack, sex) in zip(encounter_rows, entries):
-            if name.startswith("eggs:"):
-                state = name.split(":", 1)[1]
+        for slot, entry in zip(encounter_rows, entries):
+            if entry.eggs:
+                state = entry.eggs
                 weight_map = {"small": 4, "medium": 10, "large": 20}
                 slot["img"].configure(image="")
                 slot["img"].image = None
@@ -555,44 +555,30 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
                 slot["frame"].pack(fill="x", pady=2, expand=True)
                 continue
 
-            stats = DINO_STATS[name]
-            if juvenile:
-                target_f = (
-                    stats.get("hatchling_fierceness", 0)
-                    + stats.get("adult_fierceness", 0)
-                ) / 2
-                target_s = (
-                    stats.get("hatchling_speed", 0)
-                    + stats.get("adult_speed", 0)
-                ) / 2
-                disp_name = f"{name} (J)"
-            else:
-                target_f = stats.get("adult_fierceness", 0)
-                target_s = stats.get("adult_speed", 0)
-                disp_name = name
-            if sex:
-                symbol = "♂" if sex == "M" else "♀"
+            npc = entry.npc
+            if npc is None:
+                continue
+            stats = DINO_STATS[npc.name]
+            disp_name = f"{npc.name} ({npc.id})"
+            if npc.sex:
+                symbol = "♂" if npc.sex == "M" else "♀"
                 disp_name = f"{disp_name} {symbol}"
 
+            target_f = game._stat_from_weight(npc.weight, stats, "hatchling_fierceness", "adult_fierceness")
+            target_s = game._stat_from_weight(npc.weight, stats, "hatchling_speed", "adult_speed")
             rel_f = target_f / player_f
             rel_s = target_s / player_s
             catch = calculate_catch_chance(rel_s)
-            if juvenile:
-                target_weight = (
-                    stats.get("hatchling_weight", 0) + stats.get("adult_weight", 0)
-                ) / 2
-            else:
-                target_weight = stats.get("adult_weight", 0)
-            meat = target_weight * stats.get("carcass_food_value_modifier", 1.0)
+            meat = npc.weight * stats.get("carcass_food_value_modifier", 1.0)
             meat /= max(1, len(game.pack) + 1)
 
             img_path = stats.get("image")
             img = None
             if img_path:
                 abs_path = os.path.join(os.path.dirname(__file__), img_path)
-                if name not in encounter_images:
-                    encounter_images[name] = load_scaled_image(abs_path, 100, 63)
-                img = encounter_images.get(name)
+                if npc.name not in encounter_images:
+                    encounter_images[npc.name] = load_scaled_image(abs_path, 100, 63)
+                img = encounter_images.get(npc.name)
             if img:
                 slot["img"].configure(image=img)
                 slot["img"].image = img
@@ -600,37 +586,23 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
                 slot["img"].configure(image="")
                 slot["img"].image = None
 
-            if in_pack:
-                slot["name"].configure(text=f"{disp_name} (Pack)")
-                slot["stats"].configure(text="")
-                slot["btn"].configure(command=do_leave_pack, text="Leave")
-                slot["info"].configure(command=lambda n=name: show_dino_facts(n))
-                slot["info"].grid()
-            else:
-                slot["name"].configure(text=disp_name)
-                slot["stats"].configure(
-                    text=(
-                        f"F:{rel_f:.2f} S:{rel_s:.2f}"
-                        f"({int(round(catch * 100))}%) M:{meat:.1f}kg"
-                    )
+            slot["name"].configure(text=disp_name)
+            slot["stats"].configure(
+                text=(
+                    f"W:{npc.weight:.1f}kg Age:{npc.age} F:{rel_f:.2f} S:{rel_s:.2f}"
+                    f"({int(round(catch * 100))}%) M:{meat:.1f}kg"
                 )
-                if (
-                    name == game.player.name
-                    and sex == "F"
-                    and game.player_growth_stage() == "Adult"
-                ):
-                    slot["btn"].configure(command=do_mate, text="Mate")
-                elif (
-                    game.player.forms_packs
-                    and name == game.player.name
-                    and game.player.weight >= game.player.adult_weight / 100
-                ):
-                    # Pack functionality disabled for now
-                    slot["btn"].configure(command=lambda n=name, j=juvenile: do_hunt(n, j), text="Hunt")
-                else:
-                    slot["btn"].configure(command=lambda n=name, j=juvenile: do_hunt(n, j), text="Hunt")
-                slot["info"].configure(command=lambda n=name: show_dino_facts(n))
-                slot["info"].grid()
+            )
+            if (
+                npc.name == game.player.name
+                and npc.sex == "F"
+                and game.player_growth_stage() == "Adult"
+            ):
+                slot["btn"].configure(command=lambda i=npc.id: do_mate(i), text="Mate")
+            else:
+                slot["btn"].configure(command=lambda i=npc.id: do_hunt(i), text="Hunt")
+            slot["info"].configure(command=lambda n=npc.name: show_dino_facts(n))
+            slot["info"].grid()
             slot["frame"].pack(fill="x", pady=2, expand=True)
         update_population()
 
