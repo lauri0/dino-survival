@@ -44,3 +44,15 @@ class DinosaurStats:
         return self.hydration <= 0
 
 
+@dataclass
+class NPCAnimal:
+    """State for a non-player animal present on the map."""
+
+    name: str
+    juvenile: bool
+    sex: str | None
+    energy: float = 100.0
+    health: float = 100.0
+    weight: float = 0.0
+
+

@@ -18,7 +18,7 @@ def calculate_catch_chance(rel_speed: float) -> float:
     if rel_speed <= 1.0:
         return 1.0 - (rel_speed - 0.5)
     return 0.0
-from .dinosaur import DinosaurStats, Diet
+from .dinosaur import DinosaurStats, Diet, NPCAnimal
 from .plant import PlantStats, Plant
 from .map import Map
 from .settings import Setting
@@ -119,7 +119,7 @@ class Game:
         for y in range(self.map.height):
             for x in range(self.map.width):
                 terrain = self.map.terrain_at(x, y).name
-                animals: list[tuple[str, bool, str | None]] = []
+                animals: list[NPCAnimal] = []
                 for name, stats in DINO_STATS.items():
                     if len(animals) >= 5:
                         break
@@ -129,18 +129,22 @@ class Game:
                     if random.random() < chance:
                         allow_j = stats.get("can_be_juvenile", True)
                         juvenile = allow_j and random.random() < 0.5
-                        if juvenile:
-                            weight = (
-                                stats.get("hatchling_weight", 0)
-                                + stats.get("adult_weight", 0)
-                            ) / 2
+                        sex: str | None = None
+                        if name == self.player.name:
+                            sex = random.choice(["M", "F"])
+                        if allow_j:
+                            weight = random.uniform(3.0, stats.get("adult_weight", 0.0))
                         else:
-                            weight = stats.get("adult_weight", 0)
+                            weight = stats.get("adult_weight", 0.0)
                         if weight >= self.player.weight / 1000:
-                            sex: str | None = None
-                            if name == self.player.name:
-                                sex = random.choice(["M", "F"])
-                            animals.append((name, juvenile, sex))
+                            animals.append(
+                                NPCAnimal(
+                                    name=name,
+                                    juvenile=juvenile,
+                                    sex=sex,
+                                    weight=weight,
+                                )
+                            )
                 self.map.animals[y][x] = animals
 
     def _generate_encounters(self) -> None:
@@ -153,10 +157,10 @@ class Game:
             entries.append((f"eggs:{nest_state}", False, False, None))
         for j in self.pack:
             entries.append((self.player.name, j, True, None))
-        for name, juvenile, sex in cell_animals:
+        for npc in cell_animals:
             if len(entries) >= 5:
                 break
-            entries.append((name, juvenile, False, sex))
+            entries.append((npc.name, npc.juvenile, False, npc.sex))
         self.current_encounters = entries[:5]
         self.current_plants = list(cell_plants)[:5]
 
@@ -211,6 +215,7 @@ class Game:
         self.biome_turns[terrain] = self.biome_turns.get(terrain, 0) + 1
         self.map.update_nests()
         self.map.grow_plants(PLANT_STATS, self.setting.formation)
+        self._update_npcs()
         self.player.hydration = max(
             0.0, self.player.hydration - self.player.hydration_drain
         )
@@ -309,6 +314,57 @@ class Game:
             )
 
         return weight_gain, max_gain
+
+    def _npc_max_growth_gain(self, weight: float, stats: dict) -> float:
+        adult = stats.get("adult_weight", 0.0)
+        if weight >= adult:
+            return 0.0
+        max_weight = adult * 1.05
+        r = stats.get("growth_rate", 0.35)
+        gain = r * weight * (1 - weight / max_weight)
+        return min(gain, adult - weight)
+
+    def _npc_apply_growth(
+        self, npc: NPCAnimal, available_food: float, stats: dict
+    ) -> tuple[float, float]:
+        max_gain = self._npc_max_growth_gain(npc.weight, stats)
+        weight_gain = min(available_food, max_gain)
+        npc.weight = min(npc.weight + weight_gain, stats.get("adult_weight", 0.0))
+        return weight_gain, max_gain
+
+    def _npc_consume_plant(self, npc: NPCAnimal, plant: Plant, stats: dict) -> None:
+        energy_needed = 100.0 - npc.energy
+        weight_for_energy = energy_needed * npc.weight / 1000
+        growth_target = self._npc_max_growth_gain(npc.weight, stats)
+        eat_amount = min(plant.weight, weight_for_energy + growth_target)
+
+        energy_gain_possible = 1000 * eat_amount / max(npc.weight, 0.1)
+        actual_energy_gain = min(energy_needed, energy_gain_possible)
+        npc.energy = min(100.0, npc.energy + actual_energy_gain)
+        weight_used = actual_energy_gain * npc.weight / 1000
+        remaining = eat_amount - weight_used
+        self._npc_apply_growth(npc, remaining, stats)
+        plant.weight -= eat_amount
+
+    def _update_npcs(self) -> None:
+        for y in range(self.map.height):
+            for x in range(self.map.width):
+                animals = self.map.animals[y][x]
+                plants = self.map.plants[y][x]
+                for npc in animals:
+                    stats = DINO_STATS.get(npc.name, {})
+                    npc.energy = max(0.0, npc.energy - stats.get("adult_energy_drain", 0.0))
+                    regen = stats.get("health_regen", 0.0)
+                    if npc.health < 100.0 and regen:
+                        npc.health = min(100.0, npc.health + regen)
+                    diet = stats.get("diet", [])
+                    if plants and any(d in diet for d in (Diet.FERNS, Diet.CYCADS, Diet.CONIFERS)):
+                        options = [p for p in plants if p.name.lower() in ("ferns", "cycads", "conifers")]
+                        if options:
+                            chosen = max(options, key=lambda p: p.weight)
+                            self._npc_consume_plant(npc, chosen, stats)
+                            if chosen.weight <= 0:
+                                plants.remove(chosen)
 
     def hunt_dinosaur(self, target_name: str, juvenile: bool = False) -> str:
         """Hunt a specific dinosaur encountered on the map."""
@@ -528,8 +584,8 @@ class Game:
         total = 0
         for row in self.map.animals:
             for cell in row:
-                for name, _j, _s in cell:
-                    counts[name] = counts.get(name, 0) + 1
+                for npc in cell:
+                    counts[npc.name] = counts.get(npc.name, 0) + 1
                     total += 1
         # Include the player and pack members
         counts[self.player.name] = counts.get(self.player.name, 0) + 1 + len(self.pack)

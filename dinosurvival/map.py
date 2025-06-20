@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Dict, Tuple, List, Optional
 from .plant import PlantStats, Plant
+from .dinosaur import NPCAnimal
 import random
 
 @dataclass
@@ -114,9 +115,8 @@ class Map:
             [[] for _ in range(width)] for _ in range(height)
         ]
         self.nests: Dict[Tuple[int, int], Nest] = {}
-        # List of animals present in each cell. Each entry is a list of
-        # tuples ``(name, juvenile, sex)`` where ``sex`` may be ``None``.
-        self.animals: List[List[List[tuple[str, bool, str | None]]]] = [
+        # List of animals present in each cell.
+        self.animals: List[List[List["NPCAnimal"]]] = [
             [[] for _ in range(width)] for _ in range(height)
         ]
 
@@ -167,7 +167,7 @@ class Map:
             for x in range(self.width):
                 cell_plants = self.plants[y][x]
                 cell_animals = self.animals[y][x]
-                if len(cell_plants) + len(cell_animals) >= 5:
+                if len(cell_plants) >= 2 or len(cell_plants) + len(cell_animals) >= 5:
                     continue
                 terrain = self.terrain_at(x, y).name
                 for name, stats in plant_stats.items():
@@ -176,7 +176,10 @@ class Map:
                     chance = stats.growth_chance.get(terrain, 0)
                     if random.random() < chance:
                         cell_plants.append(Plant(name=name, weight=stats.weight))
-                        if len(cell_plants) + len(cell_animals) >= 5:
+                        if (
+                            len(cell_plants) >= 2
+                            or len(cell_plants) + len(cell_animals) >= 5
+                        ):
                             break
 
     def remove_animal(
@@ -192,12 +195,12 @@ class Map:
         Returns ``True`` if an animal was removed.
         """
         cell = self.animals[y][x]
-        for idx, (n, j, s) in enumerate(cell):
-            if n != name:
+        for idx, npc in enumerate(cell):
+            if npc.name != name:
                 continue
-            if juvenile is not None and j != juvenile:
+            if juvenile is not None and npc.juvenile != juvenile:
                 continue
-            if sex is not None and s != sex:
+            if sex is not None and npc.sex != sex:
                 continue
             del cell[idx]
             return True
