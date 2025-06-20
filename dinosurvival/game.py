@@ -367,19 +367,53 @@ class Game:
         self._npc_apply_growth(npc, remaining, stats)
         plant.weight -= eat_amount
 
+    def _npc_consume_meat(self, npc: NPCAnimal, carcass: NPCAnimal, stats: dict) -> None:
+        energy_needed = 100.0 - npc.energy
+        weight_for_energy = energy_needed * npc.weight / 1000
+        growth_target = self._npc_max_growth_gain(npc.weight, stats)
+        eat_amount = min(carcass.weight, weight_for_energy + growth_target)
+
+        energy_gain_possible = 1000 * eat_amount / max(npc.weight, 0.1)
+        actual_energy_gain = min(energy_needed, energy_gain_possible)
+        npc.energy = min(100.0, npc.energy + actual_energy_gain)
+        weight_used = actual_energy_gain * npc.weight / 1000
+        remaining = eat_amount - weight_used
+        self._npc_apply_growth(npc, remaining, stats)
+        carcass.weight -= eat_amount
+
     def _update_npcs(self) -> None:
         for y in range(self.map.height):
             for x in range(self.map.width):
                 animals = self.map.animals[y][x]
                 plants = self.map.plants[y][x]
-                for npc in animals:
+                for npc in list(animals):
+                    if not npc.alive:
+                        npc.weight -= npc.weight * 0.10 + 2
+                        if npc.weight <= 0:
+                            animals.remove(npc)
+                        continue
+
                     npc.age += 1
                     stats = DINO_STATS.get(npc.name, {})
                     npc.energy = max(0.0, npc.energy - stats.get("adult_energy_drain", 0.0))
                     regen = stats.get("health_regen", 0.0)
                     if npc.health < 100.0 and regen:
                         npc.health = min(100.0, npc.health + regen)
+
+                    if npc.energy > 90:
+                        continue
+
                     diet = stats.get("diet", [])
+
+                    if Diet.MEAT in diet:
+                        carcasses = [c for c in animals if not c.alive and c.weight > 0]
+                        if carcasses:
+                            carcass = max(carcasses, key=lambda c: c.weight)
+                            self._npc_consume_meat(npc, carcass, stats)
+                            if carcass.weight <= 0:
+                                animals.remove(carcass)
+                            continue
+
                     if plants and any(d in diet for d in (Diet.FERNS, Diet.CYCADS, Diet.CONIFERS)):
                         options = [p for p in plants if p.name.lower() in ("ferns", "cycads", "conifers")]
                         if options:
@@ -387,6 +421,39 @@ class Game:
                             self._npc_consume_plant(npc, chosen, stats)
                             if chosen.weight <= 0:
                                 plants.remove(chosen)
+                            continue
+
+                    if Diet.MEAT in diet:
+                        npc_speed = self._stat_from_weight(npc.weight, stats, "hatchling_speed", "adult_speed")
+                        npc_f = self._stat_from_weight(npc.weight, stats, "hatchling_fierceness", "adult_fierceness")
+                        potential = []
+                        for other in animals:
+                            if other is npc or not other.alive:
+                                continue
+                            o_stats = DINO_STATS.get(other.name, {})
+                            o_f = self._stat_from_weight(other.weight, o_stats, "hatchling_fierceness", "adult_fierceness")
+                            if o_f >= npc_f:
+                                continue
+                            rel_f = o_f / max(npc_f, 0.1)
+                            damage = (rel_f ** 2) * 100
+                            if npc.health - damage <= 0:
+                                continue
+                            o_speed = self._stat_from_weight(other.weight, o_stats, "hatchling_speed", "adult_speed")
+                            if o_speed >= npc_speed:
+                                continue
+                            if other.weight < npc.weight * 0.01:
+                                continue
+                            potential.append((other, o_speed, o_f, o_stats, damage))
+                        if potential:
+                            target, t_speed, t_f, t_stats, damage = random.choice(potential)
+                            rel_speed = t_speed / max(npc_speed, 0.1)
+                            if random.random() <= calculate_catch_chance(rel_speed):
+                                npc.health = max(0.0, npc.health - damage)
+                                target.alive = False
+                                target.age = -1
+                                self._npc_consume_meat(npc, target, stats)
+                                if target.weight <= 0:
+                                    animals.remove(target)
 
     def hunt_npc(self, npc_id: int) -> str:
         """Hunt a specific NPC animal by its ID."""
@@ -398,8 +465,6 @@ class Game:
         target = next((n for n in cell if n.id == npc_id), None)
         if target is None:
             return "Unknown target."
-
-        self.map.remove_animal(self.x, self.y, npc_id=npc_id)
 
         hunt = self.hunt_stats.setdefault(target.name, [0, 0])
         hunt[0] += 1
@@ -449,7 +514,7 @@ class Game:
                 f"You fought the {target.name} but received fatal injuries. Game Over."
             )
 
-        prey_meat = target.weight * stats.get("carcass_food_value_modifier", 1.0)
+        prey_meat = target.weight
         prey_meat /= max(1, len(self.pack) + 1)
         energy_gain = 1000 * prey_meat / max(self.player.weight, 0.1)
         needed = 100.0 - self.player.energy
@@ -460,6 +525,12 @@ class Game:
         leftover_meat = max(0.0, prey_meat - meat_used)
 
         weight_gain, max_gain = self._apply_growth(leftover_meat)
+        consumed = meat_used + weight_gain
+        target.alive = False
+        target.age = -1
+        target.weight = max(0.0, target.weight - consumed)
+        if target.weight <= 0:
+            self.map.remove_animal(self.x, self.y, npc_id=target.id)
         hunt[1] += 1
 
         msg = (

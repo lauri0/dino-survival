@@ -13,17 +13,19 @@ from dinosurvival.logging_utils import (
 )
 
 try:
-    from PIL import Image, ImageTk  # type: ignore
+    from PIL import Image, ImageTk, ImageOps  # type: ignore
 except Exception:
     Image = None  # type: ignore
     ImageTk = None  # type: ignore
 
 
-def load_scaled_image(path: str, width: int, height: int, master=None) -> tk.PhotoImage | None:
+def load_scaled_image(path: str, width: int, height: int, master=None, grayscale: bool = False) -> tk.PhotoImage | None:
     if not os.path.exists(path):
         return None
     if Image and ImageTk:
         img = Image.open(path)
+        if grayscale:
+            img = ImageOps.grayscale(img)
         scale = width / img.width
         resample = getattr(getattr(Image, "Resampling", Image), "LANCZOS")
         resized = img.resize((width, int(img.height * scale)), resample)
@@ -563,22 +565,22 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             if npc.sex:
                 symbol = "♂" if npc.sex == "M" else "♀"
                 disp_name = f"{disp_name} {symbol}"
+            disp_name = f"{disp_name} W:{npc.weight:.1f}kg Age:{npc.age}"
 
             target_f = game._stat_from_weight(npc.weight, stats, "hatchling_fierceness", "adult_fierceness")
             target_s = game._stat_from_weight(npc.weight, stats, "hatchling_speed", "adult_speed")
             rel_f = target_f / player_f
             rel_s = target_s / player_s
             catch = calculate_catch_chance(rel_s)
-            meat = npc.weight * stats.get("carcass_food_value_modifier", 1.0)
-            meat /= max(1, len(game.pack) + 1)
 
             img_path = stats.get("image")
             img = None
             if img_path:
                 abs_path = os.path.join(os.path.dirname(__file__), img_path)
-                if npc.name not in encounter_images:
-                    encounter_images[npc.name] = load_scaled_image(abs_path, 100, 63)
-                img = encounter_images.get(npc.name)
+                key = npc.name if npc.alive else f"{npc.name}_dead"
+                if key not in encounter_images:
+                    encounter_images[key] = load_scaled_image(abs_path, 100, 63, grayscale=not npc.alive)
+                img = encounter_images.get(key)
             if img:
                 slot["img"].configure(image=img)
                 slot["img"].image = img
@@ -588,10 +590,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
 
             slot["name"].configure(text=disp_name)
             slot["stats"].configure(
-                text=(
-                    f"W:{npc.weight:.1f}kg Age:{npc.age} F:{rel_f:.2f} S:{rel_s:.2f}"
-                    f"({int(round(catch * 100))}%) M:{meat:.1f}kg"
-                )
+                text=f"F:{rel_f:.2f} S:{rel_s:.2f}({int(round(catch * 100))}%)"
             )
             if (
                 npc.name == game.player.name
