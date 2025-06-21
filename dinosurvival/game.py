@@ -445,6 +445,12 @@ class Game:
                     npc.age += 1
                     stats = DINO_STATS.get(npc.name, {})
                     npc.energy = max(0.0, npc.energy - stats.get("adult_energy_drain", 0.0))
+                    if npc.energy <= 0:
+                        npc.alive = False
+                        npc.age = -1
+                        npc.fierceness = 0.0
+                        npc.speed = 0.0
+                        continue
                     regen = stats.get("health_regen", 0.0)
                     if npc.health < 100.0 and regen:
                         npc.health = min(100.0, npc.health + regen)
