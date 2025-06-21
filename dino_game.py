@@ -565,7 +565,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             if npc.sex:
                 symbol = "♂" if npc.sex == "M" else "♀"
                 disp_name = f"{disp_name} {symbol}"
-            disp_name = f"{disp_name} W:{npc.weight:.1f}kg Age:{npc.age}"
+            disp_name = f"{disp_name} W:{npc.weight:.1f}kg"
 
             target_f = game._stat_from_weight(npc.weight, stats, "hatchling_fierceness", "adult_fierceness")
             target_s = game._stat_from_weight(npc.weight, stats, "hatchling_speed", "adult_speed")
@@ -593,7 +593,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
                 text=(
                     f"F:{rel_f:.2f} S:{rel_s:.2f} "
                     f"({int(round(catch * 100))}%)"
-                    f"H:{npc.health:.0f}% E:{npc.energy:.0f}% "
+                    f"E:{npc.energy:.0f}% "
                 )
             )
             if (
