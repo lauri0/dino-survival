@@ -122,6 +122,7 @@ class Game:
         }
         self.hunt_stats: dict[str, list[int]] = {}
         self.won = False
+        self.turn_messages: list[str] = []
 
     def _populate_animals(self) -> None:
         """Populate the map with NPC animals."""
@@ -213,12 +214,13 @@ class Game:
         return total
 
     def _start_turn(self) -> str:
+        self.turn_messages = []
         self.turn_count += 1
         terrain = self.map.terrain_at(self.x, self.y).name
         self.biome_turns[terrain] = self.biome_turns.get(terrain, 0) + 1
         self.map.update_nests()
         self.map.grow_plants(PLANT_STATS, self.setting.formation)
-        self._update_npcs()
+        self.turn_messages.extend(self._update_npcs())
         self.player.hydration = max(
             0.0, self.player.hydration - self.player.hydration_drain
         )
@@ -267,6 +269,23 @@ class Game:
             self.won = True
             return "\nYou have grown to full size and mated! You win!"
         return None
+
+    def _format_turn(self, text: str) -> str:
+        text = text.lstrip("\n")
+        if not text:
+            return ""
+        lines = [line for line in text.split("\n") if line]
+        prefix = f"{self.turn_count}: "
+        return "\n".join(prefix + line for line in lines)
+
+    def _finish_turn(self, msg: str) -> str:
+        combined = ""
+        if self.turn_messages:
+            combined = "\n".join(self.turn_messages)
+        if msg:
+            part = msg.lstrip("\n")
+            combined = f"{combined}\n{part}" if combined else part
+        return self._format_turn(combined)
 
     def player_growth_stage(self) -> str:
         """Return the descriptive growth stage of the player."""
@@ -353,7 +372,7 @@ class Game:
         npc.weight = min(npc.weight + weight_gain, stats.get("adult_weight", 0.0))
         return weight_gain, max_gain
 
-    def _npc_consume_plant(self, npc: NPCAnimal, plant: Plant, stats: dict) -> None:
+    def _npc_consume_plant(self, npc: NPCAnimal, plant: Plant, stats: dict) -> float:
         energy_needed = 100.0 - npc.energy
         weight_for_energy = energy_needed * npc.weight / 1000
         growth_target = self._npc_max_growth_gain(npc.weight, stats)
@@ -366,8 +385,9 @@ class Game:
         remaining = eat_amount - weight_used
         self._npc_apply_growth(npc, remaining, stats)
         plant.weight -= eat_amount
+        return eat_amount
 
-    def _npc_consume_meat(self, npc: NPCAnimal, carcass: NPCAnimal, stats: dict) -> None:
+    def _npc_consume_meat(self, npc: NPCAnimal, carcass: NPCAnimal, stats: dict) -> float:
         energy_needed = 100.0 - npc.energy
         weight_for_energy = energy_needed * npc.weight / 1000
         growth_target = self._npc_max_growth_gain(npc.weight, stats)
@@ -380,15 +400,23 @@ class Game:
         remaining = eat_amount - weight_used
         self._npc_apply_growth(npc, remaining, stats)
         carcass.weight -= eat_amount
+        return eat_amount
 
-    def _update_npcs(self) -> None:
+    def _update_npcs(self) -> list[str]:
+        messages: list[str] = []
         for y in range(self.map.height):
             for x in range(self.map.width):
                 animals = self.map.animals[y][x]
                 plants = self.map.plants[y][x]
                 for npc in list(animals):
                     if not npc.alive:
+                        before = npc.weight
                         npc.weight -= npc.weight * 0.10 + 2
+                        lost = max(0.0, before - npc.weight)
+                        if x == self.x and y == self.y and lost > 0:
+                            messages.append(
+                                f"The {npc.name} carcass lost {lost:.1f}kg to spoilage."
+                            )
                         if npc.weight <= 0:
                             if npc in animals:
                                 animals.remove(npc)
@@ -410,7 +438,11 @@ class Game:
                         carcasses = [c for c in animals if not c.alive and c.weight > 0]
                         if carcasses:
                             carcass = max(carcasses, key=lambda c: c.weight)
-                            self._npc_consume_meat(npc, carcass, stats)
+                            eaten = self._npc_consume_meat(npc, carcass, stats)
+                            if x == self.x and y == self.y:
+                                messages.append(
+                                    f"The {npc.name} eats {eaten:.1f}kg from a carcass."
+                                )
                             if carcass.weight <= 0:
                                 animals.remove(carcass)
                             continue
@@ -419,7 +451,11 @@ class Game:
                         options = [p for p in plants if p.name.lower() in ("ferns", "cycads", "conifers")]
                         if options:
                             chosen = max(options, key=lambda p: p.weight)
-                            self._npc_consume_plant(npc, chosen, stats)
+                            eaten = self._npc_consume_plant(npc, chosen, stats)
+                            if x == self.x and y == self.y:
+                                messages.append(
+                                    f"The {npc.name} eats {eaten:.1f}kg of {chosen.name}."
+                                )
                             if chosen.weight <= 0:
                                 plants.remove(chosen)
                             continue
@@ -452,20 +488,27 @@ class Game:
                                 npc.health = max(0.0, npc.health - damage)
                                 target.alive = False
                                 target.age = -1
-                                self._npc_consume_meat(npc, target, stats)
+                                target.fierceness = 0.0
+                                target.speed = 0.0
+                                eaten = self._npc_consume_meat(npc, target, stats)
+                                if x == self.x and y == self.y:
+                                    messages.append(
+                                        f"The {npc.name} hunts and eats {eaten:.1f}kg of {target.name}."
+                                    )
                                 if target.weight <= 0:
                                     animals.remove(target)
+        return messages
 
     def hunt_npc(self, npc_id: int) -> str:
         """Hunt a specific NPC animal by its ID."""
         pre = self._start_turn()
         if pre:
-            return pre
+            return self._finish_turn(pre)
 
         cell = self.map.animals[self.y][self.x]
         target = next((n for n in cell if n.id == npc_id), None)
         if target is None:
-            return "Unknown target."
+            return self._finish_turn("Unknown target.")
 
         hunt = self.hunt_stats.setdefault(target.name, [0, 0])
         hunt[0] += 1
@@ -480,40 +523,47 @@ class Game:
             boost = self.player.aquatic_boost / 2
         player_speed = max(self.player.speed * (1 + boost / 100.0), 0.1)
 
-        target_speed = max(
-            self._stat_from_weight(target.weight, stats, "hatchling_speed", "adult_speed"),
-            0.1,
-        )
-        target_f = self._stat_from_weight(target.weight, stats, "hatchling_fierceness", "adult_fierceness")
+        if target.alive:
+            target_speed = max(
+                self._stat_from_weight(target.weight, stats, "hatchling_speed", "adult_speed"),
+                0.1,
+            )
+            target_f = self._stat_from_weight(target.weight, stats, "hatchling_fierceness", "adult_fierceness")
+        else:
+            target_speed = 0.0
+            target_f = 0.0
 
-        rel_speed = target_speed / max(player_speed, 0.1)
-        catch_chance = calculate_catch_chance(rel_speed)
-        if random.random() > catch_chance:
-            msg = f"The {target.name} escaped before you could catch it."
-            end_msg = self._apply_turn_costs(False, 5.0)
-            msg += end_msg
-            win = self._check_victory()
-            if win:
-                msg += win
-            self.last_action = "hunt"
-            if "Game Over" in end_msg:
-                return msg
-            attack = self._aggressive_attack_check()
-            if attack:
-                msg += "\n" + attack
-            self._generate_encounters()
-            self._reveal_adjacent_mountains()
-            return msg
+        if target.alive:
+            rel_speed = target_speed / max(player_speed, 0.1)
+            catch_chance = calculate_catch_chance(rel_speed)
+            if random.random() > catch_chance:
+                msg = f"The {target.name} escaped before you could catch it."
+                end_msg = self._apply_turn_costs(False, 5.0)
+                msg += end_msg
+                win = self._check_victory()
+                if win:
+                    msg += win
+                self.last_action = "hunt"
+                if "Game Over" in end_msg:
+                    return self._finish_turn(msg)
+                attack = self._aggressive_attack_check()
+                if attack:
+                    msg += "\n" + attack
+                self._generate_encounters()
+                self._reveal_adjacent_mountains()
+                return self._finish_turn(msg)
 
         player_f = max(self.effective_fierceness(), 0.1)
         target_f = max(target_f, 0.0)
-        rel_f = target_f / player_f
-        damage = (rel_f ** 2) * 100
-        self.player.health = max(0.0, self.player.health - damage)
-        if self.player.health <= 0:
-            return (
-                f"You fought the {target.name} but received fatal injuries. Game Over."
-            )
+        damage = 0.0
+        if target.alive:
+            rel_f = target_f / player_f
+            damage = (rel_f ** 2) * 100
+            self.player.health = max(0.0, self.player.health - damage)
+            if self.player.health <= 0:
+                return self._finish_turn(
+                    f"You fought the {target.name} but received fatal injuries. Game Over."
+                )
 
         prey_meat = target.weight
         prey_meat /= max(1, len(self.pack) + 1)
@@ -529,16 +579,25 @@ class Game:
         consumed = meat_used + weight_gain
         target.alive = False
         target.age = -1
+        target.fierceness = 0.0
+        target.speed = 0.0
         target.weight = max(0.0, target.weight - consumed)
         if target.weight <= 0:
             self.map.remove_animal(self.x, self.y, npc_id=target.id)
         hunt[1] += 1
 
-        msg = (
-            f"You caught and defeated the {target.name} but lost {damage:.0f}% health. "
-            f"Energy +{actual_energy_gain:.1f}%, "
-            f"Weight +{weight_gain:.1f}kg (max {max_gain:.1f}kg)."
-        )
+        if damage > 0:
+            msg = (
+                f"You caught and defeated the {target.name} but lost {damage:.0f}% health. "
+                f"Energy +{actual_energy_gain:.1f}%, "
+                f"Weight +{weight_gain:.1f}kg (max {max_gain:.1f}kg)."
+            )
+        else:
+            msg = (
+                f"You eat from the {target.name} carcass. "
+                f"Energy +{actual_energy_gain:.1f}%, "
+                f"Weight +{weight_gain:.1f}kg (max {max_gain:.1f}kg)."
+            )
         end_msg = self._apply_turn_costs(False)
         msg += end_msg
         win = self._check_victory()
@@ -552,12 +611,12 @@ class Game:
             msg += "\n" + attack
         self._generate_encounters()
         self._reveal_adjacent_mountains()
-        return msg
+        return self._finish_turn(msg)
 
     def pack_up(self, juvenile: bool) -> str:
         pre = self._start_turn()
         if pre:
-            return pre
+            return self._finish_turn(pre)
         self.pack.append(juvenile)
         # Remove the recruited dinosaur from the cell
         self.map.remove_animal(self.x, self.y, name=self.player.name)
@@ -569,18 +628,18 @@ class Game:
             msg += win
         self.last_action = "pack"
         if "Game Over" in end_msg:
-            return msg
+            return self._finish_turn(msg)
         attack = self._aggressive_attack_check()
         if attack:
             msg += "\n" + attack
         self._generate_encounters()
         self._reveal_adjacent_mountains()
-        return msg
+        return self._finish_turn(msg)
 
     def leave_pack(self) -> str:
         pre = self._start_turn()
         if pre:
-            return pre
+            return self._finish_turn(pre)
         self.pack.clear()
         msg = "You leave your pack behind."
         end_msg = self._apply_turn_costs(False)
@@ -590,18 +649,18 @@ class Game:
             msg += win
         self.last_action = "pack"
         if "Game Over" in end_msg:
-            return msg
+            return self._finish_turn(msg)
         attack = self._aggressive_attack_check()
         if attack:
             msg += "\n" + attack
         self._generate_encounters()
         self._reveal_adjacent_mountains()
-        return msg
+        return self._finish_turn(msg)
 
     def mate(self, partner_id: int) -> str:
         pre = self._start_turn()
         if pre:
-            return pre
+            return self._finish_turn(pre)
         # Remove the mating partner from the cell
         self.map.remove_animal(self.x, self.y, npc_id=partner_id)
         self.player.mated = True
@@ -613,22 +672,22 @@ class Game:
             msg += win
         self.last_action = "mate"
         if "Game Over" in end_msg:
-            return msg
+            return self._finish_turn(msg)
         attack = self._aggressive_attack_check()
         if attack:
             msg += "\n" + attack
         self._generate_encounters()
         self._reveal_adjacent_mountains()
-        return msg
+        return self._finish_turn(msg)
 
     def collect_eggs(self) -> str:
         pre = self._start_turn()
         if pre:
-            return pre
+            return self._finish_turn(pre)
 
         state = self.map.nest_state(self.x, self.y)
         if state in (None, "none"):
-            return "There are no eggs here."
+            return self._finish_turn("There are no eggs here.")
 
         weight_map = {"small": 4.0, "medium": 10.0, "large": 20.0}
         egg_weight = weight_map.get(state, 0.0)
@@ -656,10 +715,10 @@ class Game:
             msg += win
         self.last_action = "eggs"
         if "Game Over" in end_msg:
-            return msg
+            return self._finish_turn(msg)
         self._generate_encounters()
         self._reveal_adjacent_mountains()
-        return msg
+        return self._finish_turn(msg)
 
     def population_stats(self) -> tuple[dict[str, int], int]:
         """Return a mapping of species to counts and the total population."""
@@ -686,7 +745,7 @@ class Game:
     def turn(self, action: str) -> str:
         pre = self._start_turn()
         if pre:
-            return pre
+            return self._finish_turn(pre)
         moved = False
         if action == "north":
             self.move(0, -1)
@@ -732,5 +791,5 @@ class Game:
         self._generate_encounters()
         self._reveal_adjacent_mountains()
         if "Game Over" in end_msg:
-            return result
-        return result
+            return self._finish_turn(result)
+        return self._finish_turn(result)
