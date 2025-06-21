@@ -8,7 +8,10 @@
     "can_be_juvenile": true,
     "aggressive": false,
     "forms_packs": false,
-    "diet": ["ferns", "cycads"],
+    "diet": [
+      "ferns",
+      "cycads"
+    ],
     "adult_weight": 3500.0,
     "adult_fierceness": 2800,
     "adult_speed": 20,
@@ -26,7 +29,12 @@
       "badlands": 0.02,
       "lake": 0.01,
       "mountain": 0.0
-    }
+    },
+    "preferred_biomes": [
+      "woodlands",
+      "badlands"
+    ],
+    "can_walk": true
   },
   "Allosaurus": {
     "name": "Allosaurus",
@@ -37,7 +45,9 @@
     "can_be_juvenile": true,
     "aggressive": true,
     "forms_packs": true,
-    "diet": ["meat"],
+    "diet": [
+      "meat"
+    ],
     "adult_weight": 3000.0,
     "adult_fierceness": 2800.0,
     "adult_speed": 30,
@@ -55,7 +65,11 @@
       "badlands": 0.01,
       "lake": 0.01,
       "mountain": 0.0
-    }
+    },
+    "preferred_biomes": [
+      "plains"
+    ],
+    "can_walk": true
   },
   "Amphicotylus": {
     "name": "Amphicotylus",
@@ -66,7 +80,9 @@
     "can_be_juvenile": true,
     "aggressive": true,
     "forms_packs": false,
-    "diet": ["meat"],
+    "diet": [
+      "meat"
+    ],
     "adult_weight": 250.0,
     "adult_fierceness": 280,
     "adult_speed": 50,
@@ -84,7 +100,11 @@
       "badlands": 0.0,
       "lake": 0.03,
       "mountain": 0.0
-    }
+    },
+    "preferred_biomes": [
+      "lake"
+    ],
+    "can_walk": true
   },
   "Brachiosaurus": {
     "name": "Brachiosaurus",
@@ -95,7 +115,10 @@
     "can_be_juvenile": true,
     "aggressive": false,
     "forms_packs": false,
-    "diet": ["conifers", "cycads"],
+    "diet": [
+      "conifers",
+      "cycads"
+    ],
     "adult_weight": 45000.0,
     "adult_fierceness": 12000,
     "adult_speed": 13,
@@ -113,7 +136,12 @@
       "badlands": 0.0,
       "lake": 0.0,
       "mountain": 0.0
-    }
+    },
+    "preferred_biomes": [
+      "plains",
+      "woodlands"
+    ],
+    "can_walk": true
   },
   "Camarasaurus": {
     "name": "Camarasaurus",
@@ -124,7 +152,10 @@
     "can_be_juvenile": true,
     "aggressive": false,
     "forms_packs": false,
-    "diet": ["conifers", "cycads"],
+    "diet": [
+      "conifers",
+      "cycads"
+    ],
     "adult_weight": 15000.0,
     "adult_fierceness": 5400,
     "adult_speed": 15,
@@ -142,7 +173,11 @@
       "badlands": 0.09,
       "lake": 0.01,
       "mountain": 0.0
-    }
+    },
+    "preferred_biomes": [
+      "badlands"
+    ],
+    "can_walk": true
   },
   "Camptosaurus": {
     "name": "Camptosaurus",
@@ -153,7 +188,9 @@
     "can_be_juvenile": true,
     "aggressive": false,
     "forms_packs": false,
-    "diet": ["ferns"],
+    "diet": [
+      "ferns"
+    ],
     "adult_weight": 700.0,
     "adult_fierceness": 350,
     "adult_speed": 35,
@@ -171,7 +208,11 @@
       "badlands": 0.01,
       "lake": 0.02,
       "mountain": 0.0
-    }
+    },
+    "preferred_biomes": [
+      "woodlands"
+    ],
+    "can_walk": true
   },
   "Centipede": {
     "name": "Centipede",
@@ -182,7 +223,9 @@
     "can_be_juvenile": false,
     "aggressive": false,
     "forms_packs": false,
-    "diet": ["insects"],
+    "diet": [
+      "insects"
+    ],
     "adult_weight": 1.0,
     "adult_fierceness": 0.0,
     "adult_speed": 55,
@@ -200,7 +243,11 @@
       "badlands": 0.03,
       "lake": 0.0,
       "mountain": 0.0
-    }
+    },
+    "preferred_biomes": [
+      "forest"
+    ],
+    "can_walk": true
   },
   "Ceratodus": {
     "name": "Ceratodus",
@@ -211,7 +258,9 @@
     "can_be_juvenile": false,
     "aggressive": false,
     "forms_packs": false,
-    "diet": ["meat"],
+    "diet": [
+      "meat"
+    ],
     "adult_weight": 12.0,
     "adult_fierceness": 5.0,
     "adult_speed": 55,
@@ -229,7 +278,11 @@
       "badlands": 0.0,
       "lake": 0.08,
       "mountain": 0.0
-    }
+    },
+    "preferred_biomes": [
+      "lake"
+    ],
+    "can_walk": false
   },
   "Ceratosaurus": {
     "name": "Ceratosaurus",
@@ -240,7 +293,9 @@
     "can_be_juvenile": true,
     "aggressive": true,
     "forms_packs": false,
-    "diet": ["meat"],
+    "diet": [
+      "meat"
+    ],
     "adult_weight": 900.0,
     "adult_fierceness": 1000.0,
     "adult_speed": 45,
@@ -258,7 +313,12 @@
       "badlands": 0.01,
       "lake": 0.02,
       "mountain": 0.0
-    }
+    },
+    "preferred_biomes": [
+      "forest",
+      "swamp"
+    ],
+    "can_walk": true
   },
   "Diplodocus": {
     "name": "Diplodocus",
@@ -269,7 +329,10 @@
     "can_be_juvenile": true,
     "aggressive": false,
     "forms_packs": false,
-    "diet": ["ferns", "cycads"],
+    "diet": [
+      "ferns",
+      "cycads"
+    ],
     "adult_weight": 25000.0,
     "adult_fierceness": 8000,
     "adult_speed": 12,
@@ -287,7 +350,11 @@
       "badlands": 0.02,
       "lake": 0.01,
       "mountain": 0.0
-    }
+    },
+    "preferred_biomes": [
+      "plains"
+    ],
+    "can_walk": true
   },
   "Dragonfly": {
     "name": "Dragonfly",
@@ -298,7 +365,9 @@
     "can_be_juvenile": false,
     "aggressive": false,
     "forms_packs": false,
-    "diet": ["insects"],
+    "diet": [
+      "insects"
+    ],
     "adult_weight": 0.5,
     "adult_fierceness": 0.0,
     "adult_speed": 75,
@@ -316,7 +385,11 @@
       "badlands": 0.01,
       "lake": 0.03,
       "mountain": 0.0
-    }
+    },
+    "preferred_biomes": [
+      "forest"
+    ],
+    "can_walk": true
   },
   "Dryosaurus": {
     "name": "Dryosaurus",
@@ -327,7 +400,9 @@
     "can_be_juvenile": true,
     "aggressive": false,
     "forms_packs": false,
-    "diet": ["ferns"],
+    "diet": [
+      "ferns"
+    ],
     "adult_weight": 80.0,
     "adult_fierceness": 50.0,
     "adult_speed": 40,
@@ -345,7 +420,12 @@
       "badlands": 0.01,
       "lake": 0.02,
       "mountain": 0.0
-    }
+    },
+    "preferred_biomes": [
+      "forest",
+      "woodlands"
+    ],
+    "can_walk": true
   },
   "Frog": {
     "name": "Frog",
@@ -356,7 +436,9 @@
     "can_be_juvenile": false,
     "aggressive": false,
     "forms_packs": false,
-    "diet": ["insects"],
+    "diet": [
+      "insects"
+    ],
     "adult_weight": 2.5,
     "adult_fierceness": 0.0,
     "adult_speed": 45,
@@ -374,7 +456,11 @@
       "badlands": 0.0,
       "lake": 0.06,
       "mountain": 0.0
-    }
+    },
+    "preferred_biomes": [
+      "swamp"
+    ],
+    "can_walk": true
   },
   "Fruitadens": {
     "name": "Fruitadens",
@@ -385,7 +471,10 @@
     "can_be_juvenile": true,
     "aggressive": false,
     "forms_packs": false,
-    "diet": ["ferns", "insects"],
+    "diet": [
+      "ferns",
+      "insects"
+    ],
     "adult_weight": 5.0,
     "adult_fierceness": 2.5,
     "adult_speed": 60,
@@ -403,7 +492,11 @@
       "badlands": 0.0,
       "lake": 0.02,
       "mountain": 0.0
-    }
+    },
+    "preferred_biomes": [
+      "swamp"
+    ],
+    "can_walk": true
   },
   "Gargoyleosaurus": {
     "name": "Gargoyleosaurus",
@@ -414,7 +507,10 @@
     "can_be_juvenile": true,
     "aggressive": false,
     "forms_packs": false,
-    "diet": ["ferns", "cycads"],
+    "diet": [
+      "ferns",
+      "cycads"
+    ],
     "adult_weight": 1000.0,
     "adult_fierceness": 800,
     "adult_speed": 16,
@@ -432,7 +528,11 @@
       "badlands": 0.005,
       "lake": 0.01,
       "mountain": 0.0
-    }
+    },
+    "preferred_biomes": [
+      "forest"
+    ],
+    "can_walk": true
   },
   "Glyptops": {
     "name": "Glyptops",
@@ -443,7 +543,10 @@
     "can_be_juvenile": false,
     "aggressive": false,
     "forms_packs": false,
-    "diet": ["insects", "ferns"],
+    "diet": [
+      "insects",
+      "ferns"
+    ],
     "adult_weight": 5.0,
     "adult_fierceness": 3,
     "adult_speed": 45,
@@ -461,7 +564,11 @@
       "badlands": 0.0,
       "lake": 0.01,
       "mountain": 0.0
-    }
+    },
+    "preferred_biomes": [
+      "swamp"
+    ],
+    "can_walk": true
   },
   "Lizard": {
     "name": "Lizard",
@@ -472,7 +579,9 @@
     "can_be_juvenile": false,
     "aggressive": false,
     "forms_packs": false,
-    "diet": ["insects"],
+    "diet": [
+      "insects"
+    ],
     "adult_weight": 4.0,
     "adult_fierceness": 5.0,
     "adult_speed": 55,
@@ -490,7 +599,11 @@
       "badlands": 0.03,
       "lake": 0.04,
       "mountain": 0.0
-    }
+    },
+    "preferred_biomes": [
+      "swamp"
+    ],
+    "can_walk": true
   },
   "Morrolepis": {
     "name": "Morrolepis",
@@ -501,7 +614,9 @@
     "can_be_juvenile": false,
     "aggressive": false,
     "forms_packs": false,
-    "diet": ["meat"],
+    "diet": [
+      "meat"
+    ],
     "adult_weight": 2.0,
     "adult_fierceness": 0,
     "adult_speed": 65,
@@ -519,7 +634,11 @@
       "badlands": 0.0,
       "lake": 0.08,
       "mountain": 0.0
-    }
+    },
+    "preferred_biomes": [
+      "lake"
+    ],
+    "can_walk": false
   },
   "Mymoorapelta": {
     "name": "Mymoorapelta",
@@ -530,7 +649,10 @@
     "can_be_juvenile": true,
     "aggressive": false,
     "forms_packs": false,
-    "diet": ["ferns", "cycads"],
+    "diet": [
+      "ferns",
+      "cycads"
+    ],
     "adult_weight": 500.0,
     "adult_fierceness": 400,
     "adult_speed": 20,
@@ -548,7 +670,12 @@
       "badlands": 0.005,
       "lake": 0.005,
       "mountain": 0.0
-    }
+    },
+    "preferred_biomes": [
+      "plains",
+      "woodlands"
+    ],
+    "can_walk": true
   },
   "Nanosaurus": {
     "name": "Nanosaurus",
@@ -559,7 +686,9 @@
     "can_be_juvenile": true,
     "aggressive": false,
     "forms_packs": false,
-    "diet": ["ferns"],
+    "diet": [
+      "ferns"
+    ],
     "adult_weight": 10.0,
     "adult_fierceness": 6.0,
     "adult_speed": 50,
@@ -577,7 +706,11 @@
       "badlands": 0.01,
       "lake": 0.02,
       "mountain": 0.0
-    }
+    },
+    "preferred_biomes": [
+      "forest"
+    ],
+    "can_walk": true
   },
   "Ornitholestes": {
     "name": "Ornitholestes",
@@ -588,7 +721,9 @@
     "can_be_juvenile": true,
     "aggressive": true,
     "forms_packs": false,
-    "diet": ["meat"],
+    "diet": [
+      "meat"
+    ],
     "adult_weight": 20.0,
     "adult_fierceness": 25.0,
     "adult_speed": 50,
@@ -606,7 +741,11 @@
       "badlands": 0.0,
       "lake": 0.01,
       "mountain": 0.0
-    }
+    },
+    "preferred_biomes": [
+      "forest"
+    ],
+    "can_walk": true
   },
   "Scorpion": {
     "name": "Scorpion",
@@ -617,7 +756,9 @@
     "can_be_juvenile": false,
     "aggressive": true,
     "forms_packs": false,
-    "diet": ["insects"],
+    "diet": [
+      "insects"
+    ],
     "adult_weight": 2.0,
     "adult_fierceness": 5.5,
     "adult_speed": 65,
@@ -635,7 +776,11 @@
       "badlands": 0.04,
       "lake": 0.0,
       "mountain": 0.0
-    }
+    },
+    "preferred_biomes": [
+      "badlands"
+    ],
+    "can_walk": true
   },
   "Stegosaurus": {
     "name": "Stegosaurus",
@@ -646,7 +791,10 @@
     "can_be_juvenile": true,
     "aggressive": false,
     "forms_packs": false,
-    "diet": ["ferns", "cycads"],
+    "diet": [
+      "ferns",
+      "cycads"
+    ],
     "adult_weight": 4000.0,
     "adult_fierceness": 2600,
     "adult_speed": 20,
@@ -664,7 +812,11 @@
       "badlands": 0.01,
       "lake": 0.01,
       "mountain": 0.0
-    }
+    },
+    "preferred_biomes": [
+      "woodlands"
+    ],
+    "can_walk": true
   },
   "Torvosaurus": {
     "name": "Torvosaurus",
@@ -675,7 +827,9 @@
     "can_be_juvenile": true,
     "aggressive": true,
     "forms_packs": false,
-    "diet": ["meat"],
+    "diet": [
+      "meat"
+    ],
     "adult_weight": 2400.0,
     "adult_fierceness": 2600.0,
     "adult_speed": 35,
@@ -693,6 +847,10 @@
       "badlands": 0.005,
       "lake": 0.005,
       "mountain": 0.0
-    }
+    },
+    "preferred_biomes": [
+      "woodlands"
+    ],
+    "can_walk": true
   }
 }

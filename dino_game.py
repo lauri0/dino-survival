@@ -440,47 +440,18 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
 
     # Bottom-left encounter display
     encounter_frame = tk.Frame(main, width=400)
-    # After swaps this frame moves to the right column
     encounter_frame.grid(row=1, column=2, sticky="nsew", padx=10, pady=10)
     encounter_frame.grid_propagate(False)
     encounter_list = tk.Frame(encounter_frame)
     encounter_list.pack(fill="both", expand=True)
-    encounter_rows = []
     encounter_images: dict[str, tk.PhotoImage] = {}
-    for _ in range(5):
-        row = tk.Frame(encounter_list)
-        img = tk.Label(row)
-        info_frame = tk.Frame(row)
-        name_lbl = tk.Label(info_frame, font=("Helvetica", 12), anchor="w")
-        stats_lbl = tk.Label(info_frame, font=("Helvetica", 10), anchor="w")
-        name_lbl.pack(anchor="w")
-        stats_lbl.pack(anchor="w")
-        info_btn = tk.Button(row, text="Stats", width=4, height=3)
-        btn = tk.Button(row, text="Hunt", width=4, height=3)
-        img.grid(row=0, column=0, rowspan=2, sticky="w")
-        info_frame.grid(row=0, column=1, sticky="w", padx=5)
-        info_btn.grid(row=0, column=2, rowspan=2, sticky="e")
-        btn.grid(row=0, column=3, rowspan=2, sticky="e")
-        row.grid_columnconfigure(1, weight=1)
-        encounter_rows.append({"frame": row, "img": img, "name": name_lbl, "stats": stats_lbl, "btn": btn, "info": info_btn})
+    encounter_rows: list[dict] = []
 
-    # Plant display below encounters
-    plant_list = tk.Frame(encounter_frame)
-    plant_list.pack(fill="both", expand=True, side="bottom")
+    # Plant display under movement buttons
+    plant_list = tk.Frame(btn_frame)
+    plant_list.pack(fill="x", side="bottom")
     plant_rows = []
     plant_images: dict[str, tk.PhotoImage] = {}
-    for _ in range(5):
-        row = tk.Frame(plant_list)
-        img = tk.Label(row)
-        info_frame = tk.Frame(row)
-        name_lbl = tk.Label(info_frame, font=("Helvetica", 12), anchor="w")
-        weight_lbl = tk.Label(info_frame, font=("Helvetica", 10), anchor="w")
-        name_lbl.pack(anchor="w")
-        weight_lbl.pack(anchor="w")
-        img.grid(row=0, column=0, rowspan=2, sticky="w")
-        info_frame.grid(row=0, column=1, sticky="w", padx=5)
-        row.grid_columnconfigure(1, weight=1)
-        plant_rows.append({"frame": row, "img": img, "name": name_lbl, "weight": weight_lbl})
 
     # Population tracker to the right of map and encounters
     population_frame = tk.Frame(main, width=200)
@@ -576,8 +547,9 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             show_final_stats("Victory", "Congratulations! You reached adult size!")
 
     def update_encounters() -> None:
-        for slot in encounter_rows:
-            slot["frame"].pack_forget()
+        for child in encounter_list.winfo_children():
+            child.destroy()
+        encounter_rows.clear()
         player_f = game.effective_fierceness() or 1
         player_s = game.player.speed or 1
         terrain = game.map.terrain_at(game.x, game.y).name
@@ -588,7 +560,23 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             boost = game.player.aquatic_boost / 2
         player_s *= 1 + boost / 100.0
         entries = game.current_encounters
-        for slot, entry in zip(encounter_rows, entries):
+        for entry in entries:
+            row = tk.Frame(encounter_list)
+            img = tk.Label(row)
+            info_frame = tk.Frame(row)
+            name_lbl = tk.Label(info_frame, font=("Helvetica", 12), anchor="w")
+            stats_lbl = tk.Label(info_frame, font=("Helvetica", 10), anchor="w")
+            name_lbl.pack(anchor="w")
+            stats_lbl.pack(anchor="w")
+            info_btn = tk.Button(row, text="Stats", width=4, height=3)
+            btn = tk.Button(row, text="Hunt", width=4, height=3)
+            img.grid(row=0, column=0, rowspan=2, sticky="w")
+            info_frame.grid(row=0, column=1, sticky="w", padx=5)
+            info_btn.grid(row=0, column=2, rowspan=2, sticky="e")
+            btn.grid(row=0, column=3, rowspan=2, sticky="e")
+            row.grid_columnconfigure(1, weight=1)
+            slot = {"frame": row, "img": img, "name": name_lbl, "stats": stats_lbl, "btn": btn, "info": info_btn}
+            encounter_rows.append(slot)
             if entry.eggs:
                 state = entry.eggs
                 weight_map = {"small": 4, "medium": 10, "large": 20}
@@ -655,23 +643,33 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         update_population()
 
     def update_plants() -> None:
-        for slot in plant_rows:
-            slot["frame"].pack_forget()
-        for slot, plant in zip(plant_rows, game.current_plants):
+        for child in plant_list.winfo_children():
+            child.destroy()
+        plant_rows.clear()
+        for plant in game.current_plants:
+            row = tk.Frame(plant_list)
+            img = tk.Label(row)
+            info_frame = tk.Frame(row)
+            name_lbl = tk.Label(info_frame, font=("Helvetica", 12), anchor="w")
+            weight_lbl = tk.Label(info_frame, font=("Helvetica", 10), anchor="w")
+            name_lbl.pack(anchor="w")
+            weight_lbl.pack(anchor="w")
+            img.grid(row=0, column=0, rowspan=2, sticky="w")
+            info_frame.grid(row=0, column=1, sticky="w", padx=5)
+            row.grid_columnconfigure(1, weight=1)
+            slot = {"frame": row, "img": img, "name": name_lbl, "weight": weight_lbl}
+            plant_rows.append(slot)
             stats = PLANT_STATS.get(plant.name)
             img_path = stats.image if stats else None
-            img = None
+            pimg = None
             if img_path:
                 abs_path = os.path.join(os.path.dirname(__file__), img_path)
                 if plant.name not in plant_images:
                     plant_images[plant.name] = load_scaled_image(abs_path, 100, 63)
-                img = plant_images.get(plant.name)
-            if img:
-                slot["img"].configure(image=img)
-                slot["img"].image = img
-            else:
-                slot["img"].configure(image="")
-                slot["img"].image = None
+                pimg = plant_images.get(plant.name)
+            if pimg:
+                slot["img"].configure(image=pimg)
+                slot["img"].image = pimg
             slot["name"].configure(text=plant.name)
             slot["weight"].configure(text=f"W:{plant.weight:.1f}kg")
             slot["frame"].pack(fill="x", pady=2, expand=True)

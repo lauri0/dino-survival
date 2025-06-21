@@ -57,5 +57,6 @@ class NPCAnimal:
     alive: bool = True
     fierceness: float = 0.0
     speed: float = 0.0
+    next_move: str = "None"
 
 
