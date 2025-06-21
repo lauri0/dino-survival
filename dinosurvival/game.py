@@ -406,6 +406,25 @@ class Game:
         carcass.weight -= eat_amount
         return eat_amount
 
+    def _spoil_carcasses(self) -> list[str]:
+        """Apply spoilage to all carcasses after feeding has occurred."""
+        messages: list[str] = []
+        for y in range(self.map.height):
+            for x in range(self.map.width):
+                animals = self.map.animals[y][x]
+                for npc in list(animals):
+                    if not npc.alive:
+                        before = npc.weight
+                        npc.weight -= npc.weight * 0.10 + 2
+                        lost = max(0.0, before - npc.weight)
+                        if lost > 0 and x == self.x and y == self.y:
+                            messages.append(
+                                f"The {npc.name} carcass lost {lost:.1f}kg to spoilage."
+                            )
+                        if npc.weight <= 0:
+                            animals.remove(npc)
+        return messages
+
     def _update_npcs(self) -> list[str]:
         messages: list[str] = []
         for y in range(self.map.height):
@@ -418,16 +437,9 @@ class Game:
                             animals.remove(npc)
                         continue
                     if not npc.alive:
-                        before = npc.weight
-                        npc.weight -= npc.weight * 0.10 + 2
-                        lost = max(0.0, before - npc.weight)
-                        if x == self.x and y == self.y and lost > 0:
-                            messages.append(
-                                f"The {npc.name} carcass lost {lost:.1f}kg to spoilage."
-                            )
-                        if npc.weight <= 0:
-                            if npc in animals:
-                                animals.remove(npc)
+                        # Spoilage is applied after all creatures, including the
+                        # player, have had a chance to eat. Dead animals simply
+                        # remain in place for now.
                         continue
 
                     npc.age += 1
@@ -557,6 +569,7 @@ class Game:
                 attack = self._aggressive_attack_check()
                 if attack:
                     msg += "\n" + attack
+                self.turn_messages.extend(self._spoil_carcasses())
                 self._generate_encounters()
                 self._reveal_adjacent_mountains()
                 return self._finish_turn(msg)
@@ -617,6 +630,7 @@ class Game:
         attack = self._aggressive_attack_check()
         if attack:
             msg += "\n" + attack
+        self.turn_messages.extend(self._spoil_carcasses())
         self._generate_encounters()
         self._reveal_adjacent_mountains()
         return self._finish_turn(msg)
@@ -640,6 +654,7 @@ class Game:
         attack = self._aggressive_attack_check()
         if attack:
             msg += "\n" + attack
+        self.turn_messages.extend(self._spoil_carcasses())
         self._generate_encounters()
         self._reveal_adjacent_mountains()
         return self._finish_turn(msg)
@@ -661,6 +676,7 @@ class Game:
         attack = self._aggressive_attack_check()
         if attack:
             msg += "\n" + attack
+        self.turn_messages.extend(self._spoil_carcasses())
         self._generate_encounters()
         self._reveal_adjacent_mountains()
         return self._finish_turn(msg)
@@ -684,6 +700,7 @@ class Game:
         attack = self._aggressive_attack_check()
         if attack:
             msg += "\n" + attack
+        self.turn_messages.extend(self._spoil_carcasses())
         self._generate_encounters()
         self._reveal_adjacent_mountains()
         return self._finish_turn(msg)
@@ -724,6 +741,7 @@ class Game:
         self.last_action = "eggs"
         if "Game Over" in end_msg:
             return self._finish_turn(msg)
+        self.turn_messages.extend(self._spoil_carcasses())
         self._generate_encounters()
         self._reveal_adjacent_mountains()
         return self._finish_turn(msg)
@@ -796,6 +814,7 @@ class Game:
             attack = self._aggressive_attack_check()
             if attack:
                 result += "\n" + attack
+        self.turn_messages.extend(self._spoil_carcasses())
         self._generate_encounters()
         self._reveal_adjacent_mountains()
         if "Game Over" in end_msg:
