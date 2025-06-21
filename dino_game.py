@@ -592,7 +592,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             slot["stats"].configure(
                 text=(
                     f"F:{rel_f:.2f} S:{rel_s:.2f} "
-                    f"({int(round(catch * 100))}%)"
+                    f"({int(round(catch * 100))}%) "
                     f"E:{npc.energy:.0f}% "
                 )
             )
