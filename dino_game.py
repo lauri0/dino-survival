@@ -386,9 +386,12 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     btn_frame = tk.Frame(main, width=200)
     btn_frame.grid(row=1, column=1, sticky="nsew", padx=10, pady=10)
     btn_frame.grid_propagate(False)
-    # Center contents within this frame
+    # Buttons were previously centered using the place geometry manager which
+    # caused the plant list to overlap them when it grew. Pack the container at
+    # the top instead so the plants appear underneath without covering the
+    # movement controls.
     btn_container = tk.Frame(btn_frame)
-    btn_container.place(relx=0.5, rely=0.5, anchor="center")
+    btn_container.pack(pady=5)
     for i in range(3):
         btn_container.grid_columnconfigure(i, weight=1)
     for i in range(3):
