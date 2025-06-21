@@ -390,7 +390,8 @@ class Game:
                     if not npc.alive:
                         npc.weight -= npc.weight * 0.10 + 2
                         if npc.weight <= 0:
-                            animals.remove(npc)
+                            if npc in animals:
+                                animals.remove(npc)
                         continue
 
                     npc.age += 1
