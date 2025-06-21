@@ -160,6 +160,10 @@ class Game:
         """Load encounter information from the current cell."""
         entries: list[EncounterEntry] = []
         cell_animals = self.map.animals[self.y][self.x]
+        for npc in list(cell_animals):
+            if npc.weight <= 0:
+                cell_animals.remove(npc)
+                continue
         cell_plants = self.map.plants[self.y][self.x]
         nest_state = self.map.nest_state(self.x, self.y)
         if nest_state and nest_state != "none":
@@ -409,6 +413,10 @@ class Game:
                 animals = self.map.animals[y][x]
                 plants = self.map.plants[y][x]
                 for npc in list(animals):
+                    if npc.weight <= 0:
+                        if npc in animals:
+                            animals.remove(npc)
+                        continue
                     if not npc.alive:
                         before = npc.weight
                         npc.weight -= npc.weight * 0.10 + 2
