@@ -4,6 +4,7 @@ import random
 import os
 from dinosurvival.game import Game, DINO_STATS, PLANT_STATS, calculate_catch_chance
 from dinosurvival.settings import MORRISON, HELL_CREEK
+from dinosurvival.dinosaur import NPCAnimal
 from dinosurvival.logging_utils import (
     append_game_log,
     update_hunter_log,
@@ -253,6 +254,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     dino_image_label.pack()
 
     info_images: dict[str, tk.PhotoImage] = {}
+    npc_images: dict[str, tk.PhotoImage] = {}
 
     def show_dino_facts(name: str = dinosaur_name) -> None:
         info = DINO_STATS.get(name, {})
@@ -310,6 +312,48 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         ]
         for l in lines:
             tk.Label(win, text=l, font=("Helvetica", 12), anchor="w").pack(anchor="w")
+        tk.Button(win, text="Close", command=win.destroy).pack(pady=5)
+
+    def show_npc_stats(npc: NPCAnimal) -> None:
+        stats = DINO_STATS.get(npc.name, {})
+        win = tk.Toplevel(root)
+        win.title(f"{npc.name} Stats")
+        img = npc_images.get(npc.name)
+        img_path = stats.get("image")
+        if img_path and img is None:
+            abs_path = os.path.join(os.path.dirname(__file__), img_path)
+            npc_images[npc.name] = load_scaled_image(abs_path, 400, 250, master=win, grayscale=not npc.alive)
+            img = npc_images.get(npc.name)
+        if img:
+            lbl = tk.Label(win, image=img)
+            lbl.image = img
+            lbl.pack()
+        tk.Label(win, text=npc.name, font=("Helvetica", 18)).pack(pady=5)
+        tk.Label(win, text=f"Age: {npc.age} turns", font=("Helvetica", 12), anchor="w").pack(anchor="w")
+        tk.Label(win, text=f"Health: {npc.health:.0f}%", font=("Helvetica", 12), anchor="w").pack(anchor="w")
+        tk.Label(win, text=f"Energy: {npc.energy:.0f}%", font=("Helvetica", 12), anchor="w").pack(anchor="w")
+        sep = tk.Frame(win, height=2, bd=1, relief="sunken")
+        sep.pack(fill="x", pady=5)
+        tk.Label(
+            win,
+            text=f"Weight: {npc.weight:.1f}/{stats.get('adult_weight', 0)}",
+            font=("Helvetica", 12),
+            anchor="w",
+        ).pack(anchor="w")
+        fierce = game._stat_from_weight(npc.weight, stats, "hatchling_fierceness", "adult_fierceness")
+        tk.Label(
+            win,
+            text=f"Fierceness: {fierce:.1f}/{stats.get('adult_fierceness', 0)}",
+            font=("Helvetica", 12),
+            anchor="w",
+        ).pack(anchor="w")
+        speed = game._stat_from_weight(npc.weight, stats, "hatchling_speed", "adult_speed")
+        tk.Label(
+            win,
+            text=f"Speed: {speed:.1f}/{stats.get('adult_speed', 0)}",
+            font=("Helvetica", 12),
+            anchor="w",
+        ).pack(anchor="w")
         tk.Button(win, text="Close", command=win.destroy).pack(pady=5)
 
     button_row = tk.Frame(dino_frame)
@@ -411,7 +455,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         stats_lbl = tk.Label(info_frame, font=("Helvetica", 10), anchor="w")
         name_lbl.pack(anchor="w")
         stats_lbl.pack(anchor="w")
-        info_btn = tk.Button(row, text="Info", width=4, height=3)
+        info_btn = tk.Button(row, text="Stats", width=4, height=3)
         btn = tk.Button(row, text="Hunt", width=4, height=3)
         img.grid(row=0, column=0, rowspan=2, sticky="w")
         info_frame.grid(row=0, column=1, sticky="w", padx=5)
@@ -605,7 +649,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             else:
                 label = "Hunt" if npc.alive else "Eat"
                 slot["btn"].configure(command=lambda i=npc.id: do_hunt(i), text=label)
-            slot["info"].configure(command=lambda n=npc.name: show_dino_facts(n))
+            slot["info"].configure(command=lambda n=npc: show_npc_stats(n))
             slot["info"].grid()
             slot["frame"].pack(fill="x", pady=2, expand=True)
         update_population()
