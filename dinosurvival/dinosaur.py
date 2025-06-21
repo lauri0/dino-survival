@@ -58,5 +58,6 @@ class NPCAnimal:
     fierceness: float = 0.0
     speed: float = 0.0
     next_move: str = "None"
+    turns_until_lay_eggs: int = 0
 
 

@@ -21,7 +21,7 @@ def calculate_catch_chance(rel_speed: float) -> float:
     return 0.0
 from .dinosaur import DinosaurStats, Diet, NPCAnimal
 from .plant import PlantStats, Plant
-from .map import Map
+from .map import Map, EggCluster
 from .settings import Setting
 
 # Constants used to derive hatchling values from adult stats
@@ -35,7 +35,7 @@ HATCHLING_ENERGY_DRAIN_DIVISOR = 2
 class EncounterEntry:
     npc: NPCAnimal | None = None
     in_pack: bool = False
-    eggs: str | None = None
+    eggs: EggCluster | None = None
 
 STATS_FILE = os.path.join(os.path.dirname(__file__), "dino_stats.yaml")
 with open(STATS_FILE) as f:
@@ -163,9 +163,8 @@ class Game:
                 cell_animals.remove(npc)
                 continue
         cell_plants = self.map.plants[self.y][self.x]
-        nest_state = self.map.nest_state(self.x, self.y)
-        if nest_state and nest_state != "none":
-            entries.append(EncounterEntry(npc=None, eggs=nest_state))
+        for egg in self.map.eggs[self.y][self.x]:
+            entries.append(EncounterEntry(npc=None, eggs=egg))
         for npc in cell_animals:
             entries.append(EncounterEntry(npc=npc))
         self.current_encounters = entries
@@ -218,7 +217,7 @@ class Game:
         self.turn_count += 1
         terrain = self.map.terrain_at(self.x, self.y).name
         self.biome_turns[terrain] = self.biome_turns.get(terrain, 0) + 1
-        self.map.update_nests()
+        self.map.update_eggs()
         self.map.grow_plants(PLANT_STATS, self.setting.formation)
         self.turn_messages.extend(self._update_npcs())
         self.player.hydration = max(
@@ -402,6 +401,21 @@ class Game:
         carcass.weight -= eat_amount
         return eat_amount
 
+    def _npc_consume_eggs(self, npc: NPCAnimal, eggs: EggCluster, stats: dict) -> float:
+        energy_needed = 100.0 - npc.energy
+        weight_for_energy = energy_needed * npc.weight / 1000
+        growth_target = self._npc_max_growth_gain(npc.weight, stats)
+        eat_amount = min(eggs.weight, weight_for_energy + growth_target)
+
+        energy_gain_possible = 1000 * eat_amount / max(npc.weight, 0.1)
+        actual_energy_gain = min(energy_needed, energy_gain_possible)
+        npc.energy = min(100.0, npc.energy + actual_energy_gain)
+        weight_used = actual_energy_gain * npc.weight / 1000
+        remaining = eat_amount - weight_used
+        self._npc_apply_growth(npc, remaining, stats)
+        eggs.weight -= eat_amount
+        return eat_amount
+
     def _spoil_carcasses(self) -> list[str]:
         """Apply spoilage to all carcasses after feeding has occurred."""
         messages: list[str] = []
@@ -464,6 +478,8 @@ class Game:
                     npc.age += 1
                     stats = DINO_STATS.get(npc.name, {})
                     npc.next_move = "None"
+                    if npc.turns_until_lay_eggs > 0:
+                        npc.turns_until_lay_eggs -= 1
                     npc.energy = max(0.0, npc.energy - stats.get("adult_energy_drain", 0.0))
                     if npc.energy <= 0:
                         npc.alive = False
@@ -474,6 +490,26 @@ class Game:
                     regen = stats.get("health_regen", 0.0)
                     if npc.health < 100.0 and regen:
                         npc.health = min(100.0, npc.health + regen)
+
+                    if (
+                        npc.weight >= stats.get("adult_weight", 0.0)
+                        and stats.get("can_be_juvenile", True)
+                        and npc.energy >= 80
+                        and npc.health >= 80
+                        and npc.turns_until_lay_eggs == 0
+                    ):
+                        npc.energy *= 0.7
+                        eggs = EggCluster(
+                            species=npc.name,
+                            number=stats.get("num_eggs", 0),
+                            weight=10.0,
+                            turns_until_hatch=5,
+                        )
+                        self.map.add_eggs(x, y, eggs)
+                        npc.turns_until_lay_eggs = stats.get("egg_laying_interval", 0)
+                        if x == self.x and y == self.y:
+                            messages.append(f"The {npc.name} lays eggs.")
+                        continue
 
                     if npc.energy > 90:
                         continue
@@ -490,6 +526,18 @@ class Game:
                                 messages.append(f"The {npc.name} eats {eaten:.1f}kg from a carcass.")
                             if carcass.weight <= 0:
                                 animals.remove(carcass)
+                            found_food = True
+                            npc.next_move = "None"
+                            continue
+
+                        egg_clusters = self.map.eggs[y][x]
+                        if egg_clusters:
+                            egg = egg_clusters[0]
+                            eaten = self._npc_consume_eggs(npc, egg, stats)
+                            if x == self.x and y == self.y:
+                                messages.append(f"The {npc.name} eats {eaten:.1f}kg of eggs.")
+                            if egg.weight <= 0:
+                                egg_clusters.remove(egg)
                             found_food = True
                             npc.next_move = "None"
                             continue
@@ -805,17 +853,15 @@ class Game:
         if pre:
             return self._finish_turn(pre)
 
-        state = self.map.nest_state(self.x, self.y)
-        if state in (None, "none"):
+        egg = self.map.take_eggs(self.x, self.y)
+        if egg is None:
             self._move_npcs()
             self.turn_messages.extend(self._spoil_carcasses())
             self._generate_encounters()
             self._reveal_adjacent_mountains()
             return self._finish_turn("There are no eggs here.")
 
-        weight_map = {"small": 4.0, "medium": 10.0, "large": 20.0}
-        egg_weight = weight_map.get(state, 0.0)
-        self.map.take_eggs(self.x, self.y)
+        egg_weight = egg.weight
 
         energy_gain = 1000 * egg_weight / max(self.player.weight, 0.1)
         needed = 100.0 - self.player.energy
@@ -828,7 +874,7 @@ class Game:
         weight_gain, max_gain = self._apply_growth(leftover_meat)
 
         msg = (
-            f"You eat a {state} pile of eggs. "
+            f"You eat {egg.number} {egg.species} eggs. "
             f"Energy +{actual_energy_gain:.1f}%, "
             f"Weight +{weight_gain:.1f}kg (max {max_gain:.1f}kg)."
         )

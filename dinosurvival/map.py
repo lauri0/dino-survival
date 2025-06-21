@@ -12,8 +12,11 @@ class Terrain:
 
 
 @dataclass
-class Nest:
-    eggs: str  # 'none', 'small', 'medium', 'large'
+class EggCluster:
+    species: str
+    number: int
+    weight: float
+    turns_until_hatch: int
 
 
 class Map:
@@ -114,19 +117,13 @@ class Map:
         self.plants: List[List[List[Plant]]] = [
             [[] for _ in range(width)] for _ in range(height)
         ]
-        self.nests: Dict[Tuple[int, int], Nest] = {}
+        self.eggs: List[List[List[EggCluster]]] = [
+            [[] for _ in range(width)] for _ in range(height)
+        ]
         # List of animals present in each cell.
         self.animals: List[List[List["NPCAnimal"]]] = [
             [[] for _ in range(width)] for _ in range(height)
         ]
-
-        # Place 5 nests randomly across the map
-        num_nests = 5
-        all_coords = [(x, y) for y in range(height) for x in range(width)]
-        random.shuffle(all_coords)
-        for x, y in all_coords[:num_nests]:
-            state = random.choice(["none", "small", "medium", "large"])
-            self.nests[(x, y)] = Nest(state)
 
     def terrain_at(self, x: int, y: int) -> Terrain:
         return self.grid[y][x]
@@ -138,29 +135,22 @@ class Map:
         return self.revealed[y][x]
 
 
-    def has_nest(self, x: int, y: int) -> bool:
-        return (x, y) in self.nests
+    def update_eggs(self) -> None:
+        for y in range(self.height):
+            for x in range(self.width):
+                for egg in list(self.eggs[y][x]):
+                    egg.turns_until_hatch -= 1
+                    if egg.turns_until_hatch <= 0 or egg.weight <= 0:
+                        self.eggs[y][x].remove(egg)
 
-    def nest_state(self, x: int, y: int) -> Optional[str]:
-        nest = self.nests.get((x, y))
-        return nest.eggs if nest else None
-
-    def update_nests(self) -> None:
-        for nest in self.nests.values():
-            if nest.eggs == "none":
-                if random.random() < 0.01:
-                    nest.eggs = random.choice(["small", "medium", "large"])
-            else:
-                if random.random() < 0.01:
-                    nest.eggs = "none"
-
-    def take_eggs(self, x: int, y: int) -> Optional[str]:
-        nest = self.nests.get((x, y))
-        if nest and nest.eggs != "none":
-            eggs = nest.eggs
-            nest.eggs = "none"
-            return eggs
+    def take_eggs(self, x: int, y: int) -> Optional[EggCluster]:
+        cell = self.eggs[y][x]
+        if cell:
+            return cell.pop(0)
         return None
+
+    def add_eggs(self, x: int, y: int, eggs: EggCluster) -> None:
+        self.eggs[y][x].append(eggs)
 
     def grow_plants(self, plant_stats: dict[str, "PlantStats"], formation: str) -> None:
         for y in range(self.height):
