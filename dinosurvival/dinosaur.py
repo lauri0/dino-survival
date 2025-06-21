@@ -55,5 +55,7 @@ class NPCAnimal:
     energy: float = 100.0
     health: float = 100.0
     alive: bool = True
+    fierceness: float = 0.0
+    speed: float = 0.0
 
 
