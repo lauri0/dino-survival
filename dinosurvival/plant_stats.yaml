@@ -5,13 +5,13 @@
     "image": "assets/plants/ferns.png",
     "weight": 100.0,
     "growth_chance": {
-      "plains": 0.05,
-      "forest": 0.05,
-      "swamp": 0.05,
-      "woodlands": 0.05,
-      "badlands": 0.02,
-      "lake": 0.03,
-      "mountain": 0.0
+      "plains": 0.03,
+      "forest": 0.04,
+      "swamp": 0.03,
+      "woodlands": 0.02,
+      "badlands": 0.005,
+      "lake": 0.00,
+      "mountain": 0.00
     }
   },
   "Cycads": {
@@ -20,13 +20,13 @@
     "image": "assets/plants/cycads.png",
     "weight": 100.0,
     "growth_chance": {
-      "plains": 0.04,
+      "plains": 0.02,
       "forest": 0.03,
-      "swamp": 0.02,
-      "woodlands": 0.05,
-      "badlands": 0.01,
-      "lake": 0.02,
-      "mountain": 0.0
+      "swamp": 0.01,
+      "woodlands": 0.02,
+      "badlands": 0.005,
+      "lake": 0.00,
+      "mountain": 0.00
     }
   },
   "Conifers": {
@@ -35,13 +35,13 @@
     "image": "assets/plants/conifers.png",
     "weight": 100.0,
     "growth_chance": {
-      "plains": 0.03,
-      "forest": 0.05,
+      "plains": 0.005,
+      "forest": 0.02,
       "swamp": 0.01,
-      "woodlands": 0.05,
-      "badlands": 0.02,
-      "lake": 0.02,
-      "mountain": 0.02
+      "woodlands": 0.02,
+      "badlands": 0.001,
+      "lake": 0.00,
+      "mountain": 0.005
     }
   }
 }
