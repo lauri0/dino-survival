@@ -131,8 +131,6 @@ class Game:
                 terrain = self.map.terrain_at(x, y).name
                 animals: list[NPCAnimal] = []
                 for name, stats in DINO_STATS.items():
-                    if len(animals) >= 5:
-                        break
                     if self.setting.formation not in stats.get("formations", []):
                         continue
                     chance = stats.get("encounter_chance", {}).get(terrain, 0)
@@ -169,11 +167,9 @@ class Game:
         if nest_state and nest_state != "none":
             entries.append(EncounterEntry(npc=None, eggs=nest_state))
         for npc in cell_animals:
-            if len(entries) >= 5:
-                break
             entries.append(EncounterEntry(npc=npc))
-        self.current_encounters = entries[:5]
-        self.current_plants = list(cell_plants)[:5]
+        self.current_encounters = entries
+        self.current_plants = list(cell_plants)
 
     def _aggressive_attack_check(self) -> Optional[str]:
         player_f = max(self.effective_fierceness(), 0.1)
@@ -225,6 +221,7 @@ class Game:
         self.map.update_nests()
         self.map.grow_plants(PLANT_STATS, self.setting.formation)
         self.turn_messages.extend(self._update_npcs())
+        self._move_npcs()
         self.player.hydration = max(
             0.0, self.player.hydration - self.player.hydration_drain
         )
@@ -425,6 +422,29 @@ class Game:
                             animals.remove(npc)
         return messages
 
+    def _move_npcs(self) -> None:
+        moves: list[tuple[int,int,int,int,NPCAnimal]] = []
+        directions = {
+            "Up": (0, -1),
+            "Right": (1, 0),
+            "Down": (0, 1),
+            "Left": (-1, 0),
+        }
+        for y in range(self.map.height):
+            for x in range(self.map.width):
+                for npc in list(self.map.animals[y][x]):
+                    d = npc.next_move
+                    if not d or d == "None":
+                        continue
+                    dx, dy = directions.get(d, (0, 0))
+                    nx, ny = x + dx, y + dy
+                    if 0 <= nx < self.map.width and 0 <= ny < self.map.height:
+                        moves.append((x, y, nx, ny, npc))
+        for x, y, nx, ny, npc in moves:
+            self.map.animals[y][x].remove(npc)
+            self.map.animals[ny][nx].append(npc)
+            npc.next_move = "None"
+
     def _update_npcs(self) -> list[str]:
         messages: list[str] = []
         for y in range(self.map.height):
@@ -444,6 +464,7 @@ class Game:
 
                     npc.age += 1
                     stats = DINO_STATS.get(npc.name, {})
+                    npc.next_move = "None"
                     npc.energy = max(0.0, npc.energy - stats.get("adult_energy_drain", 0.0))
                     if npc.energy <= 0:
                         npc.alive = False
@@ -459,6 +480,7 @@ class Game:
                         continue
 
                     diet = stats.get("diet", [])
+                    found_food = False
 
                     if Diet.MEAT in diet:
                         carcasses = [c for c in animals if not c.alive and c.weight > 0]
@@ -466,11 +488,11 @@ class Game:
                             carcass = max(carcasses, key=lambda c: c.weight)
                             eaten = self._npc_consume_meat(npc, carcass, stats)
                             if x == self.x and y == self.y:
-                                messages.append(
-                                    f"The {npc.name} eats {eaten:.1f}kg from a carcass."
-                                )
+                                messages.append(f"The {npc.name} eats {eaten:.1f}kg from a carcass.")
                             if carcass.weight <= 0:
                                 animals.remove(carcass)
+                            found_food = True
+                            npc.next_move = "None"
                             continue
 
                     if plants and any(d in diet for d in (Diet.FERNS, Diet.CYCADS, Diet.CONIFERS)):
@@ -479,11 +501,11 @@ class Game:
                             chosen = max(options, key=lambda p: p.weight)
                             eaten = self._npc_consume_plant(npc, chosen, stats)
                             if x == self.x and y == self.y:
-                                messages.append(
-                                    f"The {npc.name} eats {eaten:.1f}kg of {chosen.name}."
-                                )
+                                messages.append(f"The {npc.name} eats {eaten:.1f}kg of {chosen.name}.")
                             if chosen.weight <= 0:
                                 plants.remove(chosen)
+                            found_food = True
+                            npc.next_move = "None"
                             continue
 
                     if Diet.MEAT in diet:
@@ -518,12 +540,43 @@ class Game:
                                 target.speed = 0.0
                                 eaten = self._npc_consume_meat(npc, target, stats)
                                 if x == self.x and y == self.y:
-                                    messages.append(
-                                        f"The {npc.name} hunts and eats {eaten:.1f}kg of {target.name}."
-                                    )
+                                    messages.append(f"The {npc.name} hunts and eats {eaten:.1f}kg of {target.name}.")
                                 if target.weight <= 0:
                                     animals.remove(target)
+                                found_food = True
+                                npc.next_move = "None"
+                                continue
+
+                    if found_food:
+                        continue
+
+                    if random.random() < 0.5:
+                        npc.next_move = "None"
+                        continue
+
+                    dirs = {"Up": (0, -1), "Right": (1, 0), "Down": (0, 1), "Left": (-1, 0)}
+                    pref = stats.get("preferred_biomes", [])
+                    can_walk = stats.get("can_walk", True)
+                    candidates = []
+                    pref_candidates = []
+                    for dname,(dx,dy) in dirs.items():
+                        nx, ny = x + dx, y + dy
+                        if not (0 <= nx < self.map.width and 0 <= ny < self.map.height):
+                            continue
+                        terrain = self.map.terrain_at(nx, ny).name
+                        if not can_walk and terrain != "lake":
+                            continue
+                        candidates.append(dname)
+                        if terrain in pref:
+                            pref_candidates.append(dname)
+                    move_choice = None
+                    if pref_candidates:
+                        move_choice = random.choice(pref_candidates)
+                    elif candidates:
+                        move_choice = random.choice(candidates)
+                    npc.next_move = move_choice or "None"
         return messages
+
 
     def hunt_npc(self, npc_id: int) -> str:
         """Hunt a specific NPC animal by its ID."""

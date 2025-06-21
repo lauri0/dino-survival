@@ -166,8 +166,7 @@ class Map:
         for y in range(self.height):
             for x in range(self.width):
                 cell_plants = self.plants[y][x]
-                cell_animals = self.animals[y][x]
-                if len(cell_plants) >= 2 or len(cell_plants) + len(cell_animals) >= 5:
+                if len(cell_plants) >= 2:
                     continue
                 terrain = self.terrain_at(x, y).name
                 for name, stats in plant_stats.items():
@@ -176,10 +175,7 @@ class Map:
                     chance = stats.growth_chance.get(terrain, 0)
                     if random.random() < chance:
                         cell_plants.append(Plant(name=name, weight=stats.weight))
-                        if (
-                            len(cell_plants) >= 2
-                            or len(cell_plants) + len(cell_animals) >= 5
-                        ):
+                        if len(cell_plants) >= 2:
                             break
 
     def remove_animal(
