@@ -28,3 +28,15 @@ def test_zero_weight_removed_on_generate():
     game._generate_encounters()
     assert carcass not in game.map.animals[game.y][game.x]
     assert all(e.npc is not carcass for e in game.current_encounters)
+
+
+def test_spoilage_occurs_after_turn():
+    random.seed(0)
+    game = game_mod.Game(MORRISON, "Allosaurus", width=6, height=6)
+    game.map.animals = [[[] for _ in range(6)] for _ in range(6)]
+    carcass = NPCAnimal(id=3, name="Lizard", sex=None, alive=False, weight=1.0)
+    game.map.animals[game.y][game.x] = [carcass]
+    game._update_npcs()
+    assert carcass.weight == 1.0
+    game.turn("stay")
+    assert carcass not in game.map.animals[game.y][game.x]
