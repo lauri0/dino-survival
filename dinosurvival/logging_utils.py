@@ -65,6 +65,12 @@ def append_game_log(formation: str, dino: str, turns: int, weight: float, won: b
         f.write(line)
 
 
+def append_event_log(message: str) -> None:
+    """Append a simple event message to the game log."""
+    with open(GAME_LOG_PATH, "a") as f:
+        f.write(f"EVENT|{message}\n")
+
+
 def update_hunter_log(formation: str, dino: str, hunts: dict) -> None:
     data = load_hunter_stats()
     form = data.setdefault(formation, {})

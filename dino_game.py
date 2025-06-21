@@ -367,6 +367,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         label = terrain.name.capitalize()
         if game.map.has_nest(game.x, game.y):
             label += " (Nest)"
+        label += f" ({game.x},{game.y})"
         biome_var.set(label)
         img = biome_images.get(terrain.name)
         if img:

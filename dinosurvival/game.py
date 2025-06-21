@@ -23,6 +23,7 @@ from .dinosaur import DinosaurStats, Diet, NPCAnimal
 from .plant import PlantStats, Plant
 from .map import Map, EggCluster
 from .settings import Setting
+from .logging_utils import append_event_log
 
 # Constants used to derive hatchling values from adult stats
 HATCHLING_WEIGHT_DIVISOR = 1000
@@ -506,6 +507,7 @@ class Game:
                             turns_until_hatch=5,
                         )
                         self.map.add_eggs(x, y, eggs)
+                        append_event_log(f"{npc.name} laid eggs at ({x},{y})")
                         npc.turns_until_lay_eggs = stats.get("egg_laying_interval", 0)
                         if x == self.x and y == self.y:
                             messages.append(f"The {npc.name} lays eggs.")
