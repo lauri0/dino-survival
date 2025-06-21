@@ -34,7 +34,9 @@
       "woodlands",
       "badlands"
     ],
-    "can_walk": true
+    "can_walk": true,
+    "egg_laying_interval": 10,
+    "num_eggs": 2
   },
   "Allosaurus": {
     "name": "Allosaurus",
@@ -69,7 +71,9 @@
     "preferred_biomes": [
       "plains"
     ],
-    "can_walk": true
+    "can_walk": true,
+    "egg_laying_interval": 10,
+    "num_eggs": 2
   },
   "Amphicotylus": {
     "name": "Amphicotylus",
@@ -104,7 +108,9 @@
     "preferred_biomes": [
       "lake"
     ],
-    "can_walk": true
+    "can_walk": true,
+    "egg_laying_interval": 10,
+    "num_eggs": 2
   },
   "Brachiosaurus": {
     "name": "Brachiosaurus",
@@ -141,7 +147,9 @@
       "plains",
       "woodlands"
     ],
-    "can_walk": true
+    "can_walk": true,
+    "egg_laying_interval": 10,
+    "num_eggs": 2
   },
   "Camarasaurus": {
     "name": "Camarasaurus",
@@ -177,7 +185,9 @@
     "preferred_biomes": [
       "badlands"
     ],
-    "can_walk": true
+    "can_walk": true,
+    "egg_laying_interval": 10,
+    "num_eggs": 2
   },
   "Camptosaurus": {
     "name": "Camptosaurus",
@@ -212,7 +222,9 @@
     "preferred_biomes": [
       "woodlands"
     ],
-    "can_walk": true
+    "can_walk": true,
+    "egg_laying_interval": 10,
+    "num_eggs": 2
   },
   "Centipede": {
     "name": "Centipede",
@@ -247,7 +259,9 @@
     "preferred_biomes": [
       "forest"
     ],
-    "can_walk": true
+    "can_walk": true,
+    "egg_laying_interval": 0,
+    "num_eggs": 0
   },
   "Ceratodus": {
     "name": "Ceratodus",
@@ -282,7 +296,9 @@
     "preferred_biomes": [
       "lake"
     ],
-    "can_walk": false
+    "can_walk": false,
+    "egg_laying_interval": 0,
+    "num_eggs": 0
   },
   "Ceratosaurus": {
     "name": "Ceratosaurus",
@@ -318,7 +334,9 @@
       "forest",
       "swamp"
     ],
-    "can_walk": true
+    "can_walk": true,
+    "egg_laying_interval": 10,
+    "num_eggs": 2
   },
   "Diplodocus": {
     "name": "Diplodocus",
@@ -354,7 +372,9 @@
     "preferred_biomes": [
       "plains"
     ],
-    "can_walk": true
+    "can_walk": true,
+    "egg_laying_interval": 10,
+    "num_eggs": 2
   },
   "Dragonfly": {
     "name": "Dragonfly",
@@ -389,7 +409,9 @@
     "preferred_biomes": [
       "forest"
     ],
-    "can_walk": true
+    "can_walk": true,
+    "egg_laying_interval": 0,
+    "num_eggs": 0
   },
   "Dryosaurus": {
     "name": "Dryosaurus",
@@ -425,7 +447,9 @@
       "forest",
       "woodlands"
     ],
-    "can_walk": true
+    "can_walk": true,
+    "egg_laying_interval": 10,
+    "num_eggs": 2
   },
   "Frog": {
     "name": "Frog",
@@ -460,7 +484,9 @@
     "preferred_biomes": [
       "swamp"
     ],
-    "can_walk": true
+    "can_walk": true,
+    "egg_laying_interval": 0,
+    "num_eggs": 0
   },
   "Fruitadens": {
     "name": "Fruitadens",
@@ -496,7 +522,9 @@
     "preferred_biomes": [
       "swamp"
     ],
-    "can_walk": true
+    "can_walk": true,
+    "egg_laying_interval": 10,
+    "num_eggs": 2
   },
   "Gargoyleosaurus": {
     "name": "Gargoyleosaurus",
@@ -532,7 +560,9 @@
     "preferred_biomes": [
       "forest"
     ],
-    "can_walk": true
+    "can_walk": true,
+    "egg_laying_interval": 10,
+    "num_eggs": 2
   },
   "Glyptops": {
     "name": "Glyptops",
@@ -568,7 +598,9 @@
     "preferred_biomes": [
       "swamp"
     ],
-    "can_walk": true
+    "can_walk": true,
+    "egg_laying_interval": 0,
+    "num_eggs": 0
   },
   "Lizard": {
     "name": "Lizard",
@@ -603,7 +635,9 @@
     "preferred_biomes": [
       "swamp"
     ],
-    "can_walk": true
+    "can_walk": true,
+    "egg_laying_interval": 0,
+    "num_eggs": 0
   },
   "Morrolepis": {
     "name": "Morrolepis",
@@ -638,7 +672,9 @@
     "preferred_biomes": [
       "lake"
     ],
-    "can_walk": false
+    "can_walk": false,
+    "egg_laying_interval": 0,
+    "num_eggs": 0
   },
   "Mymoorapelta": {
     "name": "Mymoorapelta",
@@ -675,7 +711,9 @@
       "plains",
       "woodlands"
     ],
-    "can_walk": true
+    "can_walk": true,
+    "egg_laying_interval": 10,
+    "num_eggs": 2
   },
   "Nanosaurus": {
     "name": "Nanosaurus",
@@ -710,7 +748,9 @@
     "preferred_biomes": [
       "forest"
     ],
-    "can_walk": true
+    "can_walk": true,
+    "egg_laying_interval": 10,
+    "num_eggs": 2
   },
   "Ornitholestes": {
     "name": "Ornitholestes",
@@ -745,7 +785,9 @@
     "preferred_biomes": [
       "forest"
     ],
-    "can_walk": true
+    "can_walk": true,
+    "egg_laying_interval": 10,
+    "num_eggs": 2
   },
   "Scorpion": {
     "name": "Scorpion",
@@ -780,7 +822,9 @@
     "preferred_biomes": [
       "badlands"
     ],
-    "can_walk": true
+    "can_walk": true,
+    "egg_laying_interval": 0,
+    "num_eggs": 0
   },
   "Stegosaurus": {
     "name": "Stegosaurus",
@@ -816,7 +860,9 @@
     "preferred_biomes": [
       "woodlands"
     ],
-    "can_walk": true
+    "can_walk": true,
+    "egg_laying_interval": 10,
+    "num_eggs": 2
   },
   "Torvosaurus": {
     "name": "Torvosaurus",
@@ -851,6 +897,8 @@
     "preferred_biomes": [
       "woodlands"
     ],
-    "can_walk": true
+    "can_walk": true,
+    "egg_laying_interval": 10,
+    "num_eggs": 2
   }
 }
