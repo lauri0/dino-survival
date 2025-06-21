@@ -152,6 +152,10 @@ class Map:
     def add_eggs(self, x: int, y: int, eggs: EggCluster) -> None:
         self.eggs[y][x].append(eggs)
 
+    def has_nest(self, x: int, y: int) -> bool:
+        """Return ``True`` if any eggs are present in the cell."""
+        return bool(self.eggs[y][x])
+
     def grow_plants(self, plant_stats: dict[str, "PlantStats"], formation: str) -> None:
         for y in range(self.height):
             for x in range(self.width):
