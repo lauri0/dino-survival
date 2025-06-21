@@ -536,8 +536,11 @@ class Game:
         if target is None:
             return self._finish_turn("Unknown target.")
 
-        hunt = self.hunt_stats.setdefault(target.name, [0, 0])
-        hunt[0] += 1
+        was_alive = target.alive
+        hunt = None
+        if was_alive:
+            hunt = self.hunt_stats.setdefault(target.name, [0, 0])
+            hunt[0] += 1
 
         stats = DINO_STATS.get(target.name, {})
 
@@ -611,7 +614,8 @@ class Game:
         target.weight = max(0.0, target.weight - consumed)
         if target.weight <= 0:
             self.map.remove_animal(self.x, self.y, npc_id=target.id)
-        hunt[1] += 1
+        if was_alive and hunt is not None:
+            hunt[1] += 1
 
         if damage > 0:
             msg = (

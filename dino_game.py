@@ -603,7 +603,8 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             ):
                 slot["btn"].configure(command=lambda i=npc.id: do_mate(i), text="Mate")
             else:
-                slot["btn"].configure(command=lambda i=npc.id: do_hunt(i), text="Hunt")
+                label = "Hunt" if npc.alive else "Eat"
+                slot["btn"].configure(command=lambda i=npc.id: do_hunt(i), text=label)
             slot["info"].configure(command=lambda n=npc.name: show_dino_facts(n))
             slot["info"].grid()
             slot["frame"].pack(fill="x", pady=2, expand=True)
