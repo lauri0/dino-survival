@@ -582,13 +582,19 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             slot = {"frame": row, "img": img, "name": name_lbl, "stats": stats_lbl, "btn": btn, "info": info_btn}
             encounter_rows.append(slot)
             if entry.eggs:
-                state = entry.eggs
-                weight_map = {"small": 4, "medium": 10, "large": 20}
+                cluster = entry.eggs
                 slot["img"].configure(image="")
                 slot["img"].image = None
-                slot["name"].configure(text=f"Eggs ({state.capitalize()})")
-                slot["stats"].configure(text=f"W:{weight_map.get(state, 0)}kg")
-                slot["btn"].configure(command=do_collect_eggs, text="Hunt")
+                slot["name"].configure(
+                    text=f"{cluster.species} Eggs ({cluster.number})"
+                )
+                slot["stats"].configure(
+                    text=(
+                        f"W:{cluster.weight:.1f}kg "
+                        f"Hatch:{cluster.turns_until_hatch}"
+                    )
+                )
+                slot["btn"].configure(command=do_collect_eggs, text="Eat")
                 slot["info"].grid_remove()
                 slot["frame"].pack(fill="x", pady=2, expand=True)
                 continue
