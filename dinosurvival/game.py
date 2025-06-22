@@ -515,6 +515,33 @@ class Game:
             self.map.animals[ny][nx].append(npc)
             npc.next_move = "None"
 
+    def _npc_choose_move(self, x: int, y: int, npc: NPCAnimal, stats: dict) -> None:
+        """Choose a movement direction for the NPC using normal logic."""
+        if random.random() < 0.5:
+            npc.next_move = "None"
+            return
+        dirs = {"Up": (0, -1), "Right": (1, 0), "Down": (0, 1), "Left": (-1, 0)}
+        pref = stats.get("preferred_biomes", [])
+        can_walk = stats.get("can_walk", True)
+        candidates = []
+        pref_candidates = []
+        for dname, (dx, dy) in dirs.items():
+            nx, ny = x + dx, y + dy
+            if not (0 <= nx < self.map.width and 0 <= ny < self.map.height):
+                continue
+            terrain = self.map.terrain_at(nx, ny).name
+            if not can_walk and terrain != "lake":
+                continue
+            candidates.append(dname)
+            if terrain in pref:
+                pref_candidates.append(dname)
+        move_choice = None
+        if pref_candidates:
+            move_choice = random.choice(pref_candidates)
+        elif candidates:
+            move_choice = random.choice(candidates)
+        npc.next_move = move_choice or "None"
+
     def _update_npcs(self) -> list[str]:
         messages: list[str] = []
         for y in range(self.map.height):
@@ -555,6 +582,9 @@ class Game:
                         and npc.health >= 80
                         and npc.turns_until_lay_eggs == 0
                     ):
+                        if len(animals) >= 4:
+                            self._npc_choose_move(x, y, npc, stats)
+                            continue
                         npc.energy *= 0.7
                         eggs = EggCluster(
                             species=npc.name,
@@ -665,31 +695,7 @@ class Game:
                     if found_food:
                         continue
 
-                    if random.random() < 0.5:
-                        npc.next_move = "None"
-                        continue
-
-                    dirs = {"Up": (0, -1), "Right": (1, 0), "Down": (0, 1), "Left": (-1, 0)}
-                    pref = stats.get("preferred_biomes", [])
-                    can_walk = stats.get("can_walk", True)
-                    candidates = []
-                    pref_candidates = []
-                    for dname,(dx,dy) in dirs.items():
-                        nx, ny = x + dx, y + dy
-                        if not (0 <= nx < self.map.width and 0 <= ny < self.map.height):
-                            continue
-                        terrain = self.map.terrain_at(nx, ny).name
-                        if not can_walk and terrain != "lake":
-                            continue
-                        candidates.append(dname)
-                        if terrain in pref:
-                            pref_candidates.append(dname)
-                    move_choice = None
-                    if pref_candidates:
-                        move_choice = random.choice(pref_candidates)
-                    elif candidates:
-                        move_choice = random.choice(candidates)
-                    npc.next_move = move_choice or "None"
+                    self._npc_choose_move(x, y, npc, stats)
         return messages
 
 

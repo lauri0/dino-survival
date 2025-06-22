@@ -272,16 +272,28 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
 
         counts = game.population_history.get(name, [])
         if counts:
-            canvas = tk.Canvas(win, width=400, height=250)
+            width, height = 400, 250
+            margin = 30
+            canvas = tk.Canvas(win, width=width + margin, height=height + margin)
             max_c = max(counts)
             max_c = max(max_c, 1)
-            step = 400 / max(len(counts) - 1, 1)
+            step = width / max(len(counts) - 1, 1)
+            canvas.create_line(margin, 0, margin, height)
+            canvas.create_line(margin, height, margin + width, height)
             for i in range(1, len(counts)):
-                x1 = (i - 1) * step
-                y1 = 250 - counts[i - 1] / max_c * 250
-                x2 = i * step
-                y2 = 250 - counts[i] / max_c * 250
+                x1 = margin + (i - 1) * step
+                y1 = height - counts[i - 1] / max_c * height
+                x2 = margin + i * step
+                y2 = height - counts[i] / max_c * height
                 canvas.create_line(x1, y1, x2, y2, fill="blue")
+            canvas.create_text(margin - 5, height, text="0", anchor="e", font=("Helvetica", 8))
+            canvas.create_text(margin - 5, height - height, text=str(max_c), anchor="e", font=("Helvetica", 8))
+            turns = game.turn_history
+            if turns:
+                canvas.create_text(margin, height + 10, text=str(turns[0]), anchor="n", font=("Helvetica", 8))
+                canvas.create_text(margin + width, height + 10, text=str(turns[-1]), anchor="n", font=("Helvetica", 8))
+            canvas.create_text(margin + width / 2, height + 20, text="Turn", font=("Helvetica", 10))
+            canvas.create_text(10, height / 2, text="Population", angle=90, font=("Helvetica", 10))
             canvas.pack()
 
         tk.Label(win, text=name, font=("Helvetica", 18)).pack(pady=5)
