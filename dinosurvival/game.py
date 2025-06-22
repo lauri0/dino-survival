@@ -189,6 +189,8 @@ class Game:
             if entry.eggs or entry.in_pack or entry.npc is None:
                 continue
             npc = entry.npc
+            if not npc.alive:
+                continue
             stats = DINO_STATS.get(npc.name, {})
             if not stats.get("aggressive"):
                 continue
