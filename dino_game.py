@@ -144,17 +144,15 @@ def choose_dinosaur_gui(root: tk.Tk, setting, on_select) -> None:
             lbl.pack()
         tk.Label(win, text=dname, font=("Helvetica", 18)).pack(pady=5)
         lines = []
-        forms = ", ".join(info.get("formations", []))
-        lines.append(f"Formations: {forms}")
         lines.append(f"Weight: {info.get('adult_weight', 0)} kg")
         lines.append(f"Fierceness: {info.get('adult_fierceness', 0)}")
         lines.append(f"Speed: {info.get('adult_speed', 0)}")
         lines.append(f"Energy drain per turn: {info.get('adult_energy_drain', 0)}")
-        lines.append(
-            f"Walking energy drain multiplier: {info.get('walking_energy_drain_multiplier', 1.0)}"
-        )
-        lines.append(f"Health regen: {info.get('health_regen', 0)}")
-        lines.append(f"Hydration drain: {info.get('hydration_drain', 0)}")
+        pref_biomes = ", ".join(info.get("preferred_biomes", []))
+        lines.append(f"Preferred biomes: {pref_biomes}")
+        diet_items = [d.value if hasattr(d, 'value') else d for d in info.get('diet', [])]
+        diet = ", ".join(diet_items)
+        lines.append(f"Diet: {diet}")
         for line in lines:
             tk.Label(win, text=line, font=("Helvetica", 12), anchor="w", justify="left").pack(anchor="w")
         tk.Button(win, text="Close", command=win.destroy).pack(pady=5)
@@ -327,17 +325,15 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
 
         tk.Label(win, text=name, font=("Helvetica", 18)).pack(pady=5)
         lines = []
-        forms = ", ".join(info.get("formations", []))
-        lines.append(f"Formations: {forms}")
         lines.append(f"Weight: {info.get('adult_weight', 0)} kg")
         lines.append(f"Fierceness: {info.get('adult_fierceness', 0)}")
         lines.append(f"Speed: {info.get('adult_speed', 0)}")
         lines.append(f"Energy drain per turn: {info.get('adult_energy_drain', 0)}")
-        lines.append(
-            f"Walking energy drain multiplier: {info.get('walking_energy_drain_multiplier', 1.0)}"
-        )
-        lines.append(f"Health regen: {info.get('health_regen', 0)}")
-        lines.append(f"Hydration drain: {info.get('hydration_drain', 0)}")
+        pref_biomes = ", ".join(info.get("preferred_biomes", []))
+        lines.append(f"Preferred biomes: {pref_biomes}")
+        diet_items = [d.value if hasattr(d, 'value') else d for d in info.get('diet', [])]
+        diet = ", ".join(diet_items)
+        lines.append(f"Diet: {diet}")
         for line in lines:
             tk.Label(win, text=line, font=("Helvetica", 12), anchor="w", justify="left").pack(anchor="w")
         tk.Button(win, text="Close", command=win.destroy).pack(pady=5)
