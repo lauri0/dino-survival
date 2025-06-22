@@ -63,6 +63,20 @@ def test_npc_state_and_feeding(monkeypatch):
     assert game.map.plants[0][0][0].weight < 20.0
 
 
+def test_npc_fruit_feeding(monkeypatch):
+    random.seed(0)
+    game = game_mod.Game(MORRISON, "Allosaurus", width=6, height=6)
+    game.map.animals = [[[] for _ in range(6)] for _ in range(6)]
+    game.map.plants = [[[] for _ in range(6)] for _ in range(6)]
+    npc = NPCAnimal(id=2, name="Nanosaurus", sex=None, energy=50.0, weight=5.0)
+    game.map.animals[0][0] = [npc]
+    game.map.plants[0][0] = [Plant(name="Fruits", weight=20.0)]
+    game._update_npcs()
+    assert npc.energy > 50.0
+    assert npc.weight > 5.0
+    assert game.map.plants[0][0][0].weight < 20.0
+
+
 def test_npc_initial_state():
     random.seed(0)
     game = game_mod.Game(MORRISON, "Allosaurus", width=6, height=6)

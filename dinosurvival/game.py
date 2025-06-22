@@ -636,8 +636,8 @@ class Game:
                             npc.next_move = "None"
                             continue
 
-                    if plants and any(d in diet for d in (Diet.FERNS, Diet.CYCADS, Diet.CONIFERS)):
-                        options = [p for p in plants if p.name.lower() in ("ferns", "cycads", "conifers")]
+                    if plants and any(d in diet for d in (Diet.FERNS, Diet.CYCADS, Diet.CONIFERS, Diet.FRUITS)):
+                        options = [p for p in plants if p.name.lower() in ("ferns", "cycads", "conifers", "fruits")]
                         if options:
                             chosen = max(options, key=lambda p: p.weight)
                             eaten = self._npc_consume_plant(npc, chosen, stats)
