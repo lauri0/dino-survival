@@ -468,7 +468,11 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
 
     move_buttons = {}
     move_buttons["lay"] = tk.Button(
-        btn_container, text="Lay Eggs", width=12, height=2, command=do_lay_eggs
+        btn_container,
+        text="Lay Eggs",
+        width=12,
+        height=2,
+        command=lambda: do_lay_eggs(),
     )
     move_buttons["north"] = tk.Button(
         btn_container, text="North", width=12, height=2, command=lambda: perform("north")
