@@ -184,8 +184,12 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
 
     root = tk.Tk()
     root.title("Dinosaur Survival")
+    root.attributes("-fullscreen", True)
     root.geometry("1600x800")
     root.minsize(1600, 800)
+
+    tile_size = 20
+    encounter_height = int(game.map.height * tile_size * 1.3)
 
     # Preload biome images if available
     assets_dir = os.path.join(os.path.dirname(__file__), "assets", "biomes")
@@ -498,7 +502,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     move_buttons["south"].grid(row=2, column=1)
 
     # Bottom-left encounter display
-    encounter_frame = tk.Frame(main, width=400)
+    encounter_frame = tk.Frame(main, width=400, height=encounter_height)
     encounter_frame.grid(row=1, column=2, sticky="nsew", padx=10, pady=10)
     encounter_frame.grid_propagate(False)
 
@@ -785,7 +789,6 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     map_frame.grid(row=0, column=2, sticky="nsew", padx=10, pady=10)
 
     map_tiles = []
-    tile_size = 20
     for y in range(game.map.height):
         row = []
         for x in range(game.map.width):
