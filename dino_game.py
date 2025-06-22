@@ -184,8 +184,8 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
 
     root = tk.Tk()
     root.title("Dinosaur Survival")
-    root.geometry("1600x1000")
-    root.minsize(1600, 1000)
+    root.geometry("1700x1000")
+    root.minsize(1700, 1000)
 
     tile_size = 20
 
@@ -214,9 +214,9 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     main = tk.Frame(root)
     main.pack(fill="both", expand=True)
 
-    main.grid_rowconfigure(0, weight=1)
-    main.grid_rowconfigure(1, weight=0)
-    main.grid_rowconfigure(2, weight=1)
+    main.grid_rowconfigure(0, weight=0)
+    main.grid_rowconfigure(1, weight=1)
+    main.grid_rowconfigure(2, weight=0)
     main.grid_columnconfigure(0, weight=0, minsize=200)
     main.grid_columnconfigure(1, weight=0, minsize=200)
     main.grid_columnconfigure(2, weight=1)
@@ -499,9 +499,9 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     move_buttons["east"].grid(row=1, column=2)
     move_buttons["south"].grid(row=2, column=1)
 
-    # Bottom-left encounter display
-    encounter_frame = tk.Frame(main, width=400)
-    encounter_frame.grid(row=1, column=2, sticky="nsew", padx=10, pady=10)
+    # Encounter display in the center right
+    encounter_frame = tk.Frame(main, width=500)
+    encounter_frame.grid(row=1, column=2, rowspan=4, sticky="nsew", padx=10, pady=10)
     encounter_frame.grid_propagate(False)
 
     encounter_canvas = tk.Canvas(encounter_frame)
@@ -532,9 +532,9 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     plant_rows = []
     plant_images: dict[str, tk.PhotoImage] = {}
 
-    # Population tracker to the right of map and encounters
+    # Population tracker on the right
     population_frame = tk.Frame(main, width=200)
-    population_frame.grid(row=0, column=3, rowspan=2, sticky="nsew", padx=10, pady=10)
+    population_frame.grid(row=0, column=3, rowspan=4, sticky="nsew", padx=10, pady=10)
     population_frame.grid_propagate(False)
     population_list = tk.Frame(population_frame)
     population_list.pack(fill="both", expand=True)
@@ -922,7 +922,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             row.grid_columnconfigure(1, weight=1)
             row.pack(fill="x", pady=2)
 
-    # Bottom middle stats
+    # Left stats
     stats_frame = tk.Frame(main)
     stats_frame.grid(row=1, column=0, sticky="nsew", padx=10, pady=10)
 
@@ -946,9 +946,9 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     turn_label.pack(anchor="w")
     tk.Button(stats_frame, text="Quit", width=10, command=root.destroy).pack(pady=10)
 
-    # Bottom text output
+    # Bottom left text output
     text_frame = tk.Frame(main)
-    text_frame.grid(row=2, column=0, columnspan=4, sticky="nsew")
+    text_frame.grid(row=2, column=0, columnspan=2, sticky="nsew")
     text_frame.grid_rowconfigure(0, weight=1)
     text_frame.grid_columnconfigure(0, weight=1)
 
