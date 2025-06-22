@@ -77,6 +77,24 @@ def test_npc_fruit_feeding(monkeypatch):
     assert game.map.plants[0][0][0].weight < 20.0
 
 
+def test_herbivore_eats_only_diet_plants(monkeypatch):
+    random.seed(0)
+    game = game_mod.Game(MORRISON, "Allosaurus", width=6, height=6)
+    game.map.animals = [[[] for _ in range(6)] for _ in range(6)]
+    game.map.plants = [[[] for _ in range(6)] for _ in range(6)]
+    npc = NPCAnimal(id=3, name="Stegosaurus", sex=None, energy=50.0, weight=10.0)
+    game.map.animals[0][0] = [npc]
+    game.map.plants[0][0] = [
+        Plant(name="Ferns", weight=20.0),
+        Plant(name="Fruits", weight=20.0),
+    ]
+    game._update_npcs()
+    ferns = next(p for p in game.map.plants[0][0] if p.name == "Ferns")
+    fruits = next(p for p in game.map.plants[0][0] if p.name == "Fruits")
+    assert ferns.weight < 20.0
+    assert fruits.weight == 20.0
+
+
 def test_npc_initial_state():
     random.seed(0)
     game = game_mod.Game(MORRISON, "Allosaurus", width=6, height=6)
