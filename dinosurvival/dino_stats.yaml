@@ -423,7 +423,8 @@
     "aggressive": false,
     "forms_packs": false,
     "diet": [
-      "ferns"
+      "ferns",
+      "fruits"
     ],
     "adult_weight": 80.0,
     "adult_fierceness": 50.0,
@@ -498,7 +499,7 @@
     "aggressive": false,
     "forms_packs": false,
     "diet": [
-      "ferns",
+      "fruits",
       "insects"
     ],
     "adult_weight": 5.0,
@@ -536,12 +537,11 @@
     "aggressive": false,
     "forms_packs": false,
     "diet": [
-      "ferns",
-      "cycads"
+      "ferns"
     ],
     "adult_weight": 1000.0,
-    "adult_fierceness": 800,
-    "adult_speed": 16,
+    "adult_fierceness": 1000,
+    "adult_speed": 20,
     "adult_energy_drain": 5.6,
     "growth_rate": 0.35,
     "walking_energy_drain_multiplier": 1.3,
@@ -686,12 +686,11 @@
     "aggressive": false,
     "forms_packs": false,
     "diet": [
-      "ferns",
-      "cycads"
+      "ferns"
     ],
     "adult_weight": 500.0,
-    "adult_fierceness": 400,
-    "adult_speed": 20,
+    "adult_fierceness": 550,
+    "adult_speed": 22,
     "adult_energy_drain": 5.6,
     "growth_rate": 0.35,
     "walking_energy_drain_multiplier": 1.3,
@@ -725,7 +724,7 @@
     "aggressive": false,
     "forms_packs": false,
     "diet": [
-      "ferns"
+      "fruits"
     ],
     "adult_weight": 10.0,
     "adult_fierceness": 6.0,
