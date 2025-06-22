@@ -272,8 +272,8 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
 
         counts = game.population_history.get(name, [])
         if counts:
-            width, height = 400, 250
-            margin = 30
+            width, height = 320, 200
+            margin = 24
             canvas = tk.Canvas(win, width=width + margin, height=height + margin)
             max_c = max(counts)
             max_c = max(max_c, 1)
