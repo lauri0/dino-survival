@@ -505,8 +505,26 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     encounter_frame = tk.Frame(main, width=400)
     encounter_frame.grid(row=1, column=2, sticky="nsew", padx=10, pady=10)
     encounter_frame.grid_propagate(False)
-    encounter_list = tk.Frame(encounter_frame)
-    encounter_list.pack(fill="both", expand=True)
+
+    encounter_canvas = tk.Canvas(encounter_frame)
+    encounter_scroll = tk.Scrollbar(
+        encounter_frame, orient="vertical", command=encounter_canvas.yview
+    )
+    encounter_canvas.configure(yscrollcommand=encounter_scroll.set)
+    encounter_scroll.pack(side="right", fill="y")
+    encounter_canvas.pack(side="left", fill="both", expand=True)
+
+    encounter_list = tk.Frame(encounter_canvas)
+    encounter_window = encounter_canvas.create_window(
+        (0, 0), window=encounter_list, anchor="nw"
+    )
+
+    def _resize_encounter(event) -> None:
+        encounter_canvas.configure(scrollregion=encounter_canvas.bbox("all"))
+        encounter_canvas.itemconfigure(encounter_window, width=event.width)
+
+    encounter_list.bind("<Configure>", _resize_encounter)
+
     encounter_images: dict[str, tk.PhotoImage] = {}
     encounter_rows: list[dict] = []
 
