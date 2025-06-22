@@ -238,6 +238,8 @@ class Game:
         self.turn_messages.extend(self._update_eggs())
         self.map.grow_plants(PLANT_STATS, self.setting.formation)
         self.turn_messages.extend(self._update_npcs())
+        if getattr(self.player, "turns_until_lay_eggs", 0) > 0:
+            self.player.turns_until_lay_eggs -= 1
         self.player.hydration = max(
             0.0, self.player.hydration - self.player.hydration_drain
         )
@@ -434,6 +436,64 @@ class Game:
         eggs.weight -= eat_amount
         return eat_amount
 
+    def _can_player_lay_eggs(self) -> bool:
+        stats = DINO_STATS.get(self.player.name, {})
+        animals = self.map.animals[self.y][self.x]
+        return (
+            self.player.weight >= self.player.adult_weight
+            and stats.get("can_be_juvenile", True)
+            and self.player.energy >= 80
+            and self.player.health >= 80
+            and getattr(self.player, "turns_until_lay_eggs", 0) == 0
+            and len(animals) < 4
+        )
+
+    def lay_eggs(self) -> str:
+        pre = self._start_turn()
+        if pre:
+            return self._finish_turn(pre)
+
+        if not self._can_player_lay_eggs():
+            self._move_npcs()
+            self.turn_messages.extend(self._spoil_carcasses())
+            self._generate_encounters()
+            self._reveal_adjacent_mountains()
+            return self._finish_turn("You cannot lay eggs right now.")
+
+        stats = DINO_STATS.get(self.player.name, {})
+        self.player.energy *= 0.7
+        eggs = EggCluster(
+            species=self.player.name,
+            number=stats.get("num_eggs", 0),
+            weight=10.0,
+            turns_until_hatch=5,
+        )
+        self.map.add_eggs(self.x, self.y, eggs)
+        append_event_log(f"Player laid eggs at ({self.x},{self.y})")
+        self.player.turns_until_lay_eggs = stats.get("egg_laying_interval", 0)
+
+        msg = "You lay eggs."
+        end_msg = self._apply_turn_costs(False)
+        msg += end_msg
+        win = self._check_victory()
+        if win:
+            msg += win
+        self.last_action = "lay_eggs"
+        if "Game Over" in end_msg:
+            self._move_npcs()
+            self.turn_messages.extend(self._spoil_carcasses())
+            self._generate_encounters()
+            self._reveal_adjacent_mountains()
+            return self._finish_turn(msg)
+        self._move_npcs()
+        attack = self._aggressive_attack_check()
+        if attack:
+            msg += "\n" + attack
+        self.turn_messages.extend(self._spoil_carcasses())
+        self._generate_encounters()
+        self._reveal_adjacent_mountains()
+        return self._finish_turn(msg)
+
     def _spoil_carcasses(self) -> list[str]:
         """Apply spoilage to all carcasses after feeding has occurred."""
         messages: list[str] = []
@@ -566,7 +626,8 @@ class Game:
                     npc.next_move = "None"
                     if npc.turns_until_lay_eggs > 0:
                         npc.turns_until_lay_eggs -= 1
-                    npc.energy = max(0.0, npc.energy - stats.get("adult_energy_drain", 0.0))
+                    base_drain = stats.get("adult_energy_drain", 0.0) * 0.5
+                    npc.energy = max(0.0, npc.energy - base_drain)
                     if npc.energy <= 0:
                         npc.alive = False
                         npc.age = -1
@@ -586,6 +647,18 @@ class Game:
                     ):
                         if len(animals) >= 4:
                             self._npc_choose_move(x, y, npc, stats)
+                            if npc.next_move != "None":
+                                extra = base_drain * (
+                                    stats.get("walking_energy_drain_multiplier", 1.0) - 1.0
+                                )
+                                if extra > 0:
+                                    npc.energy = max(0.0, npc.energy - extra)
+                                    if npc.energy <= 0:
+                                        npc.alive = False
+                                        npc.age = -1
+                                        npc.fierceness = 0.0
+                                        npc.speed = 0.0
+                                        continue
                             continue
                         npc.energy *= 0.7
                         eggs = EggCluster(
@@ -703,6 +776,18 @@ class Game:
                         continue
 
                     self._npc_choose_move(x, y, npc, stats)
+                    if npc.next_move != "None":
+                        extra = base_drain * (
+                            stats.get("walking_energy_drain_multiplier", 1.0) - 1.0
+                        )
+                        if extra > 0:
+                            npc.energy = max(0.0, npc.energy - extra)
+                            if npc.energy <= 0:
+                                npc.alive = False
+                                npc.age = -1
+                                npc.fierceness = 0.0
+                                npc.speed = 0.0
+                                continue
         return messages
 
 

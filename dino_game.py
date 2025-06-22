@@ -423,11 +423,16 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             biome_image_label.configure(image="")
             biome_image_label.image = None
         update_drink_button()
+        update_lay_button()
 
     def update_drink_button() -> None:
         terrain = game.map.terrain_at(game.x, game.y)
         state = "normal" if terrain.name == "lake" else "disabled"
         move_buttons["drink"].config(state=state)
+
+    def update_lay_button() -> None:
+        state = "normal" if game._can_player_lay_eggs() else "disabled"
+        move_buttons["lay"].config(state=state)
 
     # Movement buttons (middle column after swap)
     btn_frame = tk.Frame(main, width=200)
@@ -462,6 +467,9 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             show_final_stats("Victory", "Congratulations! You reached adult size!")
 
     move_buttons = {}
+    move_buttons["lay"] = tk.Button(
+        btn_container, text="Lay Eggs", width=12, height=2, command=do_lay_eggs
+    )
     move_buttons["north"] = tk.Button(
         btn_container, text="North", width=12, height=2, command=lambda: perform("north")
     )
@@ -483,6 +491,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
 
     move_buttons["north"].grid(row=0, column=1)
     move_buttons["drink"].grid(row=0, column=2)
+    move_buttons["lay"].grid(row=0, column=0)
     move_buttons["west"].grid(row=1, column=0)
     move_buttons["stay"].grid(row=1, column=1)
     move_buttons["east"].grid(row=1, column=2)
@@ -517,6 +526,8 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         update_biome()
         update_stats()
         update_drink_button()
+        update_lay_button()
+        update_lay_button()
         update_encounters()
         update_plants()
         if "Game Over" in result:
@@ -534,6 +545,8 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         update_biome()
         update_stats()
         update_drink_button()
+        update_lay_button()
+        update_lay_button()
         update_encounters()
         update_plants()
         if "Game Over" in result:
@@ -551,6 +564,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         update_biome()
         update_stats()
         update_drink_button()
+        update_lay_button()
         update_encounters()
         update_plants()
         if "Game Over" in result:
@@ -568,6 +582,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         update_biome()
         update_stats()
         update_drink_button()
+        update_lay_button()
         update_encounters()
         update_plants()
         if "Game Over" in result:
@@ -581,6 +596,23 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
 
     def do_collect_eggs() -> None:
         result = game.collect_eggs()
+        append_output(result)
+        update_stats()
+        update_biome()
+        update_map()
+        update_encounters()
+        update_plants()
+        if "Game Over" in result:
+            for b in move_buttons.values():
+                b.config(state="disabled")
+            show_final_stats("Game Over", "You have perished!")
+        if game.won:
+            for b in move_buttons.values():
+                b.config(state="disabled")
+            show_final_stats("Victory", "Congratulations! You reached adult size!")
+
+    def do_lay_eggs() -> None:
+        result = game.lay_eggs()
         append_output(result)
         update_stats()
         update_biome()
@@ -804,7 +836,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
 
     def update_stats() -> None:
         stage = game.player_growth_stage()
-        name_var.set(f"{dinosaur_name} \u2642 ({stage})")
+        name_var.set(f"{dinosaur_name} \u2640 ({stage})")
         img_key = stage.lower() if stage.lower() in ("hatchling", "juvenile") else "adult"
         img = player_images.get(img_key)
         if img:
@@ -842,6 +874,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         speed_label.config(text=f"Speed: {game.player.speed:.1f}")
         mated_label.config(text=f"Mated: {'Yes' if game.player.mated else 'No'}")
         turn_label.config(text=f"Turn: {game.turn_count}")
+        update_lay_button()
 
     def update_population() -> None:
         for child in population_list.winfo_children():
