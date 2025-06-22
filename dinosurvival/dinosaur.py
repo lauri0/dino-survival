@@ -8,6 +8,7 @@ class Diet(Enum):
     FERNS = "ferns"
     CYCADS = "cycads"
     CONIFERS = "conifers"
+    FRUITS = "fruits"
 
 @dataclass
 class DinosaurStats:
