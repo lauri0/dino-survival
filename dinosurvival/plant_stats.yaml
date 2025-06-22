@@ -3,17 +3,32 @@
     "name": "Ferns",
     "formations": ["Morrison", "Hell Creek"],
     "image": "assets/plants/ferns.png",
-    "weight": 100.0,
+    "weight": 50.0,
     "growth_chance": {
-      "plains": 0.03,
-      "forest": 0.04,
-      "swamp": 0.03,
+      "plains": 0.02,
+      "forest": 0.03,
+      "swamp": 0.02,
       "woodlands": 0.02,
       "badlands": 0.005,
       "lake": 0.00,
       "mountain": 0.00
     }
   },
+  "Fruits": {
+    "name": "Fruits",
+    "formations": ["Morrison", "Hell Creek"],
+    "image": "assets/plants/fruits.png",
+    "weight": 10.0,
+    "growth_chance": {
+      "plains": 0.005,
+      "forest": 0.04,
+      "swamp": 0.01,
+      "woodlands": 0.01,
+      "badlands": 0.002,
+      "lake": 0.00,
+      "mountain": 0.00
+    }
+  },  
   "Cycads": {
     "name": "Cycads",
     "formations": ["Morrison", "Hell Creek"],
@@ -21,7 +36,7 @@
     "weight": 100.0,
     "growth_chance": {
       "plains": 0.02,
-      "forest": 0.03,
+      "forest": 0.01,
       "swamp": 0.01,
       "woodlands": 0.02,
       "badlands": 0.005,
@@ -33,10 +48,10 @@
     "name": "Conifers",
     "formations": ["Morrison", "Hell Creek"],
     "image": "assets/plants/conifers.png",
-    "weight": 100.0,
+    "weight": 200.0,
     "growth_chance": {
       "plains": 0.005,
-      "forest": 0.02,
+      "forest": 0.01,
       "swamp": 0.01,
       "woodlands": 0.02,
       "badlands": 0.001,
