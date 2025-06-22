@@ -155,7 +155,6 @@ def choose_dinosaur_gui(root: tk.Tk, setting, on_select) -> None:
         )
         lines.append(f"Health regen: {info.get('health_regen', 0)}")
         lines.append(f"Hydration drain: {info.get('hydration_drain', 0)}")
-        lines.append(f"Aquatic speed boost: {info.get('aquatic_boost', 0)}")
         for line in lines:
             tk.Label(win, text=line, font=("Helvetica", 12), anchor="w", justify="left").pack(anchor="w")
         tk.Button(win, text="Close", command=win.destroy).pack(pady=5)
@@ -270,6 +269,21 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             lbl = tk.Label(win, image=img)
             lbl.image = img
             lbl.pack()
+
+        counts = game.population_history.get(name, [])
+        if counts:
+            canvas = tk.Canvas(win, width=400, height=250)
+            max_c = max(counts)
+            max_c = max(max_c, 1)
+            step = 400 / max(len(counts) - 1, 1)
+            for i in range(1, len(counts)):
+                x1 = (i - 1) * step
+                y1 = 250 - counts[i - 1] / max_c * 250
+                x2 = i * step
+                y2 = 250 - counts[i] / max_c * 250
+                canvas.create_line(x1, y1, x2, y2, fill="blue")
+            canvas.pack()
+
         tk.Label(win, text=name, font=("Helvetica", 18)).pack(pady=5)
         lines = []
         forms = ", ".join(info.get("formations", []))
@@ -283,15 +297,6 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         )
         lines.append(f"Health regen: {info.get('health_regen', 0)}")
         lines.append(f"Hydration drain: {info.get('hydration_drain', 0)}")
-        lines.append(f"Aquatic speed boost: {info.get('aquatic_boost', 0)}")
-        chances = info.get('encounter_chance', {})
-        total = 0.0
-        for env, val in chances.items():
-            if env == 'mountain':
-                continue
-            lines.append(f"{env.capitalize()} chance: {val * 100:.1f}%")
-            total += val * 100
-        lines.append(f"Total encounter chance: {total:.1f}%")
         for line in lines:
             tk.Label(win, text=line, font=("Helvetica", 12), anchor="w", justify="left").pack(anchor="w")
         tk.Button(win, text="Close", command=win.destroy).pack(pady=5)

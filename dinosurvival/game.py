@@ -124,6 +124,14 @@ class Game:
         self.hunt_stats: dict[str, list[int]] = {}
         self.won = False
         self.turn_messages: list[str] = []
+        # Track population counts for all species in this formation
+        self.population_history: dict[str, list[int]] = {
+            n: []
+            for n, s in DINO_STATS.items()
+            if self.setting.formation in s.get("formations", [])
+        }
+        self.turn_history: list[int] = []
+        self._record_population()
 
     def _npc_label(self, npc: NPCAnimal) -> str:
         """Return the formatted name with ID for logging."""
@@ -222,9 +230,10 @@ class Game:
     def _start_turn(self) -> str:
         self.turn_messages = []
         self.turn_count += 1
+        self._record_population()
         terrain = self.map.terrain_at(self.x, self.y).name
         self.biome_turns[terrain] = self.biome_turns.get(terrain, 0) + 1
-        self.map.update_eggs()
+        self.turn_messages.extend(self._update_eggs())
         self.map.grow_plants(PLANT_STATS, self.setting.formation)
         self.turn_messages.extend(self._update_npcs())
         self.player.hydration = max(
@@ -441,6 +450,47 @@ class Game:
                         if npc.weight <= 0:
                             animals.remove(npc)
         return messages
+
+    def _update_eggs(self) -> list[str]:
+        """Advance egg timers and hatch any ready clusters."""
+        messages: list[str] = []
+        for y in range(self.map.height):
+            for x in range(self.map.width):
+                for egg in list(self.map.eggs[y][x]):
+                    egg.turns_until_hatch -= 1
+                    if egg.turns_until_hatch <= 0 and egg.weight > 0:
+                        stats = DINO_STATS.get(egg.species, {})
+                        hatch_w = max(1.0, stats.get("adult_weight", 0.0) * 0.001)
+                        for _ in range(egg.number):
+                            sex = (
+                                random.choice(["M", "F"])
+                                if egg.species == self.player.name
+                                else None
+                            )
+                            self.map.animals[y][x].append(
+                                NPCAnimal(
+                                    id=self.next_npc_id,
+                                    name=egg.species,
+                                    sex=sex,
+                                    weight=hatch_w,
+                                )
+                            )
+                            self.next_npc_id += 1
+                        append_event_log(
+                            f"{egg.number} {egg.species} eggs hatched at ({x},{y})"
+                        )
+                        if x == self.x and y == self.y:
+                            messages.append(f"{egg.number} {egg.species} eggs hatch!")
+                        self.map.eggs[y][x].remove(egg)
+                    elif egg.turns_until_hatch <= 0 or egg.weight <= 0:
+                        self.map.eggs[y][x].remove(egg)
+        return messages
+
+    def _record_population(self) -> None:
+        counts, _ = self.population_stats()
+        for name in self.population_history:
+            self.population_history[name].append(counts.get(name, 0))
+        self.turn_history.append(self.turn_count)
 
     def _move_npcs(self) -> None:
         moves: list[tuple[int,int,int,int,NPCAnimal]] = []
