@@ -36,7 +36,7 @@
     "can_walk": true,
     "egg_laying_interval": 10,
     "num_eggs": 2
-  }
+  },
   "Edmontosaurus": {
     "name": "Edmontosaurus",
     "formations": [
