@@ -25,6 +25,55 @@ from .map import Map, EggCluster
 from .settings import Setting
 from .logging_utils import append_event_log
 
+
+def _load_stats(formation: str) -> tuple[dict, dict[str, PlantStats]]:
+    """Load dinosaur and plant stats for the given formation."""
+    base_dir = os.path.dirname(__file__)
+    suffix = formation.lower().replace(" ", "_")
+    dino_file = os.path.join(base_dir, f"dino_stats_{suffix}.yaml")
+    plant_file = os.path.join(base_dir, f"plant_stats_{suffix}.yaml")
+
+    with open(dino_file) as f:
+        dino_stats = json.load(f)
+
+    with open(plant_file) as f:
+        plant_stats = json.load(f)
+
+    # Convert plant dictionaries to dataclass instances
+    for name, stats in list(plant_stats.items()):
+        plant_stats[name] = PlantStats(**stats)
+
+    # Fill in derived hatchling stats if they were omitted from the YAML
+    for stats in dino_stats.values():
+        if "diet" in stats:
+            stats["diet"] = [Diet(item) for item in stats.get("diet", [])]
+        aw = stats.get("adult_weight", 0)
+        if "hatchling_weight" not in stats:
+            stats["hatchling_weight"] = aw / HATCHLING_WEIGHT_DIVISOR
+        af = stats.get("adult_fierceness", 0)
+        if "hatchling_fierceness" not in stats:
+            stats["hatchling_fierceness"] = af / HATCHLING_FIERCENESS_DIVISOR
+        aspeed = stats.get("adult_speed", 0)
+        if "hatchling_speed" not in stats:
+            stats["hatchling_speed"] = aspeed * HATCHLING_SPEED_MULTIPLIER
+        adrain = stats.get("adult_energy_drain", 0)
+        if "hatchling_energy_drain" not in stats:
+            stats["hatchling_energy_drain"] = adrain / HATCHLING_ENERGY_DRAIN_DIVISOR
+
+    return dino_stats, plant_stats
+
+
+_CURRENT_FORMATION = None
+
+
+def set_stats_for_formation(formation: str) -> None:
+    """Load stats for the given formation and store them globally."""
+    global DINO_STATS, PLANT_STATS, _CURRENT_FORMATION
+    if _CURRENT_FORMATION == formation:
+        return
+    DINO_STATS, PLANT_STATS = _load_stats(formation)
+    _CURRENT_FORMATION = formation
+
 # Constants used to derive hatchling values from adult stats
 HATCHLING_WEIGHT_DIVISOR = 1000
 HATCHLING_FIERCENESS_DIVISOR = 1000
@@ -38,38 +87,13 @@ class EncounterEntry:
     in_pack: bool = False
     eggs: EggCluster | None = None
 
-STATS_FILE = os.path.join(os.path.dirname(__file__), "dino_stats.yaml")
-with open(STATS_FILE) as f:
-    DINO_STATS = json.load(f)
-
-PLANT_STATS_FILE = os.path.join(os.path.dirname(__file__), "plant_stats.yaml")
-with open(PLANT_STATS_FILE) as f:
-    PLANT_STATS = json.load(f)
-
-# Convert plant dictionaries to dataclass instances
-for name, stats in list(PLANT_STATS.items()):
-    PLANT_STATS[name] = PlantStats(**stats)
-
-# Fill in derived hatchling stats if they were omitted from the YAML
-for stats in DINO_STATS.values():
-    if "diet" in stats:
-        stats["diet"] = [Diet(item) for item in stats.get("diet", [])]
-    aw = stats.get("adult_weight", 0)
-    if "hatchling_weight" not in stats:
-        stats["hatchling_weight"] = aw / HATCHLING_WEIGHT_DIVISOR
-    af = stats.get("adult_fierceness", 0)
-    if "hatchling_fierceness" not in stats:
-        stats["hatchling_fierceness"] = af / HATCHLING_FIERCENESS_DIVISOR
-    aspeed = stats.get("adult_speed", 0)
-    if "hatchling_speed" not in stats:
-        stats["hatchling_speed"] = aspeed * HATCHLING_SPEED_MULTIPLIER
-    adrain = stats.get("adult_energy_drain", 0)
-    if "hatchling_energy_drain" not in stats:
-        stats["hatchling_energy_drain"] = adrain / HATCHLING_ENERGY_DRAIN_DIVISOR
+# Load default stats for the Morrison formation
+set_stats_for_formation("Morrison")
 
 
 class Game:
     def __init__(self, setting: Setting, dinosaur_name: str, width: int = 18, height: int = 10):
+        set_stats_for_formation(setting.formation)
         self.setting = setting
         dstats = setting.playable_dinos[dinosaur_name]
         base = DINO_STATS.get(dinosaur_name, {"name": dinosaur_name})
