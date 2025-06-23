@@ -86,7 +86,7 @@
     "aggressive": false,
     "forms_packs": false,
     "diet": [
-      "fruit"
+      "fruits"
     ],
     "adult_weight": 80.0,
     "adult_fierceness": 40,
@@ -124,7 +124,7 @@
     "aggressive": false,
     "forms_packs": false,
     "diet": [
-      "fruit"
+      "fruits"
     ],
     "adult_weight": 300.0,
     "adult_fierceness": 150,
