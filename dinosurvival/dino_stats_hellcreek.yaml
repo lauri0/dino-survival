@@ -1,1 +1,233 @@
-
+{
+  "Acheroraptor": {
+    "name": "Acheroraptor",
+    "formations": [
+      "Hell Creek"
+    ],
+    "image": "assets/dinosaurs/acheroraptor.png",
+    "can_be_juvenile": true,
+    "aggressive": true,
+    "forms_packs": false,
+    "diet": [
+      "meat"
+    ],
+    "adult_weight": 30.0,
+    "adult_fierceness": 60.0,
+    "adult_speed": 100,
+    "adult_energy_drain": 4.0,
+    "growth_rate": 0.35,
+    "walking_energy_drain_multiplier": 1.3,
+    "health_regen": 2.5,
+    "hydration_drain": 2.2,
+    "aquatic_boost": 0.0,
+    "encounter_chance": {
+      "plains": 0.00,
+      "forest": 0.02,
+      "swamp": 0.00,
+      "woodlands": 0.01,
+      "badlands": 0.00,
+      "lake": 0.00,
+      "mountain": 0.00
+    },
+    "preferred_biomes": [
+      "forest",
+      "swamp"
+    ],
+    "can_walk": true,
+    "egg_laying_interval": 10,
+    "num_eggs": 2
+  }
+  "Edmontosaurus": {
+    "name": "Edmontosaurus",
+    "formations": [
+      "Hell Creek"
+    ],
+    "image": "assets/dinosaurs/edmontosaurus.png",
+    "can_be_juvenile": true,
+    "aggressive": false,
+    "forms_packs": false,
+    "diet": [
+      "ferns",
+      "cycads"
+    ],
+    "adult_weight": 6000.0,
+    "adult_fierceness": 3000,
+    "adult_speed": 25,
+    "adult_energy_drain": 2.0,
+    "growth_rate": 0.35,
+    "walking_energy_drain_multiplier": 1.3,
+    "health_regen": 2.5,
+    "hydration_drain": 2.5,
+    "aquatic_boost": 0.0,
+    "encounter_chance": {
+      "plains": 0.04,
+      "forest": 0.00,
+      "swamp": 0.03,
+      "woodlands": 0.00,
+      "badlands": 0.00,
+      "lake": 0.00,
+      "mountain": 0.00
+    },
+    "preferred_biomes": [
+      "swamp",
+      "plains"
+    ],
+    "can_walk": true,
+    "egg_laying_interval": 15,
+    "num_eggs": 2
+  },
+  "Leptoceratops": {
+    "name": "Leptoceratops",
+    "formations": [
+      "Hell Creek"
+    ],
+    "image": "assets/dinosaurs/leptoceratops.png",
+    "can_be_juvenile": true,
+    "aggressive": false,
+    "forms_packs": false,
+    "diet": [
+      "fruit"
+    ],
+    "adult_weight": 80.0,
+    "adult_fierceness": 40,
+    "adult_speed": 40,
+    "adult_energy_drain": 4.0,
+    "growth_rate": 0.35,
+    "walking_energy_drain_multiplier": 1.3,
+    "health_regen": 2.5,
+    "hydration_drain": 2.5,
+    "aquatic_boost": 0.0,
+    "encounter_chance": {
+      "plains": 0.00,
+      "forest": 0.06,
+      "swamp": 0.03,
+      "woodlands": 0.00,
+      "badlands": 0.00,
+      "lake": 0.00,
+      "mountain": 0.00
+    },
+    "preferred_biomes": [
+      "forest",
+      "swamp"
+    ],
+    "can_walk": true,
+    "egg_laying_interval": 10,
+    "num_eggs": 2
+  },
+  "Thescelosaurus": {
+    "name": "Thescelosaurus",
+    "formations": [
+      "Hell Creek"
+    ],
+    "image": "assets/dinosaurs/thescelosaurus.png",
+    "can_be_juvenile": true,
+    "aggressive": false,
+    "forms_packs": false,
+    "diet": [
+      "fruit"
+    ],
+    "adult_weight": 300.0,
+    "adult_fierceness": 150,
+    "adult_speed": 50,
+    "adult_energy_drain": 3.0,
+    "growth_rate": 0.35,
+    "walking_energy_drain_multiplier": 1.3,
+    "health_regen": 2.5,
+    "hydration_drain": 2.5,
+    "aquatic_boost": 0.0,
+    "encounter_chance": {
+      "plains": 0.04,
+      "forest": 0.00,
+      "swamp": 0.00,
+      "woodlands": 0.06,
+      "badlands": 0.00,
+      "lake": 0.00,
+      "mountain": 0.00
+    },
+    "preferred_biomes": [
+      "woodlands",
+      "plains"
+    ],
+    "can_walk": true,
+    "egg_laying_interval": 12,
+    "num_eggs": 2
+  },
+  "Triceratops": {
+    "name": "Triceratops",
+    "formations": [
+      "Hell Creek"
+    ],
+    "image": "assets/dinosaurs/triceratops.png",
+    "can_be_juvenile": true,
+    "aggressive": false,
+    "forms_packs": false,
+    "diet": [
+      "cycads"
+    ],
+    "adult_weight": 8000.0,
+    "adult_fierceness": 6000,
+    "adult_speed": 18,
+    "adult_energy_drain": 2.0,
+    "growth_rate": 0.35,
+    "walking_energy_drain_multiplier": 1.3,
+    "health_regen": 2.5,
+    "hydration_drain": 2.5,
+    "aquatic_boost": 0.0,
+    "encounter_chance": {
+      "plains": 0.03,
+      "forest": 0.00,
+      "swamp": 0.00,
+      "woodlands": 0.04,
+      "badlands": 0.00,
+      "lake": 0.00,
+      "mountain": 0.00
+    },
+    "preferred_biomes": [
+      "woodlands",
+      "plains"
+    ],
+    "can_walk": true,
+    "egg_laying_interval": 15,
+    "num_eggs": 2
+  },  
+  "Tyrannosaurus": {
+    "name": "Tyrannosaurus",
+    "formations": [
+      "Hell Creek"
+    ],
+    "image": "assets/dinosaurs/tyrannosaurus.png",
+    "can_be_juvenile": true,
+    "aggressive": true,
+    "forms_packs": false,
+    "diet": [
+      "meat"
+    ],
+    "adult_weight": 8000.0,
+    "adult_fierceness": 8000.0,
+    "adult_speed": 35,
+    "adult_energy_drain": 4.0,
+    "growth_rate": 0.35,
+    "walking_energy_drain_multiplier": 1.3,
+    "health_regen": 2.5,
+    "hydration_drain": 2.2,
+    "aquatic_boost": 0.0,
+    "encounter_chance": {
+      "plains": 0.005,
+      "forest": 0.00,
+      "swamp": 0.005,
+      "woodlands": 0.01,
+      "badlands": 0.005,
+      "lake": 0.00,
+      "mountain": 0.0
+    },
+    "preferred_biomes": [
+      "woodlands",
+      "forest",
+      "swamp",
+      "plains"
+    ],
+    "can_walk": true,
+    "egg_laying_interval": 20,
+    "num_eggs": 2
+  }
+}
