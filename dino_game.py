@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 import random
 import os
-from dinosurvival.game import Game, DINO_STATS, PLANT_STATS, calculate_catch_chance
+import dinosurvival.game as game_module
 from dinosurvival.settings import MORRISON, HELL_CREEK
 from dinosurvival.dinosaur import NPCAnimal
 from dinosurvival.logging_utils import (
@@ -55,7 +55,7 @@ def display_legacy_stats(parent: tk.Widget, formation: str, dname: str) -> None:
     win = tk.Toplevel(parent)
     win.title("Dinosaur Stats")
 
-    info = DINO_STATS.get(dname, {})
+    info = game_module.DINO_STATS.get(dname, {})
     img = None
     img_path = info.get("image")
     if img_path:
@@ -130,7 +130,7 @@ def choose_dinosaur_gui(root: tk.Tk, setting, on_select) -> None:
         display_legacy_stats(root, setting.formation, dname)
 
     def show_info(dname: str) -> None:
-        info = DINO_STATS.get(dname, {})
+        info = game_module.DINO_STATS.get(dname, {})
         win = tk.Toplevel(root)
         win.title(f"{dname} Facts")
         img = None
@@ -179,7 +179,7 @@ def choose_dinosaur_gui(root: tk.Tk, setting, on_select) -> None:
 
 def run_game_gui(setting, dinosaur_name: str) -> None:
     """Run the game using a graphical interface."""
-    game = Game(setting, dinosaur_name)
+    game = game_module.Game(setting, dinosaur_name)
     game._generate_encounters()
 
     root = tk.Tk()
@@ -195,7 +195,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
 
 
     for tname in game.setting.terrains.keys():
-        fname = f"{game.setting.formation.lower()}_{tname}.png"
+        fname = f"{game.setting.formation.lower().replace(' ', '_')}_{tname}.png"
         path = os.path.join(assets_dir, fname)
         img = load_scaled_image(path, 400, 250)
         if img:
@@ -203,7 +203,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
 
     # Load player dinosaur images for different growth stages if available
     player_images: dict[str, tk.PhotoImage | None] = {"adult": None, "hatchling": None, "juvenile": None}
-    dino_image_path = DINO_STATS.get(dinosaur_name, {}).get("image")
+    dino_image_path = game_module.DINO_STATS.get(dinosaur_name, {}).get("image")
     if dino_image_path:
         abs_path = os.path.join(os.path.dirname(__file__), dino_image_path)
         base, ext = os.path.splitext(abs_path)
@@ -256,7 +256,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     npc_images: dict[str, tk.PhotoImage] = {}
 
     def show_dino_facts(name: str = dinosaur_name) -> None:
-        info = DINO_STATS.get(name, {})
+        info = game_module.DINO_STATS.get(name, {})
         win = tk.Toplevel(root)
         win.title(f"{name} Facts")
         img = info_images.get(name)
@@ -359,7 +359,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         tk.Button(win, text="Close", command=win.destroy).pack(pady=5)
 
     def show_npc_stats(npc: NPCAnimal) -> None:
-        stats = DINO_STATS.get(npc.name, {})
+        stats = game_module.DINO_STATS.get(npc.name, {})
         win = tk.Toplevel(root)
         win.title(f"{npc.name} Stats")
         img = npc_images.get(npc.name)
@@ -705,7 +705,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             npc = entry.npc
             if npc is None:
                 continue
-            stats = DINO_STATS[npc.name]
+            stats = game_module.DINO_STATS[npc.name]
             disp_name = f"{npc.name} ({npc.id})"
             if npc.sex:
                 symbol = "♂" if npc.sex == "M" else "♀"
@@ -716,7 +716,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             target_s = game._stat_from_weight(npc.weight, stats, "hatchling_speed", "adult_speed")
             rel_f = target_f / player_f
             rel_s = target_s / player_s
-            catch = calculate_catch_chance(rel_s)
+            catch = game_module.calculate_catch_chance(rel_s)
 
             img_path = stats.get("image")
             img = None
@@ -772,7 +772,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             row.grid_columnconfigure(1, weight=1)
             slot = {"frame": row, "img": img, "name": name_lbl, "weight": weight_lbl}
             plant_rows.append(slot)
-            stats = PLANT_STATS.get(plant.name)
+            stats = game_module.PLANT_STATS.get(plant.name)
             img_path = stats.image if stats else None
             pimg = None
             if img_path:
@@ -910,7 +910,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             pct = count / total * 100
             row = tk.Frame(population_list)
             img_lbl = tk.Label(row)
-            img_path = DINO_STATS.get(name, {}).get("image")
+            img_path = game_module.DINO_STATS.get(name, {}).get("image")
             img = None
             if img_path:
                 abs_path = os.path.join(os.path.dirname(__file__), img_path)
