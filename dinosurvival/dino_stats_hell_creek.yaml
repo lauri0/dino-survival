@@ -20,22 +20,14 @@
     "health_regen": 2.5,
     "hydration_drain": 2.2,
     "aquatic_boost": 0.0,
-    "encounter_chance": {
-      "plains": 0.00,
-      "forest": 0.02,
-      "swamp": 0.00,
-      "woodlands": 0.01,
-      "badlands": 0.00,
-      "lake": 0.00,
-      "mountain": 0.00
-    },
     "preferred_biomes": [
       "forest",
       "swamp"
     ],
     "can_walk": true,
     "egg_laying_interval": 10,
-    "num_eggs": 2
+    "num_eggs": 2,
+    "initial_spawn_count": 7
   },
   "Edmontosaurus": {
     "name": "Edmontosaurus",
@@ -59,22 +51,14 @@
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
-    "encounter_chance": {
-      "plains": 0.04,
-      "forest": 0.00,
-      "swamp": 0.03,
-      "woodlands": 0.00,
-      "badlands": 0.00,
-      "lake": 0.00,
-      "mountain": 0.00
-    },
     "preferred_biomes": [
       "swamp",
       "plains"
     ],
     "can_walk": true,
     "egg_laying_interval": 15,
-    "num_eggs": 2
+    "num_eggs": 2,
+    "initial_spawn_count": 4
   },
   "Leptoceratops": {
     "name": "Leptoceratops",
@@ -97,22 +81,14 @@
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
-    "encounter_chance": {
-      "plains": 0.00,
-      "forest": 0.06,
-      "swamp": 0.03,
-      "woodlands": 0.00,
-      "badlands": 0.00,
-      "lake": 0.00,
-      "mountain": 0.00
-    },
     "preferred_biomes": [
       "forest",
       "swamp"
     ],
     "can_walk": true,
     "egg_laying_interval": 10,
-    "num_eggs": 2
+    "num_eggs": 2,
+    "initial_spawn_count": 10
   },
   "Thescelosaurus": {
     "name": "Thescelosaurus",
@@ -135,22 +111,14 @@
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
-    "encounter_chance": {
-      "plains": 0.04,
-      "forest": 0.00,
-      "swamp": 0.00,
-      "woodlands": 0.06,
-      "badlands": 0.00,
-      "lake": 0.00,
-      "mountain": 0.00
-    },
     "preferred_biomes": [
       "woodlands",
       "plains"
     ],
     "can_walk": true,
     "egg_laying_interval": 12,
-    "num_eggs": 2
+    "num_eggs": 2,
+    "initial_spawn_count": 8
   },
   "Triceratops": {
     "name": "Triceratops",
@@ -173,23 +141,15 @@
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
-    "encounter_chance": {
-      "plains": 0.03,
-      "forest": 0.00,
-      "swamp": 0.00,
-      "woodlands": 0.04,
-      "badlands": 0.00,
-      "lake": 0.00,
-      "mountain": 0.00
-    },
     "preferred_biomes": [
       "woodlands",
       "plains"
     ],
     "can_walk": true,
     "egg_laying_interval": 15,
-    "num_eggs": 2
-  },  
+    "num_eggs": 2,
+    "initial_spawn_count": 4
+  },
   "Tyrannosaurus": {
     "name": "Tyrannosaurus",
     "formations": [
@@ -211,15 +171,6 @@
     "health_regen": 2.5,
     "hydration_drain": 2.2,
     "aquatic_boost": 0.0,
-    "encounter_chance": {
-      "plains": 0.005,
-      "forest": 0.00,
-      "swamp": 0.005,
-      "woodlands": 0.01,
-      "badlands": 0.005,
-      "lake": 0.00,
-      "mountain": 0.0
-    },
     "preferred_biomes": [
       "woodlands",
       "forest",
@@ -228,6 +179,7 @@
     ],
     "can_walk": true,
     "egg_laying_interval": 20,
-    "num_eggs": 2
+    "num_eggs": 2,
+    "initial_spawn_count": 2
   }
 }

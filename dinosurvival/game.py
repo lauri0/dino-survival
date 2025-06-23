@@ -162,34 +162,42 @@ class Game:
         return f"{npc.name} ({npc.id})"
 
     def _populate_animals(self) -> None:
-        """Populate the map with NPC animals."""
+        """Populate the map with NPC animals based on initial spawn counts."""
+        land_tiles: list[tuple[int, int]] = []
+        lake_tiles: list[tuple[int, int]] = []
         for y in range(self.map.height):
             for x in range(self.map.width):
-                terrain = self.map.terrain_at(x, y).name
-                animals: list[NPCAnimal] = []
-                for name, stats in DINO_STATS.items():
-                    if self.setting.formation not in stats.get("formations", []):
-                        continue
-                    chance = stats.get("encounter_chance", {}).get(terrain, 0)
-                    if random.random() < chance:
-                        sex: str | None = None
-                        if name == self.player.name:
-                            sex = random.choice(["M", "F"])
-                        allow_j = stats.get("can_be_juvenile", True)
-                        if allow_j:
-                            weight = random.uniform(3.0, stats.get("adult_weight", 0.0))
-                        else:
-                            weight = stats.get("adult_weight", 0.0)
-                        animals.append(
-                            NPCAnimal(
-                                id=self.next_npc_id,
-                                name=name,
-                                sex=sex,
-                                weight=weight,
-                            )
-                        )
-                        self.next_npc_id += 1
-                self.map.animals[y][x] = animals
+                if self.map.terrain_at(x, y).name == "lake":
+                    lake_tiles.append((x, y))
+                else:
+                    land_tiles.append((x, y))
+
+        for name, stats in DINO_STATS.items():
+            if self.setting.formation not in stats.get("formations", []):
+                continue
+            count = stats.get("initial_spawn_count", 0)
+            spawn_tiles = lake_tiles if not stats.get("can_walk", True) else land_tiles
+            if not spawn_tiles:
+                continue
+            for _ in range(count):
+                x, y = random.choice(spawn_tiles)
+                sex: str | None = None
+                if name == self.player.name:
+                    sex = random.choice(["M", "F"])
+                allow_j = stats.get("can_be_juvenile", True)
+                if allow_j:
+                    weight = random.uniform(3.0, stats.get("adult_weight", 0.0))
+                else:
+                    weight = stats.get("adult_weight", 0.0)
+                self.map.animals[y][x].append(
+                    NPCAnimal(
+                        id=self.next_npc_id,
+                        name=name,
+                        sex=sex,
+                        weight=weight,
+                    )
+                )
+                self.next_npc_id += 1
 
     def _generate_encounters(self) -> None:
         """Load encounter information from the current cell."""

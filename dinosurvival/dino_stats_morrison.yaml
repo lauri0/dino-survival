@@ -21,22 +21,14 @@
     "health_regen": 2.0,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
-    "encounter_chance": {
-      "plains": 0.01,
-      "forest": 0.01,
-      "swamp": 0.0,
-      "woodlands": 0.02,
-      "badlands": 0.02,
-      "lake": 0.01,
-      "mountain": 0.0
-    },
     "preferred_biomes": [
       "woodlands",
       "badlands"
     ],
     "can_walk": true,
     "egg_laying_interval": 10,
-    "num_eggs": 2
+    "num_eggs": 2,
+    "initial_spawn_count": 5
   },
   "Allosaurus": {
     "name": "Allosaurus",
@@ -59,22 +51,14 @@
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
-    "encounter_chance": {
-      "plains": 0.05,
-      "forest": 0.01,
-      "swamp": 0.01,
-      "woodlands": 0.03,
-      "badlands": 0.01,
-      "lake": 0.01,
-      "mountain": 0.0
-    },
     "preferred_biomes": [
       "plains",
       "woodlands"
     ],
     "can_walk": true,
     "egg_laying_interval": 10,
-    "num_eggs": 2
+    "num_eggs": 2,
+    "initial_spawn_count": 2
   },
   "Amphicotylus": {
     "name": "Amphicotylus",
@@ -97,21 +81,13 @@
     "health_regen": 2.0,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
-    "encounter_chance": {
-      "plains": 0.0,
-      "forest": 0.0,
-      "swamp": 0.01,
-      "woodlands": 0.0,
-      "badlands": 0.0,
-      "lake": 0.03,
-      "mountain": 0.0
-    },
     "preferred_biomes": [
       "lake"
     ],
     "can_walk": true,
     "egg_laying_interval": 10,
-    "num_eggs": 2
+    "num_eggs": 2,
+    "initial_spawn_count": 5
   },
   "Brachiosaurus": {
     "name": "Brachiosaurus",
@@ -134,22 +110,14 @@
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
-    "encounter_chance": {
-      "plains": 0.01,
-      "forest": 0.0,
-      "swamp": 0.0,
-      "woodlands": 0.01,
-      "badlands": 0.0,
-      "lake": 0.0,
-      "mountain": 0.0
-    },
     "preferred_biomes": [
       "plains",
       "woodlands"
     ],
     "can_walk": true,
     "egg_laying_interval": 10,
-    "num_eggs": 2
+    "num_eggs": 2,
+    "initial_spawn_count": 3
   },
   "Camarasaurus": {
     "name": "Camarasaurus",
@@ -173,22 +141,14 @@
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
-    "encounter_chance": {
-      "plains": 0.06,
-      "forest": 0.0,
-      "swamp": 0.0,
-      "woodlands": 0.03,
-      "badlands": 0.09,
-      "lake": 0.01,
-      "mountain": 0.0
-    },
     "preferred_biomes": [
       "badlands",
       "woodlands"
     ],
     "can_walk": true,
     "egg_laying_interval": 10,
-    "num_eggs": 2
+    "num_eggs": 2,
+    "initial_spawn_count": 3
   },
   "Camptosaurus": {
     "name": "Camptosaurus",
@@ -211,21 +171,13 @@
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
-    "encounter_chance": {
-      "plains": 0.04,
-      "forest": 0.03,
-      "swamp": 0.02,
-      "woodlands": 0.15,
-      "badlands": 0.01,
-      "lake": 0.02,
-      "mountain": 0.0
-    },
     "preferred_biomes": [
       "woodlands"
     ],
     "can_walk": true,
     "egg_laying_interval": 10,
-    "num_eggs": 2
+    "num_eggs": 2,
+    "initial_spawn_count": 6
   },
   "Centipede": {
     "name": "Centipede",
@@ -248,21 +200,13 @@
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
-    "encounter_chance": {
-      "plains": 0.02,
-      "forest": 0.2,
-      "swamp": 0.02,
-      "woodlands": 0.05,
-      "badlands": 0.03,
-      "lake": 0.0,
-      "mountain": 0.0
-    },
     "preferred_biomes": [
       "forest"
     ],
     "can_walk": true,
     "egg_laying_interval": 0,
-    "num_eggs": 0
+    "num_eggs": 0,
+    "initial_spawn_count": 11
   },
   "Ceratodus": {
     "name": "Ceratodus",
@@ -285,21 +229,13 @@
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
-    "encounter_chance": {
-      "plains": 0.0,
-      "forest": 0.0,
-      "swamp": 0.0,
-      "woodlands": 0.0,
-      "badlands": 0.0,
-      "lake": 0.08,
-      "mountain": 0.0
-    },
     "preferred_biomes": [
       "lake"
     ],
     "can_walk": false,
     "egg_laying_interval": 0,
-    "num_eggs": 0
+    "num_eggs": 0,
+    "initial_spawn_count": 7
   },
   "Ceratosaurus": {
     "name": "Ceratosaurus",
@@ -322,22 +258,14 @@
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "aquatic_boost": 40.0,
-    "encounter_chance": {
-      "plains": 0.01,
-      "forest": 0.03,
-      "swamp": 0.03,
-      "woodlands": 0.01,
-      "badlands": 0.01,
-      "lake": 0.02,
-      "mountain": 0.0
-    },
     "preferred_biomes": [
       "forest",
       "swamp"
     ],
     "can_walk": true,
     "egg_laying_interval": 10,
-    "num_eggs": 2
+    "num_eggs": 2,
+    "initial_spawn_count": 3
   },
   "Diplodocus": {
     "name": "Diplodocus",
@@ -361,21 +289,13 @@
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
-    "encounter_chance": {
-      "plains": 0.07,
-      "forest": 0.0,
-      "swamp": 0.0,
-      "woodlands": 0.02,
-      "badlands": 0.02,
-      "lake": 0.01,
-      "mountain": 0.0
-    },
     "preferred_biomes": [
       "plains"
     ],
     "can_walk": true,
     "egg_laying_interval": 10,
-    "num_eggs": 2
+    "num_eggs": 2,
+    "initial_spawn_count": 3
   },
   "Dragonfly": {
     "name": "Dragonfly",
@@ -398,21 +318,13 @@
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
-    "encounter_chance": {
-      "plains": 0.03,
-      "forest": 0.09,
-      "swamp": 0.03,
-      "woodlands": 0.03,
-      "badlands": 0.01,
-      "lake": 0.03,
-      "mountain": 0.0
-    },
     "preferred_biomes": [
       "forest"
     ],
     "can_walk": true,
     "egg_laying_interval": 0,
-    "num_eggs": 0
+    "num_eggs": 0,
+    "initial_spawn_count": 11
   },
   "Dryosaurus": {
     "name": "Dryosaurus",
@@ -436,22 +348,14 @@
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
-    "encounter_chance": {
-      "plains": 0.05,
-      "forest": 0.12,
-      "swamp": 0.03,
-      "woodlands": 0.12,
-      "badlands": 0.01,
-      "lake": 0.02,
-      "mountain": 0.0
-    },
     "preferred_biomes": [
       "forest",
       "woodlands"
     ],
     "can_walk": true,
     "egg_laying_interval": 8,
-    "num_eggs": 1
+    "num_eggs": 1,
+    "initial_spawn_count": 10
   },
   "Frog": {
     "name": "Frog",
@@ -474,21 +378,13 @@
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
-    "encounter_chance": {
-      "plains": 0.0,
-      "forest": 0.005,
-      "swamp": 0.12,
-      "woodlands": 0.0,
-      "badlands": 0.0,
-      "lake": 0.06,
-      "mountain": 0.0
-    },
     "preferred_biomes": [
       "swamp"
     ],
     "can_walk": true,
     "egg_laying_interval": 0,
-    "num_eggs": 0
+    "num_eggs": 0,
+    "initial_spawn_count": 11
   },
   "Fruitadens": {
     "name": "Fruitadens",
@@ -512,21 +408,13 @@
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
-    "encounter_chance": {
-      "plains": 0.0,
-      "forest": 0.03,
-      "swamp": 0.05,
-      "woodlands": 0.0,
-      "badlands": 0.0,
-      "lake": 0.02,
-      "mountain": 0.0
-    },
     "preferred_biomes": [
       "swamp"
     ],
     "can_walk": true,
     "egg_laying_interval": 10,
-    "num_eggs": 2
+    "num_eggs": 2,
+    "initial_spawn_count": 12
   },
   "Gargoyleosaurus": {
     "name": "Gargoyleosaurus",
@@ -549,21 +437,13 @@
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
-    "encounter_chance": {
-      "plains": 0.005,
-      "forest": 0.02,
-      "swamp": 0.01,
-      "woodlands": 0.01,
-      "badlands": 0.005,
-      "lake": 0.01,
-      "mountain": 0.0
-    },
     "preferred_biomes": [
       "forest"
     ],
     "can_walk": true,
     "egg_laying_interval": 10,
-    "num_eggs": 2
+    "num_eggs": 2,
+    "initial_spawn_count": 5
   },
   "Glyptops": {
     "name": "Glyptops",
@@ -587,21 +467,13 @@
     "health_regen": 2.0,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
-    "encounter_chance": {
-      "plains": 0.0,
-      "forest": 0.0,
-      "swamp": 0.03,
-      "woodlands": 0.0,
-      "badlands": 0.0,
-      "lake": 0.01,
-      "mountain": 0.0
-    },
     "preferred_biomes": [
       "swamp"
     ],
     "can_walk": true,
     "egg_laying_interval": 0,
-    "num_eggs": 0
+    "num_eggs": 0,
+    "initial_spawn_count": 12
   },
   "Lizard": {
     "name": "Lizard",
@@ -624,21 +496,13 @@
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
-    "encounter_chance": {
-      "plains": 0.01,
-      "forest": 0.06,
-      "swamp": 0.14,
-      "woodlands": 0.03,
-      "badlands": 0.03,
-      "lake": 0.04,
-      "mountain": 0.0
-    },
     "preferred_biomes": [
       "swamp"
     ],
     "can_walk": true,
     "egg_laying_interval": 0,
-    "num_eggs": 0
+    "num_eggs": 0,
+    "initial_spawn_count": 11
   },
   "Morrolepis": {
     "name": "Morrolepis",
@@ -661,21 +525,13 @@
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
-    "encounter_chance": {
-      "plains": 0.0,
-      "forest": 0.0,
-      "swamp": 0.0,
-      "woodlands": 0.0,
-      "badlands": 0.0,
-      "lake": 0.08,
-      "mountain": 0.0
-    },
     "preferred_biomes": [
       "lake"
     ],
     "can_walk": false,
     "egg_laying_interval": 0,
-    "num_eggs": 0
+    "num_eggs": 0,
+    "initial_spawn_count": 9
   },
   "Mymoorapelta": {
     "name": "Mymoorapelta",
@@ -698,22 +554,14 @@
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
-    "encounter_chance": {
-      "plains": 0.01,
-      "forest": 0.005,
-      "swamp": 0.005,
-      "woodlands": 0.01,
-      "badlands": 0.005,
-      "lake": 0.005,
-      "mountain": 0.0
-    },
     "preferred_biomes": [
       "plains",
       "woodlands"
     ],
     "can_walk": true,
     "egg_laying_interval": 10,
-    "num_eggs": 2
+    "num_eggs": 2,
+    "initial_spawn_count": 6
   },
   "Nanosaurus": {
     "name": "Nanosaurus",
@@ -736,21 +584,13 @@
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
-    "encounter_chance": {
-      "plains": 0.03,
-      "forest": 0.14,
-      "swamp": 0.04,
-      "woodlands": 0.08,
-      "badlands": 0.01,
-      "lake": 0.02,
-      "mountain": 0.0
-    },
     "preferred_biomes": [
       "forest"
     ],
     "can_walk": true,
     "egg_laying_interval": 10,
-    "num_eggs": 2
+    "num_eggs": 2,
+    "initial_spawn_count": 10
   },
   "Ornitholestes": {
     "name": "Ornitholestes",
@@ -773,21 +613,13 @@
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
-    "encounter_chance": {
-      "plains": 0.0,
-      "forest": 0.03,
-      "swamp": 0.0,
-      "woodlands": 0.02,
-      "badlands": 0.0,
-      "lake": 0.01,
-      "mountain": 0.0
-    },
     "preferred_biomes": [
       "forest"
     ],
     "can_walk": true,
     "egg_laying_interval": 10,
-    "num_eggs": 2
+    "num_eggs": 2,
+    "initial_spawn_count": 7
   },
   "Scorpion": {
     "name": "Scorpion",
@@ -810,21 +642,13 @@
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
-    "encounter_chance": {
-      "plains": 0.0,
-      "forest": 0.0,
-      "swamp": 0.0,
-      "woodlands": 0.0,
-      "badlands": 0.04,
-      "lake": 0.0,
-      "mountain": 0.0
-    },
     "preferred_biomes": [
       "badlands"
     ],
     "can_walk": true,
     "egg_laying_interval": 0,
-    "num_eggs": 0
+    "num_eggs": 0,
+    "initial_spawn_count": 11
   },
   "Stegosaurus": {
     "name": "Stegosaurus",
@@ -848,15 +672,6 @@
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
-    "encounter_chance": {
-      "plains": 0.03,
-      "forest": 0.01,
-      "swamp": 0.01,
-      "woodlands": 0.04,
-      "badlands": 0.01,
-      "lake": 0.01,
-      "mountain": 0.0
-    },
     "preferred_biomes": [
       "woodlands",
       "forest",
@@ -864,7 +679,8 @@
     ],
     "can_walk": true,
     "egg_laying_interval": 10,
-    "num_eggs": 2
+    "num_eggs": 2,
+    "initial_spawn_count": 5
   },
   "Torvosaurus": {
     "name": "Torvosaurus",
@@ -887,21 +703,13 @@
     "health_regen": 2.5,
     "hydration_drain": 2.2,
     "aquatic_boost": 0.0,
-    "encounter_chance": {
-      "plains": 0.01,
-      "forest": 0.01,
-      "swamp": 0.01,
-      "woodlands": 0.02,
-      "badlands": 0.005,
-      "lake": 0.005,
-      "mountain": 0.0
-    },
     "preferred_biomes": [
       "woodlands",
       "forest"
     ],
     "can_walk": true,
     "egg_laying_interval": 10,
-    "num_eggs": 2
+    "num_eggs": 2,
+    "initial_spawn_count": 2
   }
 }
