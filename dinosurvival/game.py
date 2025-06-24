@@ -273,7 +273,7 @@ class Game:
                     land_tiles.append((x, y))
 
         for name, stats in CRITTER_STATS.items():
-            spawn_rate = stats.get("spawned_per_turn", 0)
+            avg_rate = stats.get("avg_spawned_per_turn", 0.0)
             max_individuals = stats.get("maximum_individuals", 0)
             count = 0
             for row in self.map.animals:
@@ -282,7 +282,9 @@ class Game:
                         if npc.name == name:
                             count += 1
             available = max_individuals - count
-            to_spawn = min(spawn_rate, max(0, available))
+            spawn_count = round(random.gauss(avg_rate, 0.5))
+            spawn_count = max(0, spawn_count)
+            to_spawn = min(spawn_count, max(0, available))
             spawn_tiles = lake_tiles if not stats.get("can_walk", True) else land_tiles
             for _ in range(to_spawn):
                 if not spawn_tiles:

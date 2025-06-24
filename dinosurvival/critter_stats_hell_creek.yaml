@@ -11,7 +11,7 @@
     "aquatic_boost": 0.0,
     "preferred_biomes": ["forest"],
     "can_walk": true,
-    "spawned_per_turn": 1,
+    "avg_spawned_per_turn": 1.0,
     "maximum_individuals": 20
   }
 }
