@@ -14,7 +14,6 @@ def test_hell_creek_population_scaling():
     multipliers = {
         name: stats.get("initial_spawn_multiplier", 0)
         for name, stats in game_mod.DINO_STATS.items()
-        if HELL_CREEK.formation in stats.get("formations", [])
     }
     total = sum(counts.get(name, 0) for name in multipliers)
     assert total == 100

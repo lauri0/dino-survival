@@ -1,9 +1,6 @@
 {
   "Alcovasaurus": {
     "name": "Alcovasaurus",
-    "formations": [
-      "Morrison"
-    ],
     "image": "assets/dinosaurs/alcovasaurus.png",
     "can_be_juvenile": true,
     "aggressive": false,
@@ -17,7 +14,6 @@
     "adult_speed": 20,
     "adult_energy_drain": 5.0,
     "growth_rate": 0.35,
-    "walking_energy_drain_multiplier": 1.3,
     "health_regen": 2.0,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
@@ -32,9 +28,6 @@
   },
   "Allosaurus": {
     "name": "Allosaurus",
-    "formations": [
-      "Morrison"
-    ],
     "image": "assets/dinosaurs/allosaurus.png",
     "can_be_juvenile": true,
     "aggressive": true,
@@ -47,7 +40,6 @@
     "adult_speed": 30,
     "adult_energy_drain": 5.0,
     "growth_rate": 0.35,
-    "walking_energy_drain_multiplier": 1.3,
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
@@ -62,9 +54,6 @@
   },
   "Amphicotylus": {
     "name": "Amphicotylus",
-    "formations": [
-      "Morrison"
-    ],
     "image": "assets/dinosaurs/amphicotylus.png",
     "can_be_juvenile": true,
     "aggressive": true,
@@ -77,7 +66,6 @@
     "adult_speed": 50,
     "adult_energy_drain": 1.5,
     "growth_rate": 0.35,
-    "walking_energy_drain_multiplier": 1.3,
     "health_regen": 2.0,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
@@ -91,9 +79,6 @@
   },
   "Brachiosaurus": {
     "name": "Brachiosaurus",
-    "formations": [
-      "Morrison"
-    ],
     "image": "assets/dinosaurs/brachiosaurus.png",
     "can_be_juvenile": true,
     "aggressive": false,
@@ -106,7 +91,6 @@
     "adult_speed": 11,
     "adult_energy_drain": 1.2,
     "growth_rate": 0.35,
-    "walking_energy_drain_multiplier": 1.3,
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
@@ -121,9 +105,6 @@
   },
   "Camarasaurus": {
     "name": "Camarasaurus",
-    "formations": [
-      "Morrison"
-    ],
     "image": "assets/dinosaurs/camarasaurus.png",
     "can_be_juvenile": true,
     "aggressive": false,
@@ -137,7 +118,6 @@
     "adult_speed": 15,
     "adult_energy_drain": 1.6,
     "growth_rate": 0.35,
-    "walking_energy_drain_multiplier": 1.3,
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
@@ -152,9 +132,6 @@
   },
   "Camptosaurus": {
     "name": "Camptosaurus",
-    "formations": [
-      "Morrison"
-    ],
     "image": "assets/dinosaurs/camptosaurus.png",
     "can_be_juvenile": true,
     "aggressive": false,
@@ -167,7 +144,6 @@
     "adult_speed": 35,
     "adult_energy_drain": 3.6,
     "growth_rate": 0.35,
-    "walking_energy_drain_multiplier": 1.3,
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
@@ -182,9 +158,6 @@
   "Centipede": {
     "name": "Centipede",
     "image": "assets/dinosaurs/centipede.png",
-    "formations": [
-      "Morrison"
-    ],
     "can_be_juvenile": false,
     "aggressive": false,
     "forms_packs": false,
@@ -196,7 +169,6 @@
     "adult_speed": 55,
     "adult_energy_drain": 5.0,
     "growth_rate": 0.35,
-    "walking_energy_drain_multiplier": 1.3,
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
@@ -211,9 +183,6 @@
   "Ceratodus": {
     "name": "Ceratodus",
     "image": "assets/dinosaurs/ceratodus.png",
-    "formations": [
-      "Morrison"
-    ],
     "can_be_juvenile": false,
     "aggressive": false,
     "forms_packs": false,
@@ -225,7 +194,6 @@
     "adult_speed": 55,
     "adult_energy_drain": 5.0,
     "growth_rate": 0.35,
-    "walking_energy_drain_multiplier": 1.3,
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
@@ -239,9 +207,6 @@
   },
   "Ceratosaurus": {
     "name": "Ceratosaurus",
-    "formations": [
-      "Morrison"
-    ],
     "image": "assets/dinosaurs/ceratosaurus.png",
     "can_be_juvenile": true,
     "aggressive": true,
@@ -254,7 +219,6 @@
     "adult_speed": 45,
     "adult_energy_drain": 4,
     "growth_rate": 0.35,
-    "walking_energy_drain_multiplier": 1.3,
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "aquatic_boost": 40.0,
@@ -269,9 +233,6 @@
   },
   "Diplodocus": {
     "name": "Diplodocus",
-    "formations": [
-      "Morrison"
-    ],
     "image": "assets/dinosaurs/diplodocus.png",
     "can_be_juvenile": true,
     "aggressive": false,
@@ -285,7 +246,6 @@
     "adult_speed": 12,
     "adult_energy_drain": 1.2,
     "growth_rate": 0.35,
-    "walking_energy_drain_multiplier": 1.3,
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
@@ -300,9 +260,6 @@
   "Dragonfly": {
     "name": "Dragonfly",
     "image": "assets/dinosaurs/dragonfly.png",
-    "formations": [
-      "Morrison"
-    ],
     "can_be_juvenile": false,
     "aggressive": false,
     "forms_packs": false,
@@ -314,7 +271,6 @@
     "adult_speed": 75,
     "adult_energy_drain": 5.0,
     "growth_rate": 0.35,
-    "walking_energy_drain_multiplier": 1.3,
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
@@ -328,9 +284,6 @@
   },
   "Dryosaurus": {
     "name": "Dryosaurus",
-    "formations": [
-      "Morrison"
-    ],
     "image": "assets/dinosaurs/dryosaurus.png",
     "can_be_juvenile": true,
     "aggressive": false,
@@ -344,7 +297,6 @@
     "adult_speed": 40,
     "adult_energy_drain": 5.0,
     "growth_rate": 0.35,
-    "walking_energy_drain_multiplier": 1.3,
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
@@ -360,9 +312,6 @@
   "Frog": {
     "name": "Frog",
     "image": "assets/dinosaurs/frog.png",
-    "formations": [
-      "Morrison"
-    ],
     "can_be_juvenile": false,
     "aggressive": false,
     "forms_packs": false,
@@ -374,7 +323,6 @@
     "adult_speed": 45,
     "adult_energy_drain": 5.0,
     "growth_rate": 0.35,
-    "walking_energy_drain_multiplier": 1.3,
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
@@ -388,9 +336,6 @@
   },
   "Fruitadens": {
     "name": "Fruitadens",
-    "formations": [
-      "Morrison"
-    ],
     "image": "assets/dinosaurs/fruitadens.png",
     "can_be_juvenile": true,
     "aggressive": false,
@@ -404,7 +349,6 @@
     "adult_speed": 60,
     "adult_energy_drain": 8.0,
     "growth_rate": 0.35,
-    "walking_energy_drain_multiplier": 1.3,
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
@@ -418,9 +362,6 @@
   },
   "Gargoyleosaurus": {
     "name": "Gargoyleosaurus",
-    "formations": [
-      "Morrison"
-    ],
     "image": "assets/dinosaurs/gargoyleosaurus.png",
     "can_be_juvenile": true,
     "aggressive": false,
@@ -433,7 +374,6 @@
     "adult_speed": 20,
     "adult_energy_drain": 5.0,
     "growth_rate": 0.35,
-    "walking_energy_drain_multiplier": 1.3,
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
@@ -447,9 +387,6 @@
   },
   "Glyptops": {
     "name": "Glyptops",
-    "formations": [
-      "Morrison"
-    ],
     "image": "assets/dinosaurs/glyptops.png",
     "can_be_juvenile": false,
     "aggressive": false,
@@ -463,7 +400,6 @@
     "adult_speed": 45,
     "adult_energy_drain": 5.0,
     "growth_rate": 0.35,
-    "walking_energy_drain_multiplier": 1.3,
     "health_regen": 2.0,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
@@ -478,9 +414,6 @@
   "Lizard": {
     "name": "Lizard",
     "image": "assets/dinosaurs/lizard.png",
-    "formations": [
-      "Morrison"
-    ],
     "can_be_juvenile": false,
     "aggressive": false,
     "forms_packs": false,
@@ -492,7 +425,6 @@
     "adult_speed": 55,
     "adult_energy_drain": 5.0,
     "growth_rate": 0.35,
-    "walking_energy_drain_multiplier": 1.3,
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
@@ -507,9 +439,6 @@
   "Morrolepis": {
     "name": "Morrolepis",
     "image": "assets/dinosaurs/morrolepis.png",
-    "formations": [
-      "Morrison"
-    ],
     "can_be_juvenile": false,
     "aggressive": false,
     "forms_packs": false,
@@ -521,7 +450,6 @@
     "adult_speed": 65,
     "adult_energy_drain": 5.0,
     "growth_rate": 0.35,
-    "walking_energy_drain_multiplier": 1.3,
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
@@ -535,9 +463,6 @@
   },
   "Mymoorapelta": {
     "name": "Mymoorapelta",
-    "formations": [
-      "Morrison"
-    ],
     "image": "assets/dinosaurs/mymoorapelta.png",
     "can_be_juvenile": true,
     "aggressive": false,
@@ -550,7 +475,6 @@
     "adult_speed": 22,
     "adult_energy_drain": 5.0,
     "growth_rate": 0.35,
-    "walking_energy_drain_multiplier": 1.3,
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
@@ -565,9 +489,6 @@
   },
   "Nanosaurus": {
     "name": "Nanosaurus",
-    "formations": [
-      "Morrison"
-    ],
     "image": "assets/dinosaurs/nanosaurus.png",
     "can_be_juvenile": true,
     "aggressive": false,
@@ -580,7 +501,6 @@
     "adult_speed": 50,
     "adult_energy_drain": 7.0,
     "growth_rate": 0.35,
-    "walking_energy_drain_multiplier": 1.3,
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
@@ -594,9 +514,6 @@
   },
   "Ornitholestes": {
     "name": "Ornitholestes",
-    "formations": [
-      "Morrison"
-    ],
     "image": "assets/dinosaurs/ornitholestes.png",
     "can_be_juvenile": true,
     "aggressive": true,
@@ -609,7 +526,6 @@
     "adult_speed": 50,
     "adult_energy_drain": 4.0,
     "growth_rate": 0.35,
-    "walking_energy_drain_multiplier": 1.3,
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
@@ -624,9 +540,6 @@
   "Scorpion": {
     "name": "Scorpion",
     "image": "assets/dinosaurs/scorpion.png",
-    "formations": [
-      "Morrison"
-    ],
     "can_be_juvenile": false,
     "aggressive": true,
     "forms_packs": false,
@@ -638,7 +551,6 @@
     "adult_speed": 65,
     "adult_energy_drain": 5.0,
     "growth_rate": 0.35,
-    "walking_energy_drain_multiplier": 1.3,
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
@@ -652,9 +564,6 @@
   },
   "Stegosaurus": {
     "name": "Stegosaurus",
-    "formations": [
-      "Morrison"
-    ],
     "image": "assets/dinosaurs/stegosaurus.png",
     "can_be_juvenile": true,
     "aggressive": false,
@@ -668,7 +577,6 @@
     "adult_speed": 20,
     "adult_energy_drain": 3.0,
     "growth_rate": 0.35,
-    "walking_energy_drain_multiplier": 1.3,
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
@@ -684,9 +592,6 @@
   },
   "Torvosaurus": {
     "name": "Torvosaurus",
-    "formations": [
-      "Morrison"
-    ],
     "image": "assets/dinosaurs/torvosaurus.png",
     "can_be_juvenile": true,
     "aggressive": true,
@@ -699,7 +604,6 @@
     "adult_speed": 35,
     "adult_energy_drain": 4.0,
     "growth_rate": 0.35,
-    "walking_energy_drain_multiplier": 1.5,
     "health_regen": 2.5,
     "hydration_drain": 2.2,
     "aquatic_boost": 0.0,
