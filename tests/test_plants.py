@@ -48,6 +48,26 @@ def test_max_two_plants_per_tile(monkeypatch):
     assert len(game.map.plants[0][0]) <= 2
 
 
+def test_plant_weight_accumulates(monkeypatch):
+    custom_stats = {
+        "TP": PlantStats(
+            name="TP",
+            formations=["Morrison"],
+            image="",
+            weight=1.0,
+            growth_chance={terrain: 1.0 for terrain in MORRISON.terrains},
+        )
+    }
+    monkeypatch.setattr(game_mod, "PLANT_STATS", custom_stats)
+    random.seed(0)
+    game = game_mod.Game(MORRISON, "Allosaurus", width=6, height=6)
+    for _ in range(15):
+        game.turn("stay")
+    cell_plants = game.map.plants[0][0]
+    assert len(cell_plants) == 1
+    assert cell_plants[0].weight == 10.0
+
+
 def test_npc_state_and_feeding(monkeypatch):
     random.seed(0)
     game = game_mod.Game(MORRISON, "Allosaurus", width=6, height=6)

@@ -160,17 +160,23 @@ class Map:
         for y in range(self.height):
             for x in range(self.width):
                 cell_plants = self.plants[y][x]
-                if len(cell_plants) >= 2:
-                    continue
                 terrain = self.terrain_at(x, y).name
                 for name, stats in plant_stats.items():
                     if formation not in stats.formations:
                         continue
                     chance = stats.growth_chance.get(terrain, 0)
-                    if random.random() < chance:
+                    if random.random() >= chance:
+                        continue
+
+                    existing = next((p for p in cell_plants if p.name == name), None)
+                    if existing is not None:
+                        existing.weight = min(
+                            existing.weight + stats.weight, stats.weight * 10
+                        )
+                    elif len(cell_plants) < 2:
                         cell_plants.append(Plant(name=name, weight=stats.weight))
-                        if len(cell_plants) >= 2:
-                            break
+                    if len(cell_plants) >= 2:
+                        break
 
     def remove_animal(
         self,
