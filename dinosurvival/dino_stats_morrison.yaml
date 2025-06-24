@@ -28,7 +28,7 @@
     "can_walk": true,
     "egg_laying_interval": 10,
     "num_eggs": 2,
-    "initial_spawn_count": 5
+    "initial_spawn_multiplier": 5
   },
   "Allosaurus": {
     "name": "Allosaurus",
@@ -58,7 +58,7 @@
     "can_walk": true,
     "egg_laying_interval": 10,
     "num_eggs": 2,
-    "initial_spawn_count": 2
+    "initial_spawn_multiplier": 2
   },
   "Amphicotylus": {
     "name": "Amphicotylus",
@@ -87,7 +87,7 @@
     "can_walk": true,
     "egg_laying_interval": 10,
     "num_eggs": 2,
-    "initial_spawn_count": 5
+    "initial_spawn_multiplier": 5
   },
   "Brachiosaurus": {
     "name": "Brachiosaurus",
@@ -117,7 +117,7 @@
     "can_walk": true,
     "egg_laying_interval": 10,
     "num_eggs": 2,
-    "initial_spawn_count": 3
+    "initial_spawn_multiplier": 3
   },
   "Camarasaurus": {
     "name": "Camarasaurus",
@@ -148,7 +148,7 @@
     "can_walk": true,
     "egg_laying_interval": 10,
     "num_eggs": 2,
-    "initial_spawn_count": 3
+    "initial_spawn_multiplier": 3
   },
   "Camptosaurus": {
     "name": "Camptosaurus",
@@ -177,7 +177,7 @@
     "can_walk": true,
     "egg_laying_interval": 10,
     "num_eggs": 2,
-    "initial_spawn_count": 6
+    "initial_spawn_multiplier": 6
   },
   "Centipede": {
     "name": "Centipede",
@@ -206,7 +206,7 @@
     "can_walk": true,
     "egg_laying_interval": 0,
     "num_eggs": 0,
-    "initial_spawn_count": 11
+    "initial_spawn_multiplier": 11
   },
   "Ceratodus": {
     "name": "Ceratodus",
@@ -235,7 +235,7 @@
     "can_walk": false,
     "egg_laying_interval": 0,
     "num_eggs": 0,
-    "initial_spawn_count": 7
+    "initial_spawn_multiplier": 7
   },
   "Ceratosaurus": {
     "name": "Ceratosaurus",
@@ -265,7 +265,7 @@
     "can_walk": true,
     "egg_laying_interval": 10,
     "num_eggs": 2,
-    "initial_spawn_count": 3
+    "initial_spawn_multiplier": 3
   },
   "Diplodocus": {
     "name": "Diplodocus",
@@ -295,7 +295,7 @@
     "can_walk": true,
     "egg_laying_interval": 10,
     "num_eggs": 2,
-    "initial_spawn_count": 3
+    "initial_spawn_multiplier": 3
   },
   "Dragonfly": {
     "name": "Dragonfly",
@@ -324,7 +324,7 @@
     "can_walk": true,
     "egg_laying_interval": 0,
     "num_eggs": 0,
-    "initial_spawn_count": 11
+    "initial_spawn_multiplier": 11
   },
   "Dryosaurus": {
     "name": "Dryosaurus",
@@ -355,7 +355,7 @@
     "can_walk": true,
     "egg_laying_interval": 8,
     "num_eggs": 1,
-    "initial_spawn_count": 10
+    "initial_spawn_multiplier": 10
   },
   "Frog": {
     "name": "Frog",
@@ -384,7 +384,7 @@
     "can_walk": true,
     "egg_laying_interval": 0,
     "num_eggs": 0,
-    "initial_spawn_count": 11
+    "initial_spawn_multiplier": 11
   },
   "Fruitadens": {
     "name": "Fruitadens",
@@ -414,7 +414,7 @@
     "can_walk": true,
     "egg_laying_interval": 10,
     "num_eggs": 2,
-    "initial_spawn_count": 12
+    "initial_spawn_multiplier": 12
   },
   "Gargoyleosaurus": {
     "name": "Gargoyleosaurus",
@@ -443,7 +443,7 @@
     "can_walk": true,
     "egg_laying_interval": 10,
     "num_eggs": 2,
-    "initial_spawn_count": 5
+    "initial_spawn_multiplier": 5
   },
   "Glyptops": {
     "name": "Glyptops",
@@ -473,7 +473,7 @@
     "can_walk": true,
     "egg_laying_interval": 0,
     "num_eggs": 0,
-    "initial_spawn_count": 12
+    "initial_spawn_multiplier": 12
   },
   "Lizard": {
     "name": "Lizard",
@@ -502,7 +502,7 @@
     "can_walk": true,
     "egg_laying_interval": 0,
     "num_eggs": 0,
-    "initial_spawn_count": 11
+    "initial_spawn_multiplier": 11
   },
   "Morrolepis": {
     "name": "Morrolepis",
@@ -531,7 +531,7 @@
     "can_walk": false,
     "egg_laying_interval": 0,
     "num_eggs": 0,
-    "initial_spawn_count": 9
+    "initial_spawn_multiplier": 9
   },
   "Mymoorapelta": {
     "name": "Mymoorapelta",
@@ -561,7 +561,7 @@
     "can_walk": true,
     "egg_laying_interval": 10,
     "num_eggs": 2,
-    "initial_spawn_count": 6
+    "initial_spawn_multiplier": 6
   },
   "Nanosaurus": {
     "name": "Nanosaurus",
@@ -590,7 +590,7 @@
     "can_walk": true,
     "egg_laying_interval": 10,
     "num_eggs": 2,
-    "initial_spawn_count": 10
+    "initial_spawn_multiplier": 10
   },
   "Ornitholestes": {
     "name": "Ornitholestes",
@@ -619,7 +619,7 @@
     "can_walk": true,
     "egg_laying_interval": 10,
     "num_eggs": 2,
-    "initial_spawn_count": 7
+    "initial_spawn_multiplier": 7
   },
   "Scorpion": {
     "name": "Scorpion",
@@ -648,7 +648,7 @@
     "can_walk": true,
     "egg_laying_interval": 0,
     "num_eggs": 0,
-    "initial_spawn_count": 11
+    "initial_spawn_multiplier": 11
   },
   "Stegosaurus": {
     "name": "Stegosaurus",
@@ -680,7 +680,7 @@
     "can_walk": true,
     "egg_laying_interval": 10,
     "num_eggs": 2,
-    "initial_spawn_count": 5
+    "initial_spawn_multiplier": 5
   },
   "Torvosaurus": {
     "name": "Torvosaurus",
@@ -710,6 +710,6 @@
     "can_walk": true,
     "egg_laying_interval": 10,
     "num_eggs": 2,
-    "initial_spawn_count": 2
+    "initial_spawn_multiplier": 2
   }
 }

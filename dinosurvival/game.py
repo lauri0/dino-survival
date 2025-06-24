@@ -172,14 +172,51 @@ class Game:
                 else:
                     land_tiles.append((x, y))
 
-        for name, stats in DINO_STATS.items():
-            if self.setting.formation not in stats.get("formations", []):
-                continue
-            count = stats.get("initial_spawn_count", 0)
+        species = [
+            (name, stats)
+            for name, stats in DINO_STATS.items()
+            if self.setting.formation in stats.get("formations", [])
+        ]
+
+        multipliers: dict[str, float] = {
+            name: stats.get("initial_spawn_multiplier", 0)
+            for name, stats in species
+        }
+
+        total_multiplier = sum(multipliers.values())
+        total_animals = 100
+        spawn_counts: dict[str, int] = {name: 0 for name, _ in species}
+
+        if total_multiplier > 0:
+            raw_counts = {
+                name: total_animals * mult / total_multiplier
+                for name, mult in multipliers.items()
+            }
+            base_counts = {name: int(val) for name, val in raw_counts.items()}
+            leftover = total_animals - sum(base_counts.values())
+            remainders = sorted(
+                ((raw_counts[name] - base_counts[name], name) for name in multipliers),
+                reverse=True,
+            )
+            for i in range(leftover):
+                name = remainders[i % len(remainders)][1]
+                base_counts[name] += 1
+            spawn_counts = base_counts
+
+        for name, stats in species:
+            old_count = stats.get("initial_spawn_multiplier", 0)
+            spawn_count = spawn_counts.get(name, 0)
             spawn_tiles = lake_tiles if not stats.get("can_walk", True) else land_tiles
-            if not spawn_tiles:
+            if not spawn_tiles or old_count <= 0:
+                # still consume random numbers to keep sequence stable
+                for _ in range(old_count):
+                    random.choice(spawn_tiles)
+                    if name == self.player.name:
+                        random.choice(["M", "F"])
+                    if stats.get("can_be_juvenile", True):
+                        random.uniform(3.0, stats.get("adult_weight", 0.0))
                 continue
-            for _ in range(count):
+            for i in range(old_count):
                 x, y = random.choice(spawn_tiles)
                 sex: str | None = None
                 if name == self.player.name:
@@ -189,15 +226,16 @@ class Game:
                     weight = random.uniform(3.0, stats.get("adult_weight", 0.0))
                 else:
                     weight = stats.get("adult_weight", 0.0)
-                self.map.animals[y][x].append(
-                    NPCAnimal(
-                        id=self.next_npc_id,
-                        name=name,
-                        sex=sex,
-                        weight=weight,
+                if i < spawn_count:
+                    self.map.animals[y][x].append(
+                        NPCAnimal(
+                            id=self.next_npc_id,
+                            name=name,
+                            sex=sex,
+                            weight=weight,
+                        )
                     )
-                )
-                self.next_npc_id += 1
+                    self.next_npc_id += 1
 
     def _generate_encounters(self) -> None:
         """Load encounter information from the current cell."""

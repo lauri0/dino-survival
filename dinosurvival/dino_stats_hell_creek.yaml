@@ -27,7 +27,7 @@
     "can_walk": true,
     "egg_laying_interval": 10,
     "num_eggs": 2,
-    "initial_spawn_count": 7
+    "initial_spawn_multiplier": 7
   },
   "Edmontosaurus": {
     "name": "Edmontosaurus",
@@ -58,7 +58,7 @@
     "can_walk": true,
     "egg_laying_interval": 15,
     "num_eggs": 2,
-    "initial_spawn_count": 4
+    "initial_spawn_multiplier": 4
   },
   "Leptoceratops": {
     "name": "Leptoceratops",
@@ -88,7 +88,7 @@
     "can_walk": true,
     "egg_laying_interval": 10,
     "num_eggs": 2,
-    "initial_spawn_count": 10
+    "initial_spawn_multiplier": 10
   },
   "Thescelosaurus": {
     "name": "Thescelosaurus",
@@ -118,7 +118,7 @@
     "can_walk": true,
     "egg_laying_interval": 12,
     "num_eggs": 2,
-    "initial_spawn_count": 8
+    "initial_spawn_multiplier": 8
   },
   "Triceratops": {
     "name": "Triceratops",
@@ -148,7 +148,7 @@
     "can_walk": true,
     "egg_laying_interval": 15,
     "num_eggs": 2,
-    "initial_spawn_count": 4
+    "initial_spawn_multiplier": 4
   },
   "Tyrannosaurus": {
     "name": "Tyrannosaurus",
@@ -180,6 +180,6 @@
     "can_walk": true,
     "egg_laying_interval": 20,
     "num_eggs": 2,
-    "initial_spawn_count": 2
+    "initial_spawn_multiplier": 2
   }
 }
