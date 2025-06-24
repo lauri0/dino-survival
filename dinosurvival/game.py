@@ -596,10 +596,15 @@ class Game:
 
         stats = DINO_STATS.get(self.player.name, {})
         self.player.energy *= 0.7
+        num_eggs = stats.get("num_eggs", 0)
+        hatch_w = stats.get(
+            "hatchling_weight",
+            max(1.0, stats.get("adult_weight", 0.0) * 0.001),
+        )
         eggs = EggCluster(
             species=self.player.name,
-            number=stats.get("num_eggs", 0),
-            weight=10.0,
+            number=num_eggs,
+            weight=hatch_w * num_eggs,
             turns_until_hatch=5,
         )
         self.map.add_eggs(self.x, self.y, eggs)
@@ -656,7 +661,10 @@ class Game:
                     egg.turns_until_hatch -= 1
                     if egg.turns_until_hatch <= 0 and egg.weight > 0:
                         stats = DINO_STATS.get(egg.species, {})
-                        hatch_w = max(1.0, stats.get("adult_weight", 0.0) * 0.001)
+                        hatch_w = stats.get(
+                            "hatchling_weight",
+                            max(1.0, stats.get("adult_weight", 0.0) * 0.001),
+                        )
                         for _ in range(egg.number):
                             sex = (
                                 random.choice(["M", "F"])
@@ -801,10 +809,15 @@ class Game:
                                         continue
                             continue
                         npc.energy *= 0.7
+                        num_eggs = stats.get("num_eggs", 0)
+                        hatch_w = stats.get(
+                            "hatchling_weight",
+                            max(1.0, stats.get("adult_weight", 0.0) * 0.001),
+                        )
                         eggs = EggCluster(
                             species=npc.name,
-                            number=stats.get("num_eggs", 0),
-                            weight=10.0,
+                            number=num_eggs,
+                            weight=hatch_w * num_eggs,
                             turns_until_hatch=5,
                         )
                         self.map.add_eggs(x, y, eggs)
@@ -839,17 +852,21 @@ class Game:
 
                         egg_clusters = self.map.eggs[y][x]
                         if egg_clusters:
-                            egg = egg_clusters[0]
-                            eaten = self._npc_consume_eggs(npc, egg, stats)
-                            if x == self.x and y == self.y:
-                                messages.append(
-                                    f"The {self._npc_label(npc)} eats {eaten:.1f}kg of eggs."
-                                )
-                            if egg.weight <= 0:
-                                egg_clusters.remove(egg)
-                            found_food = True
-                            npc.next_move = "None"
-                            continue
+                            egg = next(
+                                (e for e in egg_clusters if e.species != npc.name),
+                                None,
+                            )
+                            if egg is not None:
+                                eaten = self._npc_consume_eggs(npc, egg, stats)
+                                if x == self.x and y == self.y:
+                                    messages.append(
+                                        f"The {self._npc_label(npc)} eats {eaten:.1f}kg of eggs."
+                                    )
+                                if egg.weight <= 0:
+                                    egg_clusters.remove(egg)
+                                found_food = True
+                                npc.next_move = "None"
+                                continue
 
                     if plants and any(d in diet for d in (Diet.FERNS, Diet.CYCADS, Diet.CONIFERS, Diet.FRUITS)):
                         allowed_plants = {
