@@ -28,5 +28,11 @@ def test_egg_weight_equals_hatchling_weight_times_number():
     game.player.turns_until_lay_eggs = 0
     game.lay_eggs()
     egg = game.map.eggs[game.y][game.x][0]
-    expected = stats.get("hatchling_weight", stats.get("adult_weight", 0.0) * 0.001) * stats.get("num_eggs", 0)
+    expected = max(
+        stats.get(
+            "hatchling_weight",
+            stats.get("adult_weight", 0.0) / game_mod.HATCHLING_WEIGHT_DIVISOR,
+        ),
+        game_mod.MIN_HATCHING_WEIGHT,
+    ) * stats.get("num_eggs", 0)
     assert egg.weight == expected

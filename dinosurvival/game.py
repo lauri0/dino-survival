@@ -45,6 +45,9 @@ HATCHLING_SPEED_MULTIPLIER = _config.getint(
 HATCHLING_ENERGY_DRAIN_DIVISOR = _config.getint(
     "DEFAULT", "hatchling_energy_drain_divisor", fallback=2
 )
+MIN_HATCHING_WEIGHT = _config.getfloat(
+    "DEFAULT", "min_hatching_weight", fallback=2.0
+)
 
 
 def _load_stats(formation: str) -> tuple[dict, dict[str, PlantStats], dict]:
@@ -76,7 +79,14 @@ def _load_stats(formation: str) -> tuple[dict, dict[str, PlantStats], dict]:
             stats["diet"] = [Diet(item) for item in stats.get("diet", [])]
         aw = stats.get("adult_weight", 0)
         if "hatchling_weight" not in stats:
-            stats["hatchling_weight"] = aw / HATCHLING_WEIGHT_DIVISOR
+            stats["hatchling_weight"] = max(
+                aw / HATCHLING_WEIGHT_DIVISOR,
+                MIN_HATCHING_WEIGHT,
+            )
+        else:
+            stats["hatchling_weight"] = max(
+                stats["hatchling_weight"], MIN_HATCHING_WEIGHT
+            )
         af = stats.get("adult_fierceness", 0)
         if "hatchling_fierceness" not in stats:
             stats["hatchling_fierceness"] = af / HATCHLING_FIERCENESS_DIVISOR
@@ -126,6 +136,9 @@ class Game:
         allowed_fields = set(DinosaurStats.__dataclass_fields__.keys())
         filtered = {k: v for k, v in combined.items() if k in allowed_fields}
         self.player = DinosaurStats(**filtered)
+        self.player.hatchling_weight = max(
+            self.player.hatchling_weight, MIN_HATCHING_WEIGHT
+        )
         self.player.weight = self.player.hatchling_weight
         self.player.fierceness = self.player.hatchling_fierceness
         self.player.speed = self.player.hatchling_speed
@@ -599,8 +612,9 @@ class Game:
         num_eggs = stats.get("num_eggs", 0)
         hatch_w = stats.get(
             "hatchling_weight",
-            max(1.0, stats.get("adult_weight", 0.0) * 0.001),
+            max(MIN_HATCHING_WEIGHT, stats.get("adult_weight", 0.0) / HATCHLING_WEIGHT_DIVISOR),
         )
+        hatch_w = max(hatch_w, MIN_HATCHING_WEIGHT)
         eggs = EggCluster(
             species=self.player.name,
             number=num_eggs,
@@ -663,8 +677,12 @@ class Game:
                         stats = DINO_STATS.get(egg.species, {})
                         hatch_w = stats.get(
                             "hatchling_weight",
-                            max(1.0, stats.get("adult_weight", 0.0) * 0.001),
+                            max(
+                                MIN_HATCHING_WEIGHT,
+                                stats.get("adult_weight", 0.0) / HATCHLING_WEIGHT_DIVISOR,
+                            ),
                         )
+                        hatch_w = max(hatch_w, MIN_HATCHING_WEIGHT)
                         for _ in range(egg.number):
                             sex = (
                                 random.choice(["M", "F"])
