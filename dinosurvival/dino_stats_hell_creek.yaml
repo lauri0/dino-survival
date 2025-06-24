@@ -27,7 +27,7 @@
     "can_walk": true,
     "egg_laying_interval": 10,
     "num_eggs": 2,
-    "initial_spawn_multiplier": 7
+    "initial_spawn_multiplier": 5
   },
   "Edmontosaurus": {
     "name": "Edmontosaurus",
@@ -58,7 +58,7 @@
     "can_walk": true,
     "egg_laying_interval": 15,
     "num_eggs": 2,
-    "initial_spawn_multiplier": 4
+    "initial_spawn_multiplier": 5
   },
   "Leptoceratops": {
     "name": "Leptoceratops",
@@ -87,6 +87,37 @@
     ],
     "can_walk": true,
     "egg_laying_interval": 10,
+    "num_eggs": 2,
+    "initial_spawn_multiplier": 15
+  },
+  "Pachycephalosaurus": {
+    "name": "Pachycephalosaurus",
+    "formations": [
+      "Hell Creek"
+    ],
+    "image": "assets/dinosaurs/pachycephalosaurus.png",
+    "can_be_juvenile": true,
+    "aggressive": false,
+    "forms_packs": false,
+    "diet": [
+      "fruits",
+      "ferns"
+    ],
+    "adult_weight": 450.0,
+    "adult_fierceness": 250,
+    "adult_speed": 40,
+    "adult_energy_drain": 4.0,
+    "growth_rate": 0.35,
+    "walking_energy_drain_multiplier": 1.3,
+    "health_regen": 2.5,
+    "hydration_drain": 2.5,
+    "aquatic_boost": 0.0,
+    "preferred_biomes": [
+      "woodlands",
+      "forest"
+    ],
+    "can_walk": true,
+    "egg_laying_interval": 14,
     "num_eggs": 2,
     "initial_spawn_multiplier": 10
   },
@@ -118,7 +149,7 @@
     "can_walk": true,
     "egg_laying_interval": 12,
     "num_eggs": 2,
-    "initial_spawn_multiplier": 8
+    "initial_spawn_multiplier": 12
   },
   "Triceratops": {
     "name": "Triceratops",
@@ -148,7 +179,7 @@
     "can_walk": true,
     "egg_laying_interval": 15,
     "num_eggs": 2,
-    "initial_spawn_multiplier": 4
+    "initial_spawn_multiplier": 5
   },
   "Tyrannosaurus": {
     "name": "Tyrannosaurus",
