@@ -760,7 +760,10 @@ class Game:
             if terrain in pref:
                 pref_candidates.append(dname)
         move_choice = None
-        if pref_candidates:
+        """Given the option of choosing between preferred and unpreferred biomes the NPC will choose the latter 20% of the time."""
+        if pref_candidates and candidates and random.random() < 0.2:
+            move_choice = random.choice(candidates)
+        elif pref_candidates:
             move_choice = random.choice(pref_candidates)
         elif candidates:
             move_choice = random.choice(candidates)
