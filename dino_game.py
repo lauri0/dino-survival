@@ -382,6 +382,15 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         tk.Label(win, text=f"Energy: {npc.energy:.0f}%", font=("Helvetica", 12), anchor="w").pack(anchor="w")
         sep = tk.Frame(win, height=2, bd=1, relief="sunken")
         sep.pack(fill="x", pady=5)
+        if npc.hunts:
+            tk.Label(win, text="Successful Hunts:", font=("Helvetica", 12), anchor="w").pack(anchor="w")
+            for prey, count in sorted(npc.hunts.items()):
+                tk.Label(win, text=f"  {prey}: {count}", font=("Helvetica", 12), anchor="w").pack(anchor="w")
+        else:
+            tk.Label(win, text="Successful Hunts: None", font=("Helvetica", 12), anchor="w").pack(anchor="w")
+        tk.Label(win, text=f"Egg clusters eaten: {npc.egg_clusters_eaten}", font=("Helvetica", 12), anchor="w").pack(anchor="w")
+        sep = tk.Frame(win, height=2, bd=1, relief="sunken")
+        sep.pack(fill="x", pady=5)
         tk.Label(
             win,
             text=f"Weight: {npc.weight:.1f}/{stats.get('adult_weight', 0)}",

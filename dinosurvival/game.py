@@ -581,6 +581,8 @@ class Game:
         remaining = eat_amount - weight_used
         self._npc_apply_growth(npc, remaining, stats)
         eggs.weight -= eat_amount
+        if eat_amount > 0:
+            npc.egg_clusters_eaten += 1
         return eat_amount
 
     def _can_player_lay_eggs(self) -> bool:
@@ -936,6 +938,7 @@ class Game:
                                 target.age = -1
                                 target.fierceness = 0.0
                                 target.speed = 0.0
+                                npc.hunts[target.name] = npc.hunts.get(target.name, 0) + 1
                                 eaten = self._npc_consume_meat(npc, target, stats)
                                 if x == self.x and y == self.y:
                                     messages.append(
