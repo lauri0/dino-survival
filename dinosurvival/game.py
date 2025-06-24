@@ -207,16 +207,17 @@ class Game:
             old_count = stats.get("initial_spawn_multiplier", 0)
             spawn_count = spawn_counts.get(name, 0)
             spawn_tiles = lake_tiles if not stats.get("can_walk", True) else land_tiles
-            if not spawn_tiles or old_count <= 0:
+            loop_count = max(old_count, spawn_count)
+            if not spawn_tiles or loop_count <= 0:
                 # still consume random numbers to keep sequence stable
-                for _ in range(old_count):
+                for _ in range(loop_count):
                     random.choice(spawn_tiles)
                     if name == self.player.name:
                         random.choice(["M", "F"])
                     if stats.get("can_be_juvenile", True):
                         random.uniform(3.0, stats.get("adult_weight", 0.0))
                 continue
-            for i in range(old_count):
+            for i in range(loop_count):
                 x, y = random.choice(spawn_tiles)
                 sex: str | None = None
                 if name == self.player.name:
