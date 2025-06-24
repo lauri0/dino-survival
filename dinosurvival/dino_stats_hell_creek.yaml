@@ -25,6 +25,32 @@
     "num_eggs": 2,
     "initial_spawn_multiplier": 5
   },
+  "Ankylosaurus": {
+    "name": "Ankylosaurus",
+    "image": "assets/dinosaurs/ankylosaurus.png",
+    "can_be_juvenile": true,
+    "aggressive": false,
+    "forms_packs": false,
+    "diet": [
+      "ferns"
+    ],
+    "adult_weight": 7000.0,
+    "adult_fierceness": 7000,
+    "adult_speed": 15,
+    "adult_energy_drain": 1.8,
+    "growth_rate": 0.35,
+    "health_regen": 2.5,
+    "hydration_drain": 2.5,
+    "aquatic_boost": 0.0,
+    "preferred_biomes": [
+      "forest",
+      "badlands"
+    ],
+    "can_walk": true,
+    "egg_laying_interval": 20,
+    "num_eggs": 2,
+    "initial_spawn_multiplier": 4
+  },
   "Edmontosaurus": {
     "name": "Edmontosaurus",
     "image": "assets/dinosaurs/edmontosaurus.png",
