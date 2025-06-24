@@ -3,7 +3,7 @@
     "name": "Ferns",
     "formations": ["Morrison", "Hell Creek"],
     "image": "assets/plants/ferns.png",
-    "weight": 100.0,
+    "weight": 50.0,
     "growth_chance": {
       "plains": 0.02,
       "forest": 0.03,
@@ -18,7 +18,7 @@
     "name": "Fruits",
     "formations": ["Morrison", "Hell Creek"],
     "image": "assets/plants/fruits.png",
-    "weight": 10.0,
+    "weight": 2.5,
     "growth_chance": {
       "plains": 0.005,
       "forest": 0.04,
@@ -33,7 +33,7 @@
     "name": "Cycads",
     "formations": ["Morrison", "Hell Creek"],
     "image": "assets/plants/cycads.png",
-    "weight": 200.0,
+    "weight": 100.0,
     "growth_chance": {
       "plains": 0.02,
       "forest": 0.01,
