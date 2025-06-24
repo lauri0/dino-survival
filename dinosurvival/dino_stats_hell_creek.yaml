@@ -18,7 +18,8 @@
     "aquatic_boost": 0.0,
     "preferred_biomes": [
       "forest",
-      "swamp"
+      "swamp",
+      "plains"
     ],
     "can_walk": true,
     "egg_laying_interval": 10,
