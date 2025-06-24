@@ -61,5 +61,7 @@ class NPCAnimal:
     speed: float = 0.0
     next_move: str = "None"
     turns_until_lay_eggs: int = 0
+    hunts: dict[str, int] = field(default_factory=dict)
+    egg_clusters_eaten: int = 0
 
 
