@@ -1,6 +1,7 @@
 import random
 import json
 import os
+import configparser
 from typing import Optional
 from dataclasses import dataclass
 
@@ -25,19 +26,45 @@ from .map import Map, EggCluster
 from .settings import Setting
 from .logging_utils import append_event_log
 
+_config = configparser.ConfigParser()
+_config.read(os.path.join(os.path.dirname(__file__), "constants.ini"))
 
-def _load_stats(formation: str) -> tuple[dict, dict[str, PlantStats]]:
-    """Load dinosaur and plant stats for the given formation."""
+# Constants used throughout the game
+WALKING_ENERGY_DRAIN_MULTIPLIER = _config.getfloat(
+    "DEFAULT", "walking_energy_drain_multiplier", fallback=1.0
+)
+HATCHLING_WEIGHT_DIVISOR = _config.getint(
+    "DEFAULT", "hatchling_weight_divisor", fallback=1000
+)
+HATCHLING_FIERCENESS_DIVISOR = _config.getint(
+    "DEFAULT", "hatchling_fierceness_divisor", fallback=1000
+)
+HATCHLING_SPEED_MULTIPLIER = _config.getint(
+    "DEFAULT", "hatchling_speed_multiplier", fallback=3
+)
+HATCHLING_ENERGY_DRAIN_DIVISOR = _config.getint(
+    "DEFAULT", "hatchling_energy_drain_divisor", fallback=2
+)
+
+
+def _load_stats(formation: str) -> tuple[dict, dict[str, PlantStats], dict]:
+    """Load dinosaur, plant and critter stats for the given formation."""
     base_dir = os.path.dirname(__file__)
     suffix = formation.lower().replace(" ", "_")
     dino_file = os.path.join(base_dir, f"dino_stats_{suffix}.yaml")
     plant_file = os.path.join(base_dir, f"plant_stats_{suffix}.yaml")
+    critter_file = os.path.join(base_dir, f"critter_stats_{suffix}.yaml")
 
     with open(dino_file) as f:
         dino_stats = json.load(f)
 
     with open(plant_file) as f:
         plant_stats = json.load(f)
+
+    critter_stats = {}
+    if os.path.exists(critter_file):
+        with open(critter_file) as f:
+            critter_stats = json.load(f)
 
     # Convert plant dictionaries to dataclass instances
     for name, stats in list(plant_stats.items()):
@@ -60,25 +87,23 @@ def _load_stats(formation: str) -> tuple[dict, dict[str, PlantStats]]:
         if "hatchling_energy_drain" not in stats:
             stats["hatchling_energy_drain"] = adrain / HATCHLING_ENERGY_DRAIN_DIVISOR
 
-    return dino_stats, plant_stats
+    return dino_stats, plant_stats, critter_stats
 
 
+DINO_STATS: dict[str, dict] = {}
+PLANT_STATS: dict[str, PlantStats] = {}
+CRITTER_STATS: dict[str, dict] = {}
 _CURRENT_FORMATION = None
 
 
 def set_stats_for_formation(formation: str) -> None:
     """Load stats for the given formation and store them globally."""
-    global DINO_STATS, PLANT_STATS, _CURRENT_FORMATION
+    global DINO_STATS, PLANT_STATS, CRITTER_STATS, _CURRENT_FORMATION
     if _CURRENT_FORMATION == formation:
         return
-    DINO_STATS, PLANT_STATS = _load_stats(formation)
+    DINO_STATS, PLANT_STATS, CRITTER_STATS = _load_stats(formation)
     _CURRENT_FORMATION = formation
 
-# Constants used to derive hatchling values from adult stats
-HATCHLING_WEIGHT_DIVISOR = 1000
-HATCHLING_FIERCENESS_DIVISOR = 1000
-HATCHLING_SPEED_MULTIPLIER = 3
-HATCHLING_ENERGY_DRAIN_DIVISOR = 2
 
 
 @dataclass
@@ -113,6 +138,7 @@ class Game:
         )
         self.next_npc_id = 1
         self._populate_animals()
+        self._spawn_critters()
 
         # Pick a random starting location that is within two tiles of a lake but
         # not on a lake tile itself
@@ -150,9 +176,7 @@ class Game:
         self.turn_messages: list[str] = []
         # Track population counts for all species in this formation
         self.population_history: dict[str, list[int]] = {
-            n: []
-            for n, s in DINO_STATS.items()
-            if self.setting.formation in s.get("formations", [])
+            n: [] for n in list(DINO_STATS.keys()) + list(CRITTER_STATS.keys())
         }
         self.turn_history: list[int] = []
         self._record_population()
@@ -172,11 +196,7 @@ class Game:
                 else:
                     land_tiles.append((x, y))
 
-        species = [
-            (name, stats)
-            for name, stats in DINO_STATS.items()
-            if self.setting.formation in stats.get("formations", [])
-        ]
+        species = list(DINO_STATS.items())
 
         multipliers: dict[str, float] = {
             name: stats.get("initial_spawn_multiplier", 0)
@@ -237,6 +257,46 @@ class Game:
                         )
                     )
                     self.next_npc_id += 1
+
+    def _spawn_critters(self) -> None:
+        """Spawn critters based on per-turn rates and population caps."""
+        if not CRITTER_STATS:
+            return
+
+        land_tiles: list[tuple[int, int]] = []
+        lake_tiles: list[tuple[int, int]] = []
+        for y in range(self.map.height):
+            for x in range(self.map.width):
+                if self.map.terrain_at(x, y).name == "lake":
+                    lake_tiles.append((x, y))
+                else:
+                    land_tiles.append((x, y))
+
+        for name, stats in CRITTER_STATS.items():
+            spawn_rate = stats.get("spawned_per_turn", 0)
+            max_individuals = stats.get("maximum_individuals", 0)
+            count = 0
+            for row in self.map.animals:
+                for cell in row:
+                    for npc in cell:
+                        if npc.name == name:
+                            count += 1
+            available = max_individuals - count
+            to_spawn = min(spawn_rate, max(0, available))
+            spawn_tiles = lake_tiles if not stats.get("can_walk", True) else land_tiles
+            for _ in range(to_spawn):
+                if not spawn_tiles:
+                    break
+                x, y = random.choice(spawn_tiles)
+                self.map.animals[y][x].append(
+                    NPCAnimal(
+                        id=self.next_npc_id,
+                        name=name,
+                        sex=None,
+                        weight=stats.get("adult_weight", 0.0),
+                    )
+                )
+                self.next_npc_id += 1
 
     def _generate_encounters(self) -> None:
         """Load encounter information from the current cell."""
@@ -308,6 +368,7 @@ class Game:
         self.biome_turns[terrain] = self.biome_turns.get(terrain, 0) + 1
         self.turn_messages.extend(self._update_eggs())
         self.map.grow_plants(PLANT_STATS, self.setting.formation)
+        self._spawn_critters()
         self.turn_messages.extend(self._update_npcs())
         if getattr(self.player, "turns_until_lay_eggs", 0) > 0:
             self.player.turns_until_lay_eggs -= 1
@@ -321,7 +382,7 @@ class Game:
     def _apply_turn_costs(self, moved: bool, multiplier: float = 1.0) -> str:
         drain = self._base_energy_drain()
         if moved:
-            drain *= self.player.walking_energy_drain_multiplier
+            drain *= WALKING_ENERGY_DRAIN_MULTIPLIER
         drain *= multiplier
         self.player.energy = max(0.0, self.player.energy - drain)
         message = ""
@@ -693,7 +754,13 @@ class Game:
                         continue
 
                     npc.age += 1
-                    stats = DINO_STATS.get(npc.name, {})
+                    stats = DINO_STATS.get(npc.name)
+                    if stats is None:
+                        cstats = CRITTER_STATS.get(npc.name)
+                        npc.next_move = "None"
+                        if cstats is not None:
+                            self._npc_choose_move(x, y, npc, cstats)
+                        continue
                     npc.next_move = "None"
                     if npc.turns_until_lay_eggs > 0:
                         npc.turns_until_lay_eggs -= 1
@@ -720,7 +787,7 @@ class Game:
                             self._npc_choose_move(x, y, npc, stats)
                             if npc.next_move != "None":
                                 extra = base_drain * (
-                                    stats.get("walking_energy_drain_multiplier", 1.0) - 1.0
+                                    WALKING_ENERGY_DRAIN_MULTIPLIER - 1.0
                                 )
                                 if extra > 0:
                                     npc.energy = max(0.0, npc.energy - extra)
@@ -849,7 +916,7 @@ class Game:
                     self._npc_choose_move(x, y, npc, stats)
                     if npc.next_move != "None":
                         extra = base_drain * (
-                            stats.get("walking_energy_drain_multiplier", 1.0) - 1.0
+                            WALKING_ENERGY_DRAIN_MULTIPLIER - 1.0
                         )
                         if extra > 0:
                             npc.energy = max(0.0, npc.energy - extra)

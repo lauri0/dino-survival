@@ -1,0 +1,17 @@
+{
+  "Centipede": {
+    "name": "Centipede",
+    "image": "assets/dinosaurs/centipede.png",
+    "can_be_juvenile": false,
+    "aggressive": false,
+    "adult_weight": 1.0,
+    "adult_fierceness": 0.0,
+    "adult_speed": 55,
+    "health_regen": 2.5,
+    "aquatic_boost": 0.0,
+    "preferred_biomes": ["forest"],
+    "can_walk": true,
+    "spawned_per_turn": 1,
+    "maximum_individuals": 20
+  }
+}

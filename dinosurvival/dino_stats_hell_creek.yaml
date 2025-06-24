@@ -1,9 +1,6 @@
 {
   "Acheroraptor": {
     "name": "Acheroraptor",
-    "formations": [
-      "Hell Creek"
-    ],
     "image": "assets/dinosaurs/acheroraptor.png",
     "can_be_juvenile": true,
     "aggressive": true,
@@ -16,7 +13,6 @@
     "adult_speed": 100,
     "adult_energy_drain": 4.0,
     "growth_rate": 0.35,
-    "walking_energy_drain_multiplier": 1.3,
     "health_regen": 2.5,
     "hydration_drain": 2.2,
     "aquatic_boost": 0.0,
@@ -31,9 +27,6 @@
   },
   "Edmontosaurus": {
     "name": "Edmontosaurus",
-    "formations": [
-      "Hell Creek"
-    ],
     "image": "assets/dinosaurs/edmontosaurus.png",
     "can_be_juvenile": true,
     "aggressive": false,
@@ -47,7 +40,6 @@
     "adult_speed": 25,
     "adult_energy_drain": 2.0,
     "growth_rate": 0.35,
-    "walking_energy_drain_multiplier": 1.3,
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
@@ -62,9 +54,6 @@
   },
   "Leptoceratops": {
     "name": "Leptoceratops",
-    "formations": [
-      "Hell Creek"
-    ],
     "image": "assets/dinosaurs/leptoceratops.png",
     "can_be_juvenile": true,
     "aggressive": false,
@@ -77,7 +66,6 @@
     "adult_speed": 40,
     "adult_energy_drain": 4.0,
     "growth_rate": 0.35,
-    "walking_energy_drain_multiplier": 1.3,
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
@@ -92,9 +80,6 @@
   },
   "Pachycephalosaurus": {
     "name": "Pachycephalosaurus",
-    "formations": [
-      "Hell Creek"
-    ],
     "image": "assets/dinosaurs/pachycephalosaurus.png",
     "can_be_juvenile": true,
     "aggressive": false,
@@ -108,7 +93,6 @@
     "adult_speed": 40,
     "adult_energy_drain": 4.0,
     "growth_rate": 0.35,
-    "walking_energy_drain_multiplier": 1.3,
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
@@ -123,9 +107,6 @@
   },
   "Thescelosaurus": {
     "name": "Thescelosaurus",
-    "formations": [
-      "Hell Creek"
-    ],
     "image": "assets/dinosaurs/thescelosaurus.png",
     "can_be_juvenile": true,
     "aggressive": false,
@@ -138,7 +119,6 @@
     "adult_speed": 50,
     "adult_energy_drain": 3.0,
     "growth_rate": 0.35,
-    "walking_energy_drain_multiplier": 1.3,
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
@@ -153,9 +133,6 @@
   },
   "Triceratops": {
     "name": "Triceratops",
-    "formations": [
-      "Hell Creek"
-    ],
     "image": "assets/dinosaurs/triceratops.png",
     "can_be_juvenile": true,
     "aggressive": false,
@@ -168,7 +145,6 @@
     "adult_speed": 18,
     "adult_energy_drain": 2.0,
     "growth_rate": 0.35,
-    "walking_energy_drain_multiplier": 1.3,
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
@@ -183,9 +159,6 @@
   },
   "Tyrannosaurus": {
     "name": "Tyrannosaurus",
-    "formations": [
-      "Hell Creek"
-    ],
     "image": "assets/dinosaurs/tyrannosaurus.png",
     "can_be_juvenile": true,
     "aggressive": true,
@@ -198,7 +171,6 @@
     "adult_speed": 35,
     "adult_energy_drain": 4.0,
     "growth_rate": 0.35,
-    "walking_energy_drain_multiplier": 1.3,
     "health_regen": 2.5,
     "hydration_drain": 2.2,
     "aquatic_boost": 0.0,
