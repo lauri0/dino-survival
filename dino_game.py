@@ -256,7 +256,9 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     npc_images: dict[str, tk.PhotoImage] = {}
 
     def show_dino_facts(name: str = dinosaur_name) -> None:
-        info = game_module.DINO_STATS.get(name, {})
+        info = game_module.DINO_STATS.get(name)
+        if info is None:
+            info = game_module.CRITTER_STATS.get(name, {})
         win = tk.Toplevel(root)
         win.title(f"{name} Facts")
         img = info_images.get(name)
@@ -359,7 +361,9 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         tk.Button(win, text="Close", command=win.destroy).pack(pady=5)
 
     def show_npc_stats(npc: NPCAnimal) -> None:
-        stats = game_module.DINO_STATS.get(npc.name, {})
+        stats = game_module.DINO_STATS.get(npc.name)
+        if stats is None:
+            stats = game_module.CRITTER_STATS.get(npc.name, {})
         win = tk.Toplevel(root)
         win.title(f"{npc.name} Stats")
         img = npc_images.get(npc.name)
@@ -705,7 +709,9 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             npc = entry.npc
             if npc is None:
                 continue
-            stats = game_module.DINO_STATS[npc.name]
+            stats = game_module.DINO_STATS.get(npc.name)
+            if stats is None:
+                stats = game_module.CRITTER_STATS.get(npc.name, {})
             disp_name = f"{npc.name} ({npc.id})"
             if npc.sex:
                 symbol = "♂" if npc.sex == "M" else "♀"
@@ -911,6 +917,8 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             row = tk.Frame(population_list)
             img_lbl = tk.Label(row)
             img_path = game_module.DINO_STATS.get(name, {}).get("image")
+            if img_path is None:
+                img_path = game_module.CRITTER_STATS.get(name, {}).get("image")
             img = None
             if img_path:
                 abs_path = os.path.join(os.path.dirname(__file__), img_path)
