@@ -730,6 +730,9 @@ class Game:
                     d = npc.next_move
                     if not d or d == "None":
                         continue
+                    if not npc.alive:
+                        npc.next_move = "None"
+                        continue
                     dx, dy = directions.get(d, (0, 0))
                     nx, ny = x + dx, y + dy
                     if 0 <= nx < self.map.width and 0 <= ny < self.map.height:
