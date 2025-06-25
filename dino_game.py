@@ -503,6 +503,13 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     move_buttons["drink"] = tk.Button(
         btn_container, text="Drink", width=12, height=2, command=lambda: perform("drink")
     )
+    move_buttons["threaten"] = tk.Button(
+        btn_container,
+        text="Threaten",
+        width=12,
+        height=2,
+        command=lambda: do_threaten(),
+    )
 
     move_buttons["north"].grid(row=0, column=1)
     move_buttons["drink"].grid(row=0, column=2)
@@ -511,6 +518,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     move_buttons["stay"].grid(row=1, column=1)
     move_buttons["east"].grid(row=1, column=2)
     move_buttons["south"].grid(row=2, column=1)
+    move_buttons["threaten"].grid(row=2, column=2)
 
     # Encounter display in the center right
     encounter_frame = tk.Frame(main, width=500)
@@ -650,6 +658,24 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         update_stats()
         update_biome()
         update_map()
+        update_encounters()
+        update_plants()
+        if "Game Over" in result:
+            for b in move_buttons.values():
+                b.config(state="disabled")
+            show_final_stats("Game Over", "You have perished!")
+        if game.won:
+            for b in move_buttons.values():
+                b.config(state="disabled")
+            show_final_stats("Victory", "Congratulations! Your lineage lives on!")
+
+    def do_threaten() -> None:
+        result = game.threaten()
+        append_output(result)
+        update_biome()
+        update_stats()
+        update_drink_button()
+        update_lay_button()
         update_encounters()
         update_plants()
         if "Game Over" in result:
