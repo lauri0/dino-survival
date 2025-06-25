@@ -245,16 +245,12 @@ class Game:
                 # still consume random numbers to keep sequence stable
                 for _ in range(loop_count):
                     random.choice(spawn_tiles)
-                    if name == self.player.name:
-                        random.choice(["M", "F"])
                     if stats.get("can_be_juvenile", True):
                         random.uniform(3.0, stats.get("adult_weight", 0.0))
                 continue
             for i in range(loop_count):
                 x, y = random.choice(spawn_tiles)
                 sex: str | None = None
-                if name == self.player.name:
-                    sex = random.choice(["M", "F"])
                 allow_j = stats.get("can_be_juvenile", True)
                 if allow_j:
                     weight = random.uniform(3.0, stats.get("adult_weight", 0.0))
@@ -426,14 +422,10 @@ class Game:
                     self.map.reveal(nx, ny)
 
     def _check_victory(self) -> Optional[str]:
-        """Check if the player has reached adult weight and mated."""
-        if (
-            not self.won
-            and self.player.weight >= self.player.adult_weight
-            and self.player.mated
-        ):
+        """Check if the player has enough living descendants."""
+        if not self.won and self.descendant_count() >= 2:
             self.won = True
-            return "\nYou have grown to full size and mated! You win!"
+            return "\nYou have raised a thriving lineage! You win!"
         return None
 
     def _format_turn(self, text: str) -> str:
@@ -621,6 +613,7 @@ class Game:
             number=num_eggs,
             weight=hatch_w * num_eggs,
             turns_until_hatch=5,
+            is_descendant=True,
         )
         self.map.add_eggs(self.x, self.y, eggs)
         append_event_log(f"Player laid eggs at ({self.x},{self.y})")
@@ -685,17 +678,13 @@ class Game:
                         )
                         hatch_w = max(hatch_w, MIN_HATCHING_WEIGHT)
                         for _ in range(egg.number):
-                            sex = (
-                                random.choice(["M", "F"])
-                                if egg.species == self.player.name
-                                else None
-                            )
                             self.map.animals[y][x].append(
                                 NPCAnimal(
                                     id=self.next_npc_id,
                                     name=egg.species,
-                                    sex=sex,
+                                    sex=None,
                                     weight=hatch_w,
+                                    is_descendant=egg.is_descendant,
                                 )
                             )
                             self.next_npc_id += 1
@@ -844,6 +833,7 @@ class Game:
                             number=num_eggs,
                             weight=hatch_w * num_eggs,
                             turns_until_hatch=5,
+                            is_descendant=npc.is_descendant,
                         )
                         self.map.add_eggs(x, y, eggs)
                         append_event_log(
@@ -1261,6 +1251,16 @@ class Game:
         counts[self.player.name] = counts.get(self.player.name, 0) + 1 + len(self.pack)
         total += 1 + len(self.pack)
         return counts, total
+
+    def descendant_count(self) -> int:
+        """Return the number of living NPCs descended from the player."""
+        count = 0
+        for row in self.map.animals:
+            for cell in row:
+                for npc in cell:
+                    if npc.is_descendant and npc.alive:
+                        count += 1
+        return count
 
     def move(self, dx: int, dy: int):
         nx = max(0, min(self.map.width - 1, self.x + dx))

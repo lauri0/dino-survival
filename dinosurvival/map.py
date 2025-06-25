@@ -17,6 +17,7 @@ class EggCluster:
     number: int
     weight: float
     turns_until_hatch: int
+    is_descendant: bool = False
 
 
 class Map:

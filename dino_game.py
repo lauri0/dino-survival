@@ -475,7 +475,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         if game.won:
             for b in move_buttons.values():
                 b.config(state="disabled")
-            show_final_stats("Victory", "Congratulations! You reached adult size!")
+            show_final_stats("Victory", "Congratulations! Your lineage lives on!")
 
     move_buttons = {}
     move_buttons["lay"] = tk.Button(
@@ -570,7 +570,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         if game.won:
             for b in move_buttons.values():
                 b.config(state="disabled")
-            show_final_stats("Victory", "Congratulations! You reached adult size!")
+            show_final_stats("Victory", "Congratulations! Your lineage lives on!")
 
     def do_mate(npc_id: int) -> None:
         result = game.mate(npc_id)
@@ -589,7 +589,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         if game.won:
             for b in move_buttons.values():
                 b.config(state="disabled")
-            show_final_stats("Victory", "Congratulations! You reached adult size!")
+            show_final_stats("Victory", "Congratulations! Your lineage lives on!")
 
     def do_pack_up(juvenile: bool) -> None:
         result = game.pack_up(juvenile)
@@ -607,7 +607,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         if game.won:
             for b in move_buttons.values():
                 b.config(state="disabled")
-            show_final_stats("Victory", "Congratulations! You reached adult size!")
+            show_final_stats("Victory", "Congratulations! Your lineage lives on!")
 
     def do_leave_pack() -> None:
         result = game.leave_pack()
@@ -625,7 +625,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         if game.won:
             for b in move_buttons.values():
                 b.config(state="disabled")
-            show_final_stats("Victory", "Congratulations! You reached adult size!")
+            show_final_stats("Victory", "Congratulations! Your lineage lives on!")
 
     def do_collect_eggs() -> None:
         result = game.collect_eggs()
@@ -642,7 +642,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         if game.won:
             for b in move_buttons.values():
                 b.config(state="disabled")
-            show_final_stats("Victory", "Congratulations! You reached adult size!")
+            show_final_stats("Victory", "Congratulations! Your lineage lives on!")
 
     def do_lay_eggs() -> None:
         result = game.lay_eggs()
@@ -659,7 +659,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         if game.won:
             for b in move_buttons.values():
                 b.config(state="disabled")
-            show_final_stats("Victory", "Congratulations! You reached adult size!")
+            show_final_stats("Victory", "Congratulations! Your lineage lives on!")
 
     def update_encounters() -> None:
         for child in encounter_list.winfo_children():
@@ -722,9 +722,6 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             if stats is None:
                 stats = game_module.CRITTER_STATS.get(npc.name, {})
             disp_name = f"{npc.name} ({npc.id})"
-            if npc.sex:
-                symbol = "♂" if npc.sex == "M" else "♀"
-                disp_name = f"{disp_name} {symbol}"
             disp_name = f"{disp_name} W:{npc.weight:.1f}kg"
 
             target_f = game._stat_from_weight(npc.weight, stats, "hatchling_fierceness", "adult_fierceness")
@@ -756,15 +753,8 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
                     f"E:{npc.energy:.0f}% "
                 )
             )
-            if (
-                npc.name == game.player.name
-                and npc.sex == "F"
-                and game.player_growth_stage() == "Adult"
-            ):
-                slot["btn"].configure(command=lambda i=npc.id: do_mate(i), text="Mate")
-            else:
-                label = "Hunt" if npc.alive else "Eat"
-                slot["btn"].configure(command=lambda i=npc.id: do_hunt(i), text=label)
+            label = "Hunt" if npc.alive else "Eat"
+            slot["btn"].configure(command=lambda i=npc.id: do_hunt(i), text=label)
             slot["info"].configure(command=lambda n=npc: show_npc_stats(n))
             slot["info"].grid()
             slot["frame"].pack(fill="x", pady=2, expand=True)
@@ -911,7 +901,9 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         )
         fierce_label.config(text=f"Fierceness: {game.player.fierceness:.1f}")
         speed_label.config(text=f"Speed: {game.player.speed:.1f}")
-        mated_label.config(text=f"Mated: {'Yes' if game.player.mated else 'No'}")
+        desc_label.config(
+            text=f"Alive descendants: {game.descendant_count()}"
+        )
         turn_label.config(text=f"Turn: {game.turn_count}")
         update_lay_button()
 
@@ -962,8 +954,8 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     fierce_label.pack(anchor="w")
     speed_label = tk.Label(stats_frame, font=("Helvetica", 14), anchor="w")
     speed_label.pack(anchor="w")
-    mated_label = tk.Label(stats_frame, font=("Helvetica", 14), anchor="w")
-    mated_label.pack(anchor="w")
+    desc_label = tk.Label(stats_frame, font=("Helvetica", 14), anchor="w")
+    desc_label.pack(anchor="w")
     turn_label = tk.Label(stats_frame, font=("Helvetica", 14), anchor="w")
     turn_label.pack(anchor="w")
     tk.Button(stats_frame, text="Quit", width=10, command=root.destroy).pack(pady=10)

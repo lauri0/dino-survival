@@ -63,5 +63,6 @@ class NPCAnimal:
     turns_until_lay_eggs: int = 0
     hunts: dict[str, int] = field(default_factory=dict)
     egg_clusters_eaten: int = 0
+    is_descendant: bool = False
 
 
