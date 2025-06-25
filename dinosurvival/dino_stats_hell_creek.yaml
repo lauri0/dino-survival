@@ -89,7 +89,7 @@
       "fruits"
     ],
     "adult_weight": 80.0,
-    "adult_fierceness": 40,
+    "adult_fierceness": 45,
     "adult_speed": 40,
     "adult_energy_drain": 3.5,
     "growth_rate": 0.35,
@@ -101,7 +101,7 @@
       "swamp"
     ],
     "can_walk": true,
-    "egg_laying_interval": 12,
+    "egg_laying_interval": 9,
     "num_eggs": 3,
     "initial_spawn_multiplier": 15
   },
