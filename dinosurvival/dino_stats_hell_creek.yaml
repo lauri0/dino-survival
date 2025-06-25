@@ -35,10 +35,10 @@
     "diet": [
       "ferns"
     ],
-    "adult_weight": 7000.0,
-    "adult_fierceness": 7000,
+    "adult_weight": 6800.0,
+    "adult_fierceness": 7200,
     "adult_speed": 15,
-    "adult_energy_drain": 1.8,
+    "adult_energy_drain": 1.5,
     "growth_rate": 0.35,
     "health_regen": 2.5,
     "hydration_drain": 2.5,
@@ -48,7 +48,7 @@
       "badlands"
     ],
     "can_walk": true,
-    "egg_laying_interval": 20,
+    "egg_laying_interval": 18,
     "num_eggs": 2,
     "initial_spawn_multiplier": 4
   },
@@ -66,7 +66,7 @@
     "adult_fierceness": 3000,
     "adult_speed": 25,
     "adult_energy_drain": 2.0,
-    "growth_rate": 0.35,
+    "growth_rate": 0.4,
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "aquatic_boost": 0.0,
@@ -75,9 +75,9 @@
       "plains"
     ],
     "can_walk": true,
-    "egg_laying_interval": 15,
+    "egg_laying_interval": 13,
     "num_eggs": 2,
-    "initial_spawn_multiplier": 5
+    "initial_spawn_multiplier": 6
   },
   "Leptoceratops": {
     "name": "Leptoceratops",
@@ -91,7 +91,7 @@
     "adult_weight": 80.0,
     "adult_fierceness": 40,
     "adult_speed": 40,
-    "adult_energy_drain": 4.0,
+    "adult_energy_drain": 3.5,
     "growth_rate": 0.35,
     "health_regen": 2.5,
     "hydration_drain": 2.5,
@@ -101,7 +101,7 @@
       "swamp"
     ],
     "can_walk": true,
-    "egg_laying_interval": 10,
+    "egg_laying_interval": 8,
     "num_eggs": 2,
     "initial_spawn_multiplier": 15
   },
@@ -142,7 +142,7 @@
       "meat"
     ],
     "adult_weight": 25.0,
-    "adult_fierceness": 20.0,
+    "adult_fierceness": 18.0,
     "adult_speed": 160,
     "adult_energy_drain": 5.0,
     "growth_rate": 0.35,
@@ -155,7 +155,7 @@
       "plains"
     ],
     "can_walk": true,
-    "egg_laying_interval": 10,
+    "egg_laying_interval": 12,
     "num_eggs": 2,
     "initial_spawn_multiplier": 5
   },
@@ -181,8 +181,8 @@
       "plains"
     ],
     "can_walk": true,
-    "egg_laying_interval": 12,
-    "num_eggs": 2,
+    "egg_laying_interval": 6,
+    "num_eggs": 1,
     "initial_spawn_multiplier": 12
   },
   "Triceratops": {
@@ -207,7 +207,7 @@
       "plains"
     ],
     "can_walk": true,
-    "egg_laying_interval": 15,
+    "egg_laying_interval": 14,
     "num_eggs": 2,
     "initial_spawn_multiplier": 5
   },
