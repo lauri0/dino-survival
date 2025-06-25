@@ -570,9 +570,8 @@ class Game:
 
     def _npc_consume_eggs(self, npc: NPCAnimal, eggs: EggCluster, stats: dict) -> float:
         energy_needed = 100.0 - npc.energy
-        weight_for_energy = energy_needed * npc.weight / 1000
         growth_target = self._npc_max_growth_gain(npc.weight, stats)
-        eat_amount = min(eggs.weight, weight_for_energy + growth_target)
+        eat_amount = eggs.weight
 
         energy_gain_possible = 1000 * eat_amount / max(npc.weight, 0.1)
         actual_energy_gain = min(energy_needed, energy_gain_possible)
@@ -580,7 +579,7 @@ class Game:
         weight_used = actual_energy_gain * npc.weight / 1000
         remaining = eat_amount - weight_used
         self._npc_apply_growth(npc, remaining, stats)
-        eggs.weight -= eat_amount
+        eggs.weight = 0
         if eat_amount > 0:
             npc.egg_clusters_eaten += 1
         return eat_amount
@@ -888,8 +887,7 @@ class Game:
                                     messages.append(
                                         f"The {self._npc_label(npc)} eats {eaten:.1f}kg of eggs."
                                     )
-                                if egg.weight <= 0:
-                                    egg_clusters.remove(egg)
+                                egg_clusters.remove(egg)
                                 found_food = True
                                 npc.next_move = "None"
                                 continue
