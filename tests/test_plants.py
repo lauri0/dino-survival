@@ -123,7 +123,9 @@ def test_npc_initial_state():
             for npc in cell:
                 assert npc.energy == 100.0
                 assert npc.health == 100.0
-                stats = game_mod.DINO_STATS[npc.name]
+                stats = game_mod.DINO_STATS.get(npc.name)
+                if stats is None:
+                    stats = game_mod.CRITTER_STATS[npc.name]
                 if stats.get("can_be_juvenile", True):
                     assert 3.0 <= npc.weight <= stats.get("adult_weight", 0.0)
                 else:

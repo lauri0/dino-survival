@@ -1,0 +1,138 @@
+{
+  "Centipede": {
+    "adult_fierceness": 0.0,
+    "adult_speed": 55,
+    "adult_weight": 1.0,
+    "aggressive": false,
+    "aquatic_boost": 0.0,
+    "avg_spawned_per_turn": 1.0,
+    "can_be_juvenile": false,
+    "can_walk": true,
+    "health_regen": 2.5,
+    "image": "assets/dinosaurs/centipede.png",
+    "maximum_individuals": 20,
+    "name": "Centipede",
+    "preferred_biomes": [
+      "forest"
+    ]
+  },
+  "Ceratodus": {
+    "adult_fierceness": 5.0,
+    "adult_speed": 55,
+    "adult_weight": 12.0,
+    "aggressive": false,
+    "aquatic_boost": 0.0,
+    "avg_spawned_per_turn": 1.0,
+    "can_be_juvenile": false,
+    "can_walk": false,
+    "health_regen": 2.5,
+    "image": "assets/dinosaurs/ceratodus.png",
+    "maximum_individuals": 20,
+    "name": "Ceratodus",
+    "preferred_biomes": [
+      "lake"
+    ]
+  },
+  "Dragonfly": {
+    "adult_fierceness": 0.0,
+    "adult_speed": 75,
+    "adult_weight": 0.5,
+    "aggressive": false,
+    "aquatic_boost": 0.0,
+    "avg_spawned_per_turn": 1.0,
+    "can_be_juvenile": false,
+    "can_walk": true,
+    "health_regen": 2.5,
+    "image": "assets/dinosaurs/dragonfly.png",
+    "maximum_individuals": 20,
+    "name": "Dragonfly",
+    "preferred_biomes": [
+      "forest"
+    ]
+  },
+  "Frog": {
+    "adult_fierceness": 0.0,
+    "adult_speed": 45,
+    "adult_weight": 2.5,
+    "aggressive": false,
+    "aquatic_boost": 0.0,
+    "avg_spawned_per_turn": 1.0,
+    "can_be_juvenile": false,
+    "can_walk": true,
+    "health_regen": 2.5,
+    "image": "assets/dinosaurs/frog.png",
+    "maximum_individuals": 20,
+    "name": "Frog",
+    "preferred_biomes": [
+      "swamp"
+    ]
+  },
+  "Glyptops": {
+    "adult_fierceness": 3,
+    "adult_speed": 45,
+    "adult_weight": 5.0,
+    "aggressive": false,
+    "aquatic_boost": 0.0,
+    "avg_spawned_per_turn": 1.0,
+    "can_be_juvenile": false,
+    "can_walk": true,
+    "health_regen": 2.0,
+    "image": "assets/dinosaurs/glyptops.png",
+    "maximum_individuals": 20,
+    "name": "Glyptops",
+    "preferred_biomes": [
+      "swamp"
+    ]
+  },
+  "Lizard": {
+    "adult_fierceness": 5.0,
+    "adult_speed": 55,
+    "adult_weight": 4.0,
+    "aggressive": false,
+    "aquatic_boost": 0.0,
+    "avg_spawned_per_turn": 1.0,
+    "can_be_juvenile": false,
+    "can_walk": true,
+    "health_regen": 2.5,
+    "image": "assets/dinosaurs/lizard.png",
+    "maximum_individuals": 20,
+    "name": "Lizard",
+    "preferred_biomes": [
+      "swamp"
+    ]
+  },
+  "Morrolepis": {
+    "adult_fierceness": 0,
+    "adult_speed": 65,
+    "adult_weight": 2.0,
+    "aggressive": false,
+    "aquatic_boost": 0.0,
+    "avg_spawned_per_turn": 1.0,
+    "can_be_juvenile": false,
+    "can_walk": false,
+    "health_regen": 2.5,
+    "image": "assets/dinosaurs/morrolepis.png",
+    "maximum_individuals": 20,
+    "name": "Morrolepis",
+    "preferred_biomes": [
+      "lake"
+    ]
+  },
+  "Scorpion": {
+    "adult_fierceness": 5.5,
+    "adult_speed": 65,
+    "adult_weight": 2.0,
+    "aggressive": true,
+    "aquatic_boost": 0.0,
+    "avg_spawned_per_turn": 1.0,
+    "can_be_juvenile": false,
+    "can_walk": true,
+    "health_regen": 2.5,
+    "image": "assets/dinosaurs/scorpion.png",
+    "maximum_individuals": 20,
+    "name": "Scorpion",
+    "preferred_biomes": [
+      "badlands"
+    ]
+  }
+}
