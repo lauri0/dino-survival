@@ -174,10 +174,8 @@ class Map:
                         existing.weight = min(
                             existing.weight + stats.weight, stats.weight * 10
                         )
-                    elif len(cell_plants) < 2:
+                    else:
                         cell_plants.append(Plant(name=name, weight=stats.weight))
-                    if len(cell_plants) >= 2:
-                        break
 
     def remove_animal(
         self,
