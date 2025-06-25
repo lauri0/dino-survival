@@ -641,6 +641,104 @@ class Game:
         self._reveal_adjacent_mountains()
         return self._finish_turn(msg)
 
+    def threaten(self) -> str:
+        pre = self._start_turn()
+        if pre:
+            return self._finish_turn(pre)
+
+        cell = self.map.animals[self.y][self.x]
+        player_f = max(self.effective_fierceness(), 0.1)
+
+        weaker: list[tuple[NPCAnimal, dict]] = []
+        stronger: list[NPCAnimal] = []
+        for npc in cell:
+            if not npc.alive:
+                continue
+            stats = DINO_STATS.get(npc.name)
+            if stats is None:
+                stats = CRITTER_STATS.get(npc.name, {})
+            npc_f = self._stat_from_weight(
+                npc.weight, stats, "hatchling_fierceness", "adult_fierceness"
+            )
+            if npc_f > player_f:
+                stronger.append(npc)
+            else:
+                weaker.append((npc, stats))
+
+        if stronger:
+            attacker = random.choice(stronger)
+            msg = (
+                f"You threaten the animals, but the {self._npc_label(attacker)} "
+                "attacks and kills you! Game Over."
+            )
+            end_msg = self._apply_turn_costs(False, 2.0)
+            self.player.health = 0
+            msg += end_msg
+            append_event_log(
+                f"Player threatened and was killed by {self._npc_label(attacker)} "
+                f"at ({self.x},{self.y})"
+            )
+            self.last_action = "threaten"
+            self._move_npcs()
+            self.turn_messages.extend(self._spoil_carcasses())
+            self._generate_encounters()
+            self._reveal_adjacent_mountains()
+            return self._finish_turn(msg)
+
+        directions = {
+            "Up": (0, -1),
+            "Right": (1, 0),
+            "Down": (0, 1),
+            "Left": (-1, 0),
+        }
+        moved_count = 0
+        for npc, stats in weaker:
+            options = []
+            can_walk = stats.get("can_walk", True)
+            for dname, (dx, dy) in directions.items():
+                nx, ny = self.x + dx, self.y + dy
+                if not (0 <= nx < self.map.width and 0 <= ny < self.map.height):
+                    continue
+                terrain = self.map.terrain_at(nx, ny).name
+                if not can_walk and terrain != "lake":
+                    continue
+                options.append(dname)
+            npc.next_move = random.choice(options) if options else "None"
+            if options:
+                moved_count += 1
+
+        if moved_count:
+            msg = "You threaten the animals. They scatter!"
+            append_event_log(
+                f"Player threatened {moved_count} animals at ({self.x},{self.y})"
+            )
+        else:
+            msg = "You threaten the animals, but nothing happens."
+            append_event_log(
+                f"Player threatened but nothing fled at ({self.x},{self.y})"
+            )
+
+        end_msg = self._apply_turn_costs(False, 2.0)
+        msg += end_msg
+        win = self._check_victory()
+        if win:
+            msg += win
+        self.last_action = "threaten"
+        if "Game Over" in end_msg:
+            self._move_npcs()
+            self.turn_messages.extend(self._spoil_carcasses())
+            self._generate_encounters()
+            self._reveal_adjacent_mountains()
+            return self._finish_turn(msg)
+        self._move_npcs()
+        attack = self._aggressive_attack_check()
+        if attack:
+            msg += "\n" + attack
+        self.turn_messages.extend(self._spoil_carcasses())
+        self._generate_encounters()
+        self._reveal_adjacent_mountains()
+        return self._finish_turn(msg)
+
     def _spoil_carcasses(self) -> list[str]:
         """Apply spoilage to all carcasses after feeding has occurred."""
         messages: list[str] = []
