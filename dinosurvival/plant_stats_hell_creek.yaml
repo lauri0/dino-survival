@@ -33,7 +33,7 @@
     "name": "Cycads",
     "formations": ["Morrison", "Hell Creek"],
     "image": "assets/plants/cycads.png",
-    "weight": 200.0,
+    "weight": 250.0,
     "growth_chance": {
       "plains": 0.02,
       "forest": 0.01,
