@@ -132,6 +132,33 @@
     "num_eggs": 2,
     "initial_spawn_multiplier": 10
   },
+  "Pectinodon": {
+    "name": "Pectinodon",
+    "image": "assets/dinosaurs/pectinodon.png",
+    "can_be_juvenile": true,
+    "aggressive": true,
+    "forms_packs": false,
+    "diet": [
+      "meat"
+    ],
+    "adult_weight": 25.0,
+    "adult_fierceness": 20.0,
+    "adult_speed": 160,
+    "adult_energy_drain": 5.0,
+    "growth_rate": 0.35,
+    "health_regen": 2.5,
+    "hydration_drain": 2.2,
+    "aquatic_boost": 0.0,
+    "preferred_biomes": [
+      "woodlands",
+      "swamp",
+      "plains"
+    ],
+    "can_walk": true,
+    "egg_laying_interval": 10,
+    "num_eggs": 2,
+    "initial_spawn_multiplier": 5
+  },
   "Thescelosaurus": {
     "name": "Thescelosaurus",
     "image": "assets/dinosaurs/thescelosaurus.png",
