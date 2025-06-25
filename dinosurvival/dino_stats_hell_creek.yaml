@@ -75,8 +75,8 @@
       "plains"
     ],
     "can_walk": true,
-    "egg_laying_interval": 13,
-    "num_eggs": 2,
+    "egg_laying_interval": 16,
+    "num_eggs": 3,
     "initial_spawn_multiplier": 6
   },
   "Leptoceratops": {
@@ -101,8 +101,8 @@
       "swamp"
     ],
     "can_walk": true,
-    "egg_laying_interval": 8,
-    "num_eggs": 2,
+    "egg_laying_interval": 12,
+    "num_eggs": 3,
     "initial_spawn_multiplier": 15
   },
   "Pachycephalosaurus": {
