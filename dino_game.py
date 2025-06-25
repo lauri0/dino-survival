@@ -153,6 +153,12 @@ def choose_dinosaur_gui(root: tk.Tk, setting, on_select) -> None:
         diet_items = [d.value if hasattr(d, 'value') else d for d in info.get('diet', [])]
         diet = ", ".join(diet_items)
         lines.append(f"Diet: {diet}")
+        interval = info.get("egg_laying_interval")
+        if interval is not None:
+            lines.append(f"Egg laying interval: {interval} turns")
+        num_eggs = info.get("num_eggs")
+        if num_eggs is not None:
+            lines.append(f"Eggs laid at once: {num_eggs}")
         for line in lines:
             tk.Label(win, text=line, font=("Helvetica", 12), anchor="w", justify="left").pack(anchor="w")
         tk.Button(win, text="Close", command=win.destroy).pack(pady=5)
@@ -343,6 +349,12 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         diet_items = [d.value if hasattr(d, 'value') else d for d in info.get('diet', [])]
         diet = ", ".join(diet_items)
         lines.append(f"Diet: {diet}")
+        interval = info.get("egg_laying_interval")
+        if interval is not None:
+            lines.append(f"Egg laying interval: {interval} turns")
+        num_eggs = info.get("num_eggs")
+        if num_eggs is not None:
+            lines.append(f"Eggs laid at once: {num_eggs}")
         for line in lines:
             tk.Label(win, text=line, font=("Helvetica", 12), anchor="w", justify="left").pack(anchor="w")
         tk.Button(win, text="Close", command=win.destroy).pack(pady=5)
