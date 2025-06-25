@@ -30,22 +30,25 @@ def test_plants_generated_and_encounters(monkeypatch):
     assert game.current_plants[0].name == "TestPlant"
 
 
-def test_max_two_plants_per_tile(monkeypatch):
+def test_all_plant_types_can_coexist(monkeypatch):
     custom_stats = {
-        "TP": PlantStats(
-            name="TP",
+        f"TP{i}": PlantStats(
+            name=f"TP{i}",
             formations=["Morrison"],
             image="",
             weight=1.0,
             growth_chance={terrain: 1.0 for terrain in MORRISON.terrains},
         )
+        for i in range(4)
     }
     monkeypatch.setattr(game_mod, "PLANT_STATS", custom_stats)
     random.seed(0)
     game = game_mod.Game(MORRISON, "Allosaurus", width=6, height=6)
-    for _ in range(5):
+    # Run a few turns to ensure growth occurs
+    for _ in range(3):
         game.turn("stay")
-    assert len(game.map.plants[0][0]) <= 2
+    names = {p.name for p in game.map.plants[0][0]}
+    assert names == set(custom_stats.keys())
 
 
 def test_plant_weight_accumulates(monkeypatch):
