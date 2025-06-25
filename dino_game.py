@@ -267,19 +267,21 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             abs_path = os.path.join(os.path.dirname(__file__), img_path)
             info_images[name] = load_scaled_image(abs_path, 400, 250, master=win)
             img = info_images.get(name)
-        if img:
-            lbl = tk.Label(win, image=img)
-            lbl.image = img
-            lbl.pack()
 
+        header = tk.Frame(win)
         counts = game.population_history.get(name, [])
+        if img:
+            lbl = tk.Label(header, image=img)
+            lbl.image = img
+            lbl.pack(side="left", padx=5)
+
         if counts:
             width, height = 320, 200
             margin = 24
             top_pad = 10
             right_pad = 10
             canvas = tk.Canvas(
-                win,
+                header,
                 width=width + margin + right_pad,
                 height=height + margin + top_pad,
             )
@@ -325,7 +327,10 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
                 angle=90,
                 font=("Helvetica", 10),
             )
-            canvas.pack()
+            canvas.pack(side="left", padx=5)
+
+        if img or counts:
+            header.pack()
 
         tk.Label(win, text=name, font=("Helvetica", 18)).pack(pady=5)
         lines = []
