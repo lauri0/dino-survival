@@ -755,7 +755,10 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             disp_name = f"{npc.name} ({npc.id})"
             disp_name = f"{disp_name} W:{npc.weight:.1f}kg"
 
-            target_f = game._stat_from_weight(npc.weight, stats, "hatchling_fierceness", "adult_fierceness")
+            target_f = game._stat_from_weight(
+                npc.weight, stats, "hatchling_fierceness", "adult_fierceness"
+            )
+            target_f *= npc.health / 100.0
             target_s = game._stat_from_weight(npc.weight, stats, "hatchling_speed", "adult_speed")
             rel_f = target_f / player_f
             rel_s = target_s / player_s
@@ -930,7 +933,8 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
                 f"{game.player.adult_weight:.0f}kg ({pct:.1f}%)"
             )
         )
-        fierce_label.config(text=f"Fierceness: {game.player.fierceness:.1f}")
+        adj_f = game.player.fierceness * (game.player.health / 100.0)
+        fierce_label.config(text=f"Fierceness: {adj_f:.1f}")
         speed_label.config(text=f"Speed: {game.player.speed:.1f}")
         desc_label.config(
             text=f"Alive descendants: {game.descendant_count()}"

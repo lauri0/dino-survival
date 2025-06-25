@@ -342,6 +342,7 @@ class Game:
                 "hatchling_fierceness",
                 "adult_fierceness",
             )
+            target_f *= npc.health / 100.0
             rel_f = target_f / player_f
             if rel_f > 2.0 and random.random() < 0.5:
                 self.player.health = 0
@@ -358,7 +359,7 @@ class Game:
         )
 
     def effective_fierceness(self) -> float:
-        total = self.player.fierceness
+        total = self.player.fierceness * (self.player.health / 100.0)
         stats = DINO_STATS.get(self.player.name, {})
         for j in self.pack:
             if j:
@@ -660,6 +661,7 @@ class Game:
             npc_f = self._stat_from_weight(
                 npc.weight, stats, "hatchling_fierceness", "adult_fierceness"
             )
+            npc_f *= npc.health / 100.0
             if npc_f > player_f:
                 stronger.append(npc)
             else:
@@ -1002,13 +1004,19 @@ class Game:
 
                     if Diet.MEAT in diet:
                         npc_speed = self._stat_from_weight(npc.weight, stats, "hatchling_speed", "adult_speed")
-                        npc_f = self._stat_from_weight(npc.weight, stats, "hatchling_fierceness", "adult_fierceness")
+                        npc_f = self._stat_from_weight(
+                            npc.weight, stats, "hatchling_fierceness", "adult_fierceness"
+                        )
+                        npc_f *= npc.health / 100.0
                         potential = []
                         for other in animals:
                             if other is npc or not other.alive:
                                 continue
                             o_stats = DINO_STATS.get(other.name, {})
-                            o_f = self._stat_from_weight(other.weight, o_stats, "hatchling_fierceness", "adult_fierceness")
+                            o_f = self._stat_from_weight(
+                                other.weight, o_stats, "hatchling_fierceness", "adult_fierceness"
+                            )
+                            o_f *= other.health / 100.0
                             if o_f >= npc_f:
                                 continue
                             rel_f = o_f / max(npc_f, 0.1)
@@ -1097,7 +1105,10 @@ class Game:
                 self._stat_from_weight(target.weight, stats, "hatchling_speed", "adult_speed"),
                 0.1,
             )
-            target_f = self._stat_from_weight(target.weight, stats, "hatchling_fierceness", "adult_fierceness")
+            target_f = self._stat_from_weight(
+                target.weight, stats, "hatchling_fierceness", "adult_fierceness"
+            )
+            target_f *= target.health / 100.0
         else:
             target_speed = 0.0
             target_f = 0.0
