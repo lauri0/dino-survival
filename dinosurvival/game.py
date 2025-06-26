@@ -158,7 +158,7 @@ class Game:
         ]
         self.next_npc_id = 1
         self._populate_animals()
-        self._spawn_critters()
+        self._spawn_critters(initial=True)
 
         # Pick a random starting location that is within two tiles of a lake but
         # not on a lake tile itself
@@ -275,8 +275,12 @@ class Game:
                     )
                     self.next_npc_id += 1
 
-    def _spawn_critters(self) -> None:
-        """Spawn critters based on per-turn rates and population caps."""
+    def _spawn_critters(self, *, initial: bool = False) -> None:
+        """Spawn critters based on per-turn rates and population caps.
+
+        If ``initial`` is True, spawn half of the maximum number of each
+        critter regardless of the per-turn spawn rate.
+        """
         if not CRITTER_STATS:
             return
 
@@ -299,8 +303,11 @@ class Game:
                         if npc.name == name:
                             count += 1
             available = max_individuals - count
-            spawn_count = round(random.gauss(avg_rate, 0.5))
-            spawn_count = max(0, spawn_count)
+            if initial:
+                spawn_count = max_individuals // 2
+            else:
+                spawn_count = round(random.gauss(avg_rate, 0.5))
+                spawn_count = max(0, spawn_count)
             to_spawn = min(spawn_count, max(0, available))
             spawn_tiles = lake_tiles if not stats.get("can_walk", True) else land_tiles
             for _ in range(to_spawn):

@@ -23,6 +23,7 @@ def test_overcrowded_laying_moves():
         turns_until_lay_eggs=0,
     )
     game.map.animals[0][0].append(ready)
+    random.seed(0)
     game._update_npcs()
     assert not game.map.eggs[0][0]
     assert ready.next_move != "None"
