@@ -143,8 +143,19 @@ class Game:
             self.player.hatchling_weight, MIN_HATCHING_WEIGHT
         )
         self.player.weight = self.player.hatchling_weight
-        self.player.fierceness = self.player.hatchling_fierceness
-        self.player.speed = self.player.hatchling_speed
+        # Scale initial stats based on current weight using adult values
+        self.player.fierceness = self._stat_from_weight(
+            self.player.weight,
+            filtered,
+            "hatchling_fierceness",
+            "adult_fierceness",
+        )
+        self.player.speed = self._stat_from_weight(
+            self.player.weight,
+            filtered,
+            "hatchling_speed",
+            "adult_speed",
+        )
         self.map = Map(
             width,
             height,
@@ -527,9 +538,9 @@ class Game:
         weight_gain = min(available_meat, max_gain)
         self.player.weight = min(self.player.weight + weight_gain, self.player.adult_weight)
 
-        growth_range = self.player.adult_weight - self.player.hatchling_weight
-        if growth_range > 0:
-            pct = (self.player.weight - self.player.hatchling_weight) / growth_range
+        if self.player.adult_weight > 0:
+            pct = self.player.weight / self.player.adult_weight
+            pct = max(0.0, min(pct, 1.0))
             self.player.fierceness = (
                 self.player.hatchling_fierceness
                 + pct * (self.player.adult_fierceness - self.player.hatchling_fierceness)
@@ -557,12 +568,11 @@ class Game:
         hatch_key: str,
         adult_key: str,
     ) -> float:
-        h_weight = stats.get("hatchling_weight", 0.0)
         a_weight = stats.get("adult_weight", 0.0)
-        if a_weight <= h_weight:
+        if a_weight <= 0:
             pct = 1.0
         else:
-            pct = (weight - h_weight) / (a_weight - h_weight)
+            pct = weight / a_weight
         pct = max(0.0, min(pct, 1.0))
         h_val = stats.get(hatch_key, 0.0)
         a_val = stats.get(adult_key, 0.0)
@@ -638,6 +648,7 @@ class Game:
                 sex=None,
                 weight=stats.get("adult_weight", 0.0),
                 abilities=stats.get("abilities", []),
+                last_action="spawned",
             )
             self.map.animals[y][x].append(npc)
             self.next_npc_id += 1
@@ -952,6 +963,8 @@ class Game:
                     npc.age += 1
                     prev_action = npc.last_action
                     npc.last_action = "stay"
+                    if prev_action == "spawned":
+                        continue
                     if "ambush" in npc.abilities:
                         if prev_action == "stay":
                             npc.ambush_streak = min(npc.ambush_streak + 1, 3)
@@ -1490,6 +1503,7 @@ class Game:
                     sex=None,
                     weight=stats.get("adult_weight", 0.0),
                     abilities=stats.get("abilities", []),
+                    last_action="spawned",
                 )
                 self.map.animals[self.y][self.x].append(npc)
                 self.next_npc_id += 1
