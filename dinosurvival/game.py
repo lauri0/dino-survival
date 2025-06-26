@@ -1479,7 +1479,16 @@ class Game:
             result += win
         self._energy_multiplier = 1.0
         self.last_action = action
+        if "Game Over" in end_msg:
+            self.turn_messages.extend(self._update_npcs())
+            self._move_npcs()
+            self.turn_messages.extend(self._spoil_carcasses())
+            self._generate_encounters()
+            self._reveal_adjacent_mountains()
+            return self._finish_turn(result)
+
         self._move_npcs()
+        self.turn_messages.extend(self._update_npcs())
         if action in ("stay", "drink"):
             attack = self._aggressive_attack_check()
             if attack:
@@ -1487,6 +1496,4 @@ class Game:
         self.turn_messages.extend(self._spoil_carcasses())
         self._generate_encounters()
         self._reveal_adjacent_mountains()
-        if "Game Over" in end_msg:
-            return self._finish_turn(result)
         return self._finish_turn(result)
