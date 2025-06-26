@@ -622,6 +622,27 @@ class Game:
             npc.egg_clusters_eaten += 1
         return eat_amount
 
+    def _npc_dig_burrow(self, x: int, y: int) -> bool:
+        """Dig out a burrow instantly and spawn a mammal if present."""
+        burrow = self.map.get_burrow(x, y)
+        if burrow is None or not burrow.full:
+            return False
+        burrow.full = False
+        burrow.progress = 0.0
+        if self.mammal_species:
+            name = random.choice(self.mammal_species)
+            stats = CRITTER_STATS.get(name, {})
+            npc = NPCAnimal(
+                id=self.next_npc_id,
+                name=name,
+                sex=None,
+                weight=stats.get("adult_weight", 0.0),
+                abilities=stats.get("abilities", []),
+            )
+            self.map.animals[y][x].append(npc)
+            self.next_npc_id += 1
+        return True
+
     def _can_player_lay_eggs(self) -> bool:
         stats = DINO_STATS.get(self.player.name, {})
         animals = self.map.animals[self.y][self.x]
@@ -1043,6 +1064,16 @@ class Game:
                                 npc.last_action = "act"
                                 continue
 
+                        if "digger" in npc.abilities and self._npc_dig_burrow(x, y):
+                            if x == self.x and y == self.y:
+                                messages.append(
+                                    f"The {self._npc_label(npc)} digs up a burrow."
+                                )
+                            found_food = True
+                            npc.next_move = "None"
+                            npc.last_action = "act"
+                            continue
+
                     if plants and any(d in diet for d in (Diet.FERNS, Diet.CYCADS, Diet.CONIFERS, Diet.FRUITS)):
                         allowed_plants = {
                             d.value
@@ -1443,7 +1474,8 @@ class Game:
             self._reveal_adjacent_mountains()
             return self._finish_turn("The burrow is empty.")
 
-        burrow.progress = min(100.0, burrow.progress + 25.0)
+        gain = 100.0 if "digger" in self.player.abilities else 25.0
+        burrow.progress = min(100.0, burrow.progress + gain)
         msg = f"Digging... {burrow.progress:.0f}%"
         spawned = None
         if burrow.progress >= 100.0:

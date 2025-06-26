@@ -150,6 +150,9 @@
     "diet": [
       "meat"
     ],
+    "abilities": [
+      "digger"
+    ],
     "egg_laying_interval": 12,
     "forms_packs": false,
     "growth_rate": 0.35,
