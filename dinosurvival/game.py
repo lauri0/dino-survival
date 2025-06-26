@@ -381,7 +381,6 @@ class Game:
         self.turn_messages.extend(self._update_eggs())
         self.map.grow_plants(PLANT_STATS, self.setting.formation)
         self._spawn_critters()
-        self.turn_messages.extend(self._update_npcs())
         if getattr(self.player, "turns_until_lay_eggs", 0) > 0:
             self.player.turns_until_lay_eggs -= 1
         self.player.hydration = max(
@@ -595,6 +594,7 @@ class Game:
             return self._finish_turn(pre)
 
         if not self._can_player_lay_eggs():
+            self.turn_messages.extend(self._update_npcs())
             self._move_npcs()
             self.turn_messages.extend(self._spoil_carcasses())
             self._generate_encounters()
@@ -628,12 +628,14 @@ class Game:
             msg += win
         self.last_action = "lay_eggs"
         if "Game Over" in end_msg:
+            self.turn_messages.extend(self._update_npcs())
             self._move_npcs()
             self.turn_messages.extend(self._spoil_carcasses())
             self._generate_encounters()
             self._reveal_adjacent_mountains()
             return self._finish_turn(msg)
         self._move_npcs()
+        self.turn_messages.extend(self._update_npcs())
         attack = self._aggressive_attack_check()
         if attack:
             msg += "\n" + attack
@@ -727,12 +729,14 @@ class Game:
             msg += win
         self.last_action = "threaten"
         if "Game Over" in end_msg:
+            self.turn_messages.extend(self._update_npcs())
             self._move_npcs()
             self.turn_messages.extend(self._spoil_carcasses())
             self._generate_encounters()
             self._reveal_adjacent_mountains()
             return self._finish_turn(msg)
         self._move_npcs()
+        self.turn_messages.extend(self._update_npcs())
         attack = self._aggressive_attack_check()
         if attack:
             msg += "\n" + attack
@@ -1078,6 +1082,7 @@ class Game:
         cell = self.map.animals[self.y][self.x]
         target = next((n for n in cell if n.id == npc_id), None)
         if target is None:
+            self.turn_messages.extend(self._update_npcs())
             self._move_npcs()
             self.turn_messages.extend(self._spoil_carcasses())
             self._generate_encounters()
@@ -1125,11 +1130,13 @@ class Game:
                     msg += win
                 self.last_action = "hunt"
                 if "Game Over" in end_msg:
+                    self.turn_messages.extend(self._update_npcs())
                     self._move_npcs()
                     self.turn_messages.extend(self._spoil_carcasses())
                     self._generate_encounters()
                     self._reveal_adjacent_mountains()
                     return self._finish_turn(msg)
+                self.turn_messages.extend(self._update_npcs())
                 self._move_npcs()
                 attack = self._aggressive_attack_check()
                 if attack:
@@ -1147,6 +1154,7 @@ class Game:
             damage = (rel_f ** 2) * 100
             self.player.health = max(0.0, self.player.health - damage)
             if self.player.health <= 0:
+                self.turn_messages.extend(self._update_npcs())
                 self._move_npcs()
                 self.turn_messages.extend(self._spoil_carcasses())
                 self._generate_encounters()
@@ -1196,11 +1204,13 @@ class Game:
             msg += win
         self.last_action = "hunt"
         if "Game Over" in end_msg:
+            self.turn_messages.extend(self._update_npcs())
             self._move_npcs()
             self.turn_messages.extend(self._spoil_carcasses())
             self._generate_encounters()
             self._reveal_adjacent_mountains()
             return msg
+        self.turn_messages.extend(self._update_npcs())
         self._move_npcs()
         attack = self._aggressive_attack_check()
         if attack:
@@ -1229,11 +1239,13 @@ class Game:
             msg += win
         self.last_action = "pack"
         if "Game Over" in end_msg:
+            self.turn_messages.extend(self._update_npcs())
             self._move_npcs()
             self.turn_messages.extend(self._spoil_carcasses())
             self._generate_encounters()
             self._reveal_adjacent_mountains()
             return self._finish_turn(msg)
+        self.turn_messages.extend(self._update_npcs())
         self._move_npcs()
         attack = self._aggressive_attack_check()
         if attack:
@@ -1256,11 +1268,13 @@ class Game:
             msg += win
         self.last_action = "pack"
         if "Game Over" in end_msg:
+            self.turn_messages.extend(self._update_npcs())
             self._move_npcs()
             self.turn_messages.extend(self._spoil_carcasses())
             self._generate_encounters()
             self._reveal_adjacent_mountains()
             return self._finish_turn(msg)
+        self.turn_messages.extend(self._update_npcs())
         self._move_npcs()
         attack = self._aggressive_attack_check()
         if attack:
@@ -1285,11 +1299,13 @@ class Game:
             msg += win
         self.last_action = "mate"
         if "Game Over" in end_msg:
+            self.turn_messages.extend(self._update_npcs())
             self._move_npcs()
             self.turn_messages.extend(self._spoil_carcasses())
             self._generate_encounters()
             self._reveal_adjacent_mountains()
             return self._finish_turn(msg)
+        self.turn_messages.extend(self._update_npcs())
         self._move_npcs()
         attack = self._aggressive_attack_check()
         if attack:
@@ -1306,6 +1322,7 @@ class Game:
 
         egg = self.map.take_eggs(self.x, self.y)
         if egg is None:
+            self.turn_messages.extend(self._update_npcs())
             self._move_npcs()
             self.turn_messages.extend(self._spoil_carcasses())
             self._generate_encounters()
@@ -1336,11 +1353,13 @@ class Game:
             msg += win
         self.last_action = "eggs"
         if "Game Over" in end_msg:
+            self.turn_messages.extend(self._update_npcs())
             self._move_npcs()
             self.turn_messages.extend(self._spoil_carcasses())
             self._generate_encounters()
             self._reveal_adjacent_mountains()
             return self._finish_turn(msg)
+        self.turn_messages.extend(self._update_npcs())
         self._move_npcs()
         self.turn_messages.extend(self._spoil_carcasses())
         self._generate_encounters()
