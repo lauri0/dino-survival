@@ -14,7 +14,8 @@
     "maximum_individuals": 20,
     "name": "Centipede",
     "preferred_biomes": [
-      "forest"
+      "forest",
+      "woodlands"
     ]
   },
   "Didelphodon": {
@@ -23,7 +24,7 @@
     "adult_weight": 5.0,
     "aggressive": false,
     "aquatic_boost": 0.0,
-    "avg_spawned_per_turn": 1.0,
+    "avg_spawned_per_turn": 0.0,
     "can_be_juvenile": false,
     "can_walk": true,
     "class": "mammal",
