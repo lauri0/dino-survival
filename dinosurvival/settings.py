@@ -42,6 +42,8 @@ HELL_CREEK = Setting(
     formation="Hell Creek",
     playable_dinos={
         "Tyrannosaurus": {"energy_threshold": 0, "growth_stages": 4},
+        "Acheroraptor": {"energy_threshold": 0, "growth_stages": 3},
+        "Pectinodon": {"energy_threshold": 0, "growth_stages": 3},
     },
     terrains={
         "badlands": Terrain("badlands", {"small_prey": 0.3, "large_prey": 0.7}),
