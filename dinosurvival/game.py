@@ -366,13 +366,7 @@ class Game:
             stats = DINO_STATS.get(npc.name, {})
             if not stats.get("aggressive"):
                 continue
-            target_f = self._stat_from_weight(
-                npc.weight,
-                stats,
-                "hatchling_fierceness",
-                "adult_fierceness",
-            )
-            target_f *= npc.health / 100.0
+            target_f = self.npc_effective_fierceness(npc, stats, self.x, self.y)
             rel_f = target_f / player_f
             if rel_f > 2.0 and random.random() < 0.5:
                 self.player.health = 0
@@ -389,7 +383,14 @@ class Game:
         )
 
     def effective_fierceness(self) -> float:
-        total = self.player.fierceness * (self.player.health / 100.0)
+        base = self.player.fierceness * (self.player.health / 100.0)
+        if "pack_hunter" in self.player.abilities:
+            if any(
+                npc.alive and npc.name == self.player.name
+                for npc in self.map.animals[self.y][self.x]
+            ):
+                base *= 2
+        total = base
         stats = DINO_STATS.get(self.player.name, {})
         for j in self.pack:
             if j:
@@ -422,6 +423,25 @@ class Game:
         if "ambush" in npc.abilities:
             speed *= 1 + min(npc.ambush_streak, 3) * 0.05
         return max(speed, 0.1)
+
+    def _npc_has_packmate(self, npc: NPCAnimal, x: int, y: int) -> bool:
+        for other in self.map.animals[y][x]:
+            if other is npc:
+                continue
+            if other.alive and other.name == npc.name:
+                return True
+        if self.x == x and self.y == y and self.player.name == npc.name:
+            return True
+        return False
+
+    def npc_effective_fierceness(self, npc: NPCAnimal, stats: dict, x: int, y: int) -> float:
+        f = self._stat_from_weight(
+            npc.weight, stats, "hatchling_fierceness", "adult_fierceness"
+        )
+        f *= npc.health / 100.0
+        if "pack_hunter" in npc.abilities and self._npc_has_packmate(npc, x, y):
+            f *= 2
+        return f
 
     def _start_turn(self) -> str:
         self.turn_messages = []
@@ -738,10 +758,7 @@ class Game:
             stats = DINO_STATS.get(npc.name)
             if stats is None:
                 stats = CRITTER_STATS.get(npc.name, {})
-            npc_f = self._stat_from_weight(
-                npc.weight, stats, "hatchling_fierceness", "adult_fierceness"
-            )
-            npc_f *= npc.health / 100.0
+            npc_f = self.npc_effective_fierceness(npc, stats, self.x, self.y)
             if npc_f > player_f:
                 stronger.append(npc)
             else:
@@ -1114,19 +1131,13 @@ class Game:
                         )
                         if "ambush" in npc.abilities:
                             npc_speed *= 1 + min(npc.ambush_streak, 3) * 0.05
-                        npc_f = self._stat_from_weight(
-                            npc.weight, stats, "hatchling_fierceness", "adult_fierceness"
-                        )
-                        npc_f *= npc.health / 100.0
+                        npc_f = self.npc_effective_fierceness(npc, stats, x, y)
                         potential = []
                         for other in animals:
                             if other is npc or not other.alive:
                                 continue
                             o_stats = DINO_STATS.get(other.name, {})
-                            o_f = self._stat_from_weight(
-                                other.weight, o_stats, "hatchling_fierceness", "adult_fierceness"
-                            )
-                            o_f *= other.health / 100.0
+                            o_f = self.npc_effective_fierceness(other, o_stats, x, y)
                             if o_f >= npc_f:
                                 continue
                             rel_f = o_f / max(npc_f, 0.1)
@@ -1209,10 +1220,7 @@ class Game:
 
         if target.alive:
             target_speed = self.npc_effective_speed(target, stats)
-            target_f = self._stat_from_weight(
-                target.weight, stats, "hatchling_fierceness", "adult_fierceness"
-            )
-            target_f *= target.health / 100.0
+            target_f = self.npc_effective_fierceness(target, stats, self.x, self.y)
         else:
             target_speed = 0.0
             target_f = 0.0
