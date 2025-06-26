@@ -30,7 +30,7 @@
     "class": "mammal",
     "health_regen": 2.5,
     "image": "assets/dinosaurs/didelphodon.png",
-    "maximum_individuals": 20,
+    "maximum_individuals": 0,
     "name": "Didelphodon",
     "preferred_biomes": [
       "forest"
