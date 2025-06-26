@@ -22,7 +22,7 @@ def calculate_catch_chance(rel_speed: float) -> float:
     return 0.0
 from .dinosaur import DinosaurStats, Diet, NPCAnimal
 from .plant import PlantStats, Plant
-from .map import Map, EggCluster
+from .map import Map, EggCluster, Burrow
 from .settings import Setting
 from .logging_utils import append_event_log
 
@@ -123,6 +123,7 @@ class EncounterEntry:
     npc: NPCAnimal | None = None
     in_pack: bool = False
     eggs: EggCluster | None = None
+    burrow: Burrow | None = None
 
 # Load default stats for the Morrison formation
 set_stats_for_formation("Morrison")
@@ -151,6 +152,10 @@ class Game:
             setting.height_levels,
             setting.humidity_levels,
         )
+        self.map.populate_burrows(setting.num_burrows)
+        self.mammal_species: list[str] = [
+            n for n, s in CRITTER_STATS.items() if s.get("class") == "mammal"
+        ]
         self.next_npc_id = 1
         self._populate_animals()
         self._spawn_critters()
@@ -322,6 +327,9 @@ class Game:
                 cell_animals.remove(npc)
                 continue
         cell_plants = self.map.plants[self.y][self.x]
+        burrow = self.map.get_burrow(self.x, self.y)
+        if burrow is not None:
+            entries.append(EncounterEntry(burrow=burrow))
         for egg in self.map.eggs[self.y][self.x]:
             entries.append(EncounterEntry(npc=None, eggs=egg))
         for npc in cell_animals:
@@ -1391,6 +1399,70 @@ class Game:
         if win:
             msg += win
         self.last_action = "eggs"
+        if "Game Over" in end_msg:
+            self.turn_messages.extend(self._update_npcs())
+            self._move_npcs()
+            self.turn_messages.extend(self._spoil_carcasses())
+            self._generate_encounters()
+            self._reveal_adjacent_mountains()
+            return self._finish_turn(msg)
+        self.turn_messages.extend(self._update_npcs())
+        self._move_npcs()
+        self.turn_messages.extend(self._spoil_carcasses())
+        self._generate_encounters()
+        self._reveal_adjacent_mountains()
+        return self._finish_turn(msg)
+
+    def dig_burrow(self) -> str:
+        pre = self._start_turn()
+        if pre:
+            return self._finish_turn(pre)
+
+        burrow = self.map.get_burrow(self.x, self.y)
+        if burrow is None:
+            self.turn_messages.extend(self._update_npcs())
+            self._move_npcs()
+            self.turn_messages.extend(self._spoil_carcasses())
+            self._generate_encounters()
+            self._reveal_adjacent_mountains()
+            return self._finish_turn("There is no burrow here.")
+
+        if not burrow.full:
+            self.turn_messages.extend(self._update_npcs())
+            self._move_npcs()
+            self.turn_messages.extend(self._spoil_carcasses())
+            self._generate_encounters()
+            self._reveal_adjacent_mountains()
+            return self._finish_turn("The burrow is empty.")
+
+        burrow.progress = min(100.0, burrow.progress + 25.0)
+        msg = f"Digging... {burrow.progress:.0f}%"
+        spawned = None
+        if burrow.progress >= 100.0:
+            burrow.full = False
+            burrow.progress = 0.0
+            if self.mammal_species:
+                name = random.choice(self.mammal_species)
+                stats = CRITTER_STATS.get(name, {})
+                npc = NPCAnimal(
+                    id=self.next_npc_id,
+                    name=name,
+                    sex=None,
+                    weight=stats.get("adult_weight", 0.0),
+                    abilities=stats.get("abilities", []),
+                )
+                self.map.animals[self.y][self.x].append(npc)
+                self.next_npc_id += 1
+                spawned = name
+        if spawned:
+            msg = f"You dug out a {spawned}!"
+
+        end_msg = self._apply_turn_costs(False)
+        msg += end_msg
+        win = self._check_victory()
+        if win:
+            msg += win
+        self.last_action = "dig"
         if "Game Over" in end_msg:
             self.turn_messages.extend(self._update_npcs())
             self._move_npcs()

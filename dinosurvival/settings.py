@@ -11,6 +11,7 @@ class Setting:
     terrains: Dict[str, Terrain]
     height_levels: Dict[str, float]
     humidity_levels: Dict[str, float]
+    num_burrows: int = 0
 
 
 MORRISON = Setting(
@@ -33,6 +34,7 @@ MORRISON = Setting(
     },
     height_levels={"low": 0.3, "normal": 0.45, "mountain": 0.25},
     humidity_levels={"arid": 0.3, "normal": 0.4, "humid": 0.3},
+    num_burrows=0,
 )
 
 HELL_CREEK = Setting(
@@ -52,4 +54,5 @@ HELL_CREEK = Setting(
     },
     height_levels={"low": 0.3, "normal": 0.6, "mountain": 0.1},
     humidity_levels={"arid": 0.2, "normal": 0.5, "humid": 0.3},
+    num_burrows=5,
 )

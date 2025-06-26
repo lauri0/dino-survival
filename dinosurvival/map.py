@@ -20,6 +20,14 @@ class EggCluster:
     is_descendant: bool = False
 
 
+@dataclass
+class Burrow:
+    """A small ground burrow that may contain an animal."""
+
+    full: bool = True
+    progress: float = 0.0
+
+
 class Map:
     def __init__(
         self,
@@ -125,6 +133,10 @@ class Map:
         self.animals: List[List[List["NPCAnimal"]]] = [
             [[] for _ in range(width)] for _ in range(height)
         ]
+        # Optional burrow present in each cell
+        self.burrows: List[List[Optional[Burrow]]] = [
+            [None for _ in range(width)] for _ in range(height)
+        ]
 
     def terrain_at(self, x: int, y: int) -> Terrain:
         return self.grid[y][x]
@@ -156,6 +168,30 @@ class Map:
     def has_nest(self, x: int, y: int) -> bool:
         """Return ``True`` if any eggs are present in the cell."""
         return bool(self.eggs[y][x])
+
+    def has_burrow(self, x: int, y: int) -> bool:
+        """Return ``True`` if a burrow exists in the cell."""
+        return self.burrows[y][x] is not None
+
+    def spawn_burrow(self, x: int, y: int, full: bool = True) -> None:
+        self.burrows[y][x] = Burrow(full=full)
+
+    def get_burrow(self, x: int, y: int) -> Optional[Burrow]:
+        return self.burrows[y][x]
+
+    def populate_burrows(self, count: int) -> None:
+        """Randomly place the given number of burrows on land tiles."""
+        land_tiles: List[Tuple[int, int]] = []
+        for y in range(self.height):
+            for x in range(self.width):
+                if self.terrain_at(x, y).name != "lake":
+                    land_tiles.append((x, y))
+        for _ in range(count):
+            if not land_tiles:
+                break
+            x, y = random.choice(land_tiles)
+            land_tiles.remove((x, y))
+            self.spawn_burrow(x, y, full=True)
 
     def grow_plants(self, plant_stats: dict[str, "PlantStats"], formation: str) -> None:
         for y in range(self.height):

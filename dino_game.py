@@ -674,6 +674,23 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
                 b.config(state="disabled")
             show_final_stats("Victory", "Congratulations! Your lineage lives on!")
 
+    def do_dig_burrow() -> None:
+        result = game.dig_burrow()
+        append_output(result)
+        update_stats()
+        update_biome()
+        update_map()
+        update_encounters()
+        update_plants()
+        if "Game Over" in result:
+            for b in move_buttons.values():
+                b.config(state="disabled")
+            show_final_stats("Game Over", "You have perished!")
+        if game.won:
+            for b in move_buttons.values():
+                b.config(state="disabled")
+            show_final_stats("Victory", "Congratulations! Your lineage lives on!")
+
     def do_lay_eggs() -> None:
         result = game.lay_eggs()
         append_output(result)
@@ -738,6 +755,25 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             row.grid_columnconfigure(1, weight=1)
             slot = {"frame": row, "img": img, "name": name_lbl, "stats": stats_lbl, "btn": btn, "info": info_btn}
             encounter_rows.append(slot)
+            if entry.burrow:
+                b = entry.burrow
+                key = "burrow"
+                if key not in encounter_images:
+                    path = os.path.join(os.path.dirname(__file__), "assets/other/burrow.png")
+                    encounter_images[key] = load_scaled_image(path, 100, 63)
+                bimg = encounter_images.get(key)
+                if bimg:
+                    slot["img"].configure(image=bimg)
+                    slot["img"].image = bimg
+                else:
+                    slot["img"].configure(image="")
+                status = "Full" if b.full else "Empty"
+                slot["name"].configure(text=f"Burrow ({status})")
+                slot["stats"].configure(text=f"Dig:{b.progress:.0f}%")
+                slot["btn"].configure(command=do_dig_burrow, text="Dig")
+                slot["info"].grid_remove()
+                slot["frame"].pack(fill="x", pady=2, expand=True)
+                continue
             if entry.eggs:
                 cluster = entry.eggs
                 slot["img"].configure(image="")
@@ -886,6 +922,17 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
                         tile_size / 2 + 3,
                         tile_size / 2 + 3,
                         fill="black",
+                        outline="black",
+                    )
+                if revealed and game.map.has_burrow(x, y):
+                    canvas.create_polygon(
+                        tile_size / 2,
+                        tile_size / 2 - 4,
+                        tile_size / 2 - 4,
+                        tile_size / 2 + 4,
+                        tile_size / 2 + 4,
+                        tile_size / 2 + 4,
+                        fill="brown",
                         outline="black",
                     )
                 if (x, y) == (game.x, game.y):
