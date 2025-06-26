@@ -419,6 +419,7 @@ class Game:
         self.turn_messages.extend(self._update_eggs())
         self.map.grow_plants(PLANT_STATS, self.setting.formation)
         self._spawn_critters()
+        self.map.refresh_burrows()
         if getattr(self.player, "turns_until_lay_eggs", 0) > 0:
             self.player.turns_until_lay_eggs -= 1
         self.player.hydration = max(

@@ -174,6 +174,9 @@ class Map:
         return self.burrows[y][x] is not None
 
     def spawn_burrow(self, x: int, y: int, full: bool = True) -> None:
+        """Create a burrow on the specified cell if it is not a lake."""
+        if self.terrain_at(x, y).name == "lake":
+            return
         self.burrows[y][x] = Burrow(full=full)
 
     def get_burrow(self, x: int, y: int) -> Optional[Burrow]:
@@ -192,6 +195,16 @@ class Map:
             x, y = random.choice(land_tiles)
             land_tiles.remove((x, y))
             self.spawn_burrow(x, y, full=True)
+
+    def refresh_burrows(self, chance: float = 0.02) -> None:
+        """Randomly refill empty burrows based on a probability."""
+        for y in range(self.height):
+            for x in range(self.width):
+                burrow = self.burrows[y][x]
+                if burrow is not None and not burrow.full:
+                    if random.random() < chance:
+                        burrow.full = True
+                        burrow.progress = 0.0
 
     def grow_plants(self, plant_stats: dict[str, "PlantStats"], formation: str) -> None:
         for y in range(self.height):
