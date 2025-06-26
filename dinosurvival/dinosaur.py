@@ -37,6 +37,8 @@ class DinosaurStats:
     mated: bool = False
     turns_until_lay_eggs: int = 0
     diet: list[Diet] = field(default_factory=list)
+    abilities: list[str] = field(default_factory=list)
+    ambush_streak: int = 0
 
     def is_exhausted(self) -> bool:
         return self.energy <= 0
@@ -64,5 +66,8 @@ class NPCAnimal:
     hunts: dict[str, int] = field(default_factory=dict)
     egg_clusters_eaten: int = 0
     is_descendant: bool = False
+    abilities: list[str] = field(default_factory=list)
+    ambush_streak: int = 0
+    last_action: str = "None"
 
 
