@@ -83,8 +83,12 @@ def display_legacy_stats(parent: tk.Widget, formation: str, dname: str) -> None:
     tk.Button(win, text="Close", command=win.destroy).pack(pady=5)
 
 
-def choose_dinosaur_gui(root: tk.Tk, setting, on_select) -> None:
-    """Display a dinosaur selection menu inside an existing root window."""
+def choose_dinosaur_gui(root: tk.Tk, setting, on_select, on_back=None) -> None:
+    """Display a dinosaur selection menu inside an existing root window.
+
+    ``on_back`` can be provided to return to a previous menu instead of
+    closing the application.
+    """
 
     frame = tk.Frame(root)
     frame.pack(expand=True)
@@ -177,7 +181,10 @@ def choose_dinosaur_gui(root: tk.Tk, setting, on_select) -> None:
         tk.Button(row, text="Dinosaur Stats", command=lambda d=dino: show_legacy(d)).pack(side="left")
         row.pack(pady=5)
 
-    tk.Button(frame, text="Quit", width=20, height=2, command=root.destroy).pack(pady=10)
+    btn_row = tk.Frame(frame)
+    btn_row.pack(pady=10)
+    tk.Button(btn_row, text="Back", width=20, height=2, command=lambda: (frame.destroy(), on_back() if on_back else None)).pack(side="left", padx=5)
+    tk.Button(btn_row, text="Quit", width=20, height=2, command=root.destroy).pack(side="left", padx=5)
 
     # This function does not start a new main loop; the provided root must already
     # be running. The window will be destroyed when a dinosaur is chosen.
@@ -1143,7 +1150,7 @@ def launch_menu():
             selection["setting"] = setting
             selection["dino"] = dino
 
-        choose_dinosaur_gui(root, setting, on_select)
+        choose_dinosaur_gui(root, setting, on_select, on_back=show_start_menu)
 
     show_start_menu()
     root.mainloop()
