@@ -397,6 +397,11 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         tk.Label(win, text=f"Age: {npc.age} turns", font=("Helvetica", 12), anchor="w").pack(anchor="w")
         tk.Label(win, text=f"Health: {npc.health:.0f}%", font=("Helvetica", 12), anchor="w").pack(anchor="w")
         tk.Label(win, text=f"Energy: {npc.energy:.0f}%", font=("Helvetica", 12), anchor="w").pack(anchor="w")
+        abil = "None"
+        if "ambush" in npc.abilities:
+            bonus = min(npc.ambush_streak, 3) * 5
+            abil = f"Ambush ({npc.ambush_streak} stacks) +{bonus}% speed"
+        tk.Label(win, text=f"Abilities: {abil}", font=("Helvetica", 12), anchor="w").pack(anchor="w")
         sep = tk.Frame(win, height=2, bd=1, relief="sunken")
         sep.pack(fill="x", pady=5)
         if npc.hunts:
@@ -421,7 +426,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             font=("Helvetica", 12),
             anchor="w",
         ).pack(anchor="w")
-        speed = game._stat_from_weight(npc.weight, stats, "hatchling_speed", "adult_speed")
+        speed = game.npc_effective_speed(npc, stats)
         tk.Label(
             win,
             text=f"Speed: {speed:.1f}/{stats.get('adult_speed', 0)}",
@@ -709,14 +714,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             child.destroy()
         encounter_rows.clear()
         player_f = game.effective_fierceness() or 1
-        player_s = game.player.speed or 1
-        terrain = game.map.terrain_at(game.x, game.y).name
-        boost = 0.0
-        if terrain == "lake":
-            boost = game.player.aquatic_boost
-        elif terrain == "swamp":
-            boost = game.player.aquatic_boost / 2
-        player_s *= 1 + boost / 100.0
+        player_s = game.player_effective_speed() or 1
         entries = game.current_encounters
         for entry in entries:
             row = tk.Frame(encounter_list)
@@ -771,7 +769,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
                 npc.weight, stats, "hatchling_fierceness", "adult_fierceness"
             )
             target_f *= npc.health / 100.0
-            target_s = game._stat_from_weight(npc.weight, stats, "hatchling_speed", "adult_speed")
+            target_s = game.npc_effective_speed(npc, stats)
             rel_f = target_f / player_f
             rel_s = target_s / player_s
             catch = game_module.calculate_catch_chance(rel_s)
@@ -947,7 +945,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         )
         adj_f = game.player.fierceness * (game.player.health / 100.0)
         fierce_label.config(text=f"Fierceness: {adj_f:.1f}")
-        speed_label.config(text=f"Speed: {game.player.speed:.1f}")
+        speed_label.config(text=f"Speed: {game.player_effective_speed():.1f}")
         desc_label.config(
             text=f"Alive descendants: {game.descendant_count()}"
         )

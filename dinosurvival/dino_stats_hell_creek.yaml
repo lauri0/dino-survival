@@ -220,6 +220,7 @@
     "diet": [
       "meat"
     ],
+    "abilities": ["ambush"],
     "adult_weight": 8000.0,
     "adult_fierceness": 8000.0,
     "adult_speed": 38,

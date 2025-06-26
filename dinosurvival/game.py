@@ -77,6 +77,8 @@ def _load_stats(formation: str) -> tuple[dict, dict[str, PlantStats], dict]:
     for stats in dino_stats.values():
         if "diet" in stats:
             stats["diet"] = [Diet(item) for item in stats.get("diet", [])]
+        if "abilities" in stats:
+            stats["abilities"] = list(stats.get("abilities", []))
         aw = stats.get("adult_weight", 0)
         if "hatchling_weight" not in stats:
             stats["hatchling_weight"] = max(
@@ -263,6 +265,7 @@ class Game:
                             name=name,
                             sex=sex,
                             weight=weight,
+                            abilities=stats.get("abilities", []),
                         )
                     )
                     self.next_npc_id += 1
@@ -305,6 +308,7 @@ class Game:
                         name=name,
                         sex=None,
                         weight=stats.get("adult_weight", 0.0),
+                        abilities=stats.get("abilities", []),
                     )
                 )
                 self.next_npc_id += 1
@@ -372,9 +376,35 @@ class Game:
             total += f
         return total
 
+    def player_effective_speed(self) -> float:
+        speed = self.player.speed
+        terrain = self.map.terrain_at(self.x, self.y).name
+        boost = 0.0
+        if terrain == "lake":
+            boost = self.player.aquatic_boost
+        elif terrain == "swamp":
+            boost = self.player.aquatic_boost / 2
+        speed *= 1 + boost / 100.0
+        if "ambush" in self.player.abilities:
+            speed *= 1 + min(self.player.ambush_streak, 3) * 0.05
+        return max(speed, 0.1)
+
+    def npc_effective_speed(self, npc: NPCAnimal, stats: dict) -> float:
+        speed = self._stat_from_weight(
+            npc.weight, stats, "hatchling_speed", "adult_speed"
+        )
+        if "ambush" in npc.abilities:
+            speed *= 1 + min(npc.ambush_streak, 3) * 0.05
+        return max(speed, 0.1)
+
     def _start_turn(self) -> str:
         self.turn_messages = []
         self.turn_count += 1
+        if "ambush" in self.player.abilities:
+            if self.last_action == "stay":
+                self.player.ambush_streak = min(self.player.ambush_streak + 1, 3)
+            else:
+                self.player.ambush_streak = 0
         self._record_population()
         terrain = self.map.terrain_at(self.x, self.y).name
         self.biome_turns[terrain] = self.biome_turns.get(terrain, 0) + 1
@@ -788,6 +818,7 @@ class Game:
                                     name=egg.species,
                                     sex=None,
                                     weight=hatch_w,
+                                    abilities=DINO_STATS.get(egg.species, {}).get("abilities", []),
                                     is_descendant=egg.is_descendant,
                                 )
                             )
@@ -882,6 +913,13 @@ class Game:
                         continue
 
                     npc.age += 1
+                    prev_action = npc.last_action
+                    npc.last_action = "stay"
+                    if "ambush" in npc.abilities:
+                        if prev_action == "stay":
+                            npc.ambush_streak = min(npc.ambush_streak + 1, 3)
+                        else:
+                            npc.ambush_streak = 0
                     stats = DINO_STATS.get(npc.name)
                     if stats is None:
                         cstats = CRITTER_STATS.get(npc.name)
@@ -946,6 +984,7 @@ class Game:
                         npc.turns_until_lay_eggs = stats.get("egg_laying_interval", 0)
                         if x == self.x and y == self.y:
                             messages.append(f"The {self._npc_label(npc)} lays eggs.")
+                        npc.last_action = "act"
                         continue
 
                     if npc.energy > 90:
@@ -967,6 +1006,7 @@ class Game:
                                 animals.remove(carcass)
                             found_food = True
                             npc.next_move = "None"
+                            npc.last_action = "act"
                             continue
 
                         egg_clusters = self.map.eggs[y][x]
@@ -984,6 +1024,7 @@ class Game:
                                 egg_clusters.remove(egg)
                                 found_food = True
                                 npc.next_move = "None"
+                                npc.last_action = "act"
                                 continue
 
                     if plants and any(d in diet for d in (Diet.FERNS, Diet.CYCADS, Diet.CONIFERS, Diet.FRUITS)):
@@ -1004,10 +1045,15 @@ class Game:
                                 plants.remove(chosen)
                             found_food = True
                             npc.next_move = "None"
+                            npc.last_action = "act"
                             continue
 
                     if Diet.MEAT in diet:
-                        npc_speed = self._stat_from_weight(npc.weight, stats, "hatchling_speed", "adult_speed")
+                        npc_speed = self._stat_from_weight(
+                            npc.weight, stats, "hatchling_speed", "adult_speed"
+                        )
+                        if "ambush" in npc.abilities:
+                            npc_speed *= 1 + min(npc.ambush_streak, 3) * 0.05
                         npc_f = self._stat_from_weight(
                             npc.weight, stats, "hatchling_fierceness", "adult_fierceness"
                         )
@@ -1052,6 +1098,7 @@ class Game:
                                     animals.remove(target)
                                 found_food = True
                                 npc.next_move = "None"
+                                npc.last_action = "act"
                                 continue
 
                     if found_food:
@@ -1070,6 +1117,7 @@ class Game:
                                 npc.fierceness = 0.0
                                 npc.speed = 0.0
                                 continue
+                        npc.last_action = "move"
         return messages
 
 
@@ -1097,19 +1145,10 @@ class Game:
 
         stats = DINO_STATS.get(target.name, {})
 
-        terrain = self.map.terrain_at(self.x, self.y).name
-        boost = 0.0
-        if terrain == "lake":
-            boost = self.player.aquatic_boost
-        elif terrain == "swamp":
-            boost = self.player.aquatic_boost / 2
-        player_speed = max(self.player.speed * (1 + boost / 100.0), 0.1)
+        player_speed = self.player_effective_speed()
 
         if target.alive:
-            target_speed = max(
-                self._stat_from_weight(target.weight, stats, "hatchling_speed", "adult_speed"),
-                0.1,
-            )
+            target_speed = self.npc_effective_speed(target, stats)
             target_f = self._stat_from_weight(
                 target.weight, stats, "hatchling_fierceness", "adult_fierceness"
             )
