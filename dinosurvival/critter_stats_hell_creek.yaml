@@ -1,17 +1,38 @@
 {
   "Centipede": {
-    "name": "Centipede",
-    "image": "assets/dinosaurs/centipede.png",
-    "can_be_juvenile": false,
-    "aggressive": false,
-    "adult_weight": 1.0,
     "adult_fierceness": 0.0,
     "adult_speed": 55,
-    "health_regen": 2.5,
+    "adult_weight": 1.0,
+    "aggressive": false,
     "aquatic_boost": 0.0,
-    "preferred_biomes": ["forest"],
-    "can_walk": true,
     "avg_spawned_per_turn": 1.0,
-    "maximum_individuals": 20
+    "can_be_juvenile": false,
+    "can_walk": true,
+    "class": "arthropod",
+    "health_regen": 2.5,
+    "image": "assets/dinosaurs/centipede.png",
+    "maximum_individuals": 20,
+    "name": "Centipede",
+    "preferred_biomes": [
+      "forest"
+    ]
+  },
+  "Didelphodon": {
+    "adult_fierceness": 2.0,
+    "adult_speed": 60,
+    "adult_weight": 5.0,
+    "aggressive": false,
+    "aquatic_boost": 0.0,
+    "avg_spawned_per_turn": 1.0,
+    "can_be_juvenile": false,
+    "can_walk": true,
+    "class": "mammal",
+    "health_regen": 2.5,
+    "image": "assets/dinosaurs/didelphodon.png",
+    "maximum_individuals": 20,
+    "name": "Didelphodon",
+    "preferred_biomes": [
+      "forest"
+    ]
   }
 }

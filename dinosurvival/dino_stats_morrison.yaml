@@ -8,6 +8,7 @@
     "aquatic_boost": 0.0,
     "can_be_juvenile": true,
     "can_walk": true,
+    "class": "reptile",
     "diet": [
       "ferns",
       "cycads"
@@ -35,6 +36,7 @@
     "aquatic_boost": 0.0,
     "can_be_juvenile": true,
     "can_walk": true,
+    "class": "reptile",
     "diet": [
       "meat"
     ],
@@ -61,6 +63,7 @@
     "aquatic_boost": 0.0,
     "can_be_juvenile": true,
     "can_walk": true,
+    "class": "reptile",
     "diet": [
       "meat"
     ],
@@ -86,6 +89,7 @@
     "aquatic_boost": 0.0,
     "can_be_juvenile": true,
     "can_walk": true,
+    "class": "reptile",
     "diet": [
       "conifers"
     ],
@@ -112,6 +116,7 @@
     "aquatic_boost": 0.0,
     "can_be_juvenile": true,
     "can_walk": true,
+    "class": "reptile",
     "diet": [
       "conifers",
       "cycads"
@@ -139,6 +144,7 @@
     "aquatic_boost": 0.0,
     "can_be_juvenile": true,
     "can_walk": true,
+    "class": "reptile",
     "diet": [
       "ferns"
     ],
@@ -164,6 +170,7 @@
     "aquatic_boost": 40.0,
     "can_be_juvenile": true,
     "can_walk": true,
+    "class": "reptile",
     "diet": [
       "meat"
     ],
@@ -190,6 +197,7 @@
     "aquatic_boost": 0.0,
     "can_be_juvenile": true,
     "can_walk": true,
+    "class": "reptile",
     "diet": [
       "conifers",
       "cycads"
@@ -216,6 +224,7 @@
     "aquatic_boost": 0.0,
     "can_be_juvenile": true,
     "can_walk": true,
+    "class": "reptile",
     "diet": [
       "ferns",
       "fruits"
@@ -243,6 +252,7 @@
     "aquatic_boost": 0.0,
     "can_be_juvenile": true,
     "can_walk": true,
+    "class": "reptile",
     "diet": [
       "fruits",
       "insects"
@@ -269,6 +279,7 @@
     "aquatic_boost": 0.0,
     "can_be_juvenile": true,
     "can_walk": true,
+    "class": "reptile",
     "diet": [
       "ferns"
     ],
@@ -294,6 +305,7 @@
     "aquatic_boost": 0.0,
     "can_be_juvenile": true,
     "can_walk": true,
+    "class": "reptile",
     "diet": [
       "ferns"
     ],
@@ -320,6 +332,7 @@
     "aquatic_boost": 0.0,
     "can_be_juvenile": true,
     "can_walk": true,
+    "class": "reptile",
     "diet": [
       "fruits"
     ],
@@ -345,6 +358,7 @@
     "aquatic_boost": 0.0,
     "can_be_juvenile": true,
     "can_walk": true,
+    "class": "reptile",
     "diet": [
       "meat"
     ],
@@ -370,6 +384,7 @@
     "aquatic_boost": 0.0,
     "can_be_juvenile": true,
     "can_walk": true,
+    "class": "reptile",
     "diet": [
       "ferns",
       "cycads"
@@ -398,6 +413,7 @@
     "aquatic_boost": 0.0,
     "can_be_juvenile": true,
     "can_walk": true,
+    "class": "reptile",
     "diet": [
       "meat"
     ],
