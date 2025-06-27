@@ -139,6 +139,13 @@ class Map:
         self.burrows: List[List[Optional[Burrow]]] = [
             [None for _ in range(width)] for _ in range(height)
         ]
+        # Track active lava tiles and erupting volcanoes
+        self.lava_info: List[List[Optional[Dict[str, int]]]] = [
+            [None for _ in range(width)] for _ in range(height)
+        ]
+        self.erupting: List[List[bool]] = [
+            [False for _ in range(width)] for _ in range(height)
+        ]
 
     def terrain_at(self, x: int, y: int) -> Terrain:
         return self.grid[y][x]
@@ -251,6 +258,98 @@ class Map:
             del cell[idx]
             return True
         return False
+
+    # ------------------------------------------------------------------
+    # Volcano and lava handling
+    # ------------------------------------------------------------------
+
+    def start_volcano_eruption(self, x: int, y: int, size: str = "small") -> None:
+        """Trigger a volcanic eruption at ``(x, y)``.
+
+        ``size`` may be ``"small"``, ``"medium"``, or ``"large"`` and
+        controls how far the lava will spread.
+        """
+        if self.terrain_at(x, y).name != "volcano":
+            return
+
+        steps_map = {"small": 0, "medium": 2, "large": 4}
+        steps = steps_map.get(size, 0)
+
+        self.erupting[y][x] = True
+
+        affected = [(x, y), (x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)]
+        for ax, ay in affected:
+            if not (0 <= ax < self.width and 0 <= ay < self.height):
+                continue
+            # Kill animals, eggs, and burrows
+            self.animals[ay][ax] = []
+            self.eggs[ay][ax] = []
+            self.burrows[ay][ax] = None
+
+            self.grid[ay][ax] = self.terrains["lava"]
+            spread_steps = steps if (ax == x and ay == y) else max(steps - 1, 0)
+            self.lava_info[ay][ax] = {"steps": spread_steps, "cooldown": 1}
+
+    def update_lava(self) -> None:
+        """Advance lava spread and handle solidification."""
+
+        new_lava: List[Tuple[int, int, int]] = []
+        to_solidify: List[Tuple[int, int]] = []
+
+        for y in range(self.height):
+            for x in range(self.width):
+                info = self.lava_info[y][x]
+                if info is None:
+                    continue
+
+                if info["steps"] > 0:
+                    for nx, ny in (
+                        (x + 1, y),
+                        (x - 1, y),
+                        (x, y + 1),
+                        (x, y - 1),
+                    ):
+                        if 0 <= nx < self.width and 0 <= ny < self.height:
+                            if self.lava_info[ny][nx] is None:
+                                new_lava.append((nx, ny, info["steps"] - 1))
+                    info["steps"] -= 1
+                else:
+                    info["cooldown"] -= 1
+                    if info["cooldown"] <= 0:
+                        to_solidify.append((x, y))
+
+        for nx, ny, steps in new_lava:
+            self.animals[ny][nx] = []
+            self.eggs[ny][nx] = []
+            self.burrows[ny][nx] = None
+            self.grid[ny][nx] = self.terrains["lava"]
+            self.lava_info[ny][nx] = {"steps": steps, "cooldown": 1}
+
+        for x, y in to_solidify:
+            self.grid[y][x] = self.terrains["solidified_lava_field"]
+            self.lava_info[y][x] = None
+            self.erupting[y][x] = False
+
+    def roll_volcanoes(self) -> None:
+        """Randomly erupt dormant volcanoes."""
+        for y in range(self.height):
+            for x in range(self.width):
+                if self.terrain_at(x, y).name != "volcano":
+                    continue
+                if random.random() < 0.01:
+                    r = random.random()
+                    if r < 0.1:
+                        size = "large"
+                    elif r < 0.4:
+                        size = "medium"
+                    else:
+                        size = "small"
+                    self.start_volcano_eruption(x, y, size)
+
+    def update_volcanic_activity(self) -> None:
+        """Run volcanic eruption checks and update lava spread."""
+        self.roll_volcanoes()
+        self.update_lava()
 
     def _generate_noise(self, width: int, height: int, scale: int = 3) -> List[List[float]]:
         """Create a simple value noise map for distributing biomes.
