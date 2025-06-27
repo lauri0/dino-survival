@@ -24,7 +24,8 @@ MORRISON = Setting(
         "Ornitholestes": {"energy_threshold": 0, "growth_stages": 3},
     },
     terrains={
-        "badlands": Terrain("badlands", {"small_prey": 0.3, "large_prey": 0.7}),
+        "desert": Terrain("desert", {"small_prey": 0.3, "large_prey": 0.7}),
+        "toxic_badlands": Terrain("toxic_badlands", {"small_prey": 0.3, "large_prey": 0.7}),
         "plains": Terrain("plains", {"small_prey": 0.8, "large_prey": 0.2}),
         "woodlands": Terrain("woodlands", {"small_prey": 0.6, "large_prey": 0.4}),
         "forest": Terrain("forest", {"small_prey": 0.6, "large_prey": 0.4}),
@@ -46,7 +47,8 @@ HELL_CREEK = Setting(
         "Pectinodon": {"energy_threshold": 0, "growth_stages": 3},
     },
     terrains={
-        "badlands": Terrain("badlands", {"small_prey": 0.3, "large_prey": 0.7}),
+        "desert": Terrain("desert", {"small_prey": 0.3, "large_prey": 0.7}),
+        "toxic_badlands": Terrain("toxic_badlands", {"small_prey": 0.3, "large_prey": 0.7}),
         "plains": Terrain("plains", {"small_prey": 0.4, "large_prey": 0.6}),
         "woodlands": Terrain("woodlands", {"small_prey": 0.6, "large_prey": 0.4}),
         "forest": Terrain("forest", {"small_prey": 0.7, "large_prey": 0.3}),

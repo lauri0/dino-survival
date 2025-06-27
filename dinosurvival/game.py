@@ -222,9 +222,10 @@ class Game:
         lake_tiles: list[tuple[int, int]] = []
         for y in range(self.map.height):
             for x in range(self.map.width):
-                if self.map.terrain_at(x, y).name == "lake":
+                terrain = self.map.terrain_at(x, y).name
+                if terrain == "lake":
                     lake_tiles.append((x, y))
-                else:
+                elif terrain != "toxic_badlands":
                     land_tiles.append((x, y))
 
         species = list(DINO_STATS.items())
@@ -299,9 +300,10 @@ class Game:
         lake_tiles: list[tuple[int, int]] = []
         for y in range(self.map.height):
             for x in range(self.map.width):
-                if self.map.terrain_at(x, y).name == "lake":
+                terrain = self.map.terrain_at(x, y).name
+                if terrain == "lake":
                     lake_tiles.append((x, y))
-                else:
+                elif terrain != "toxic_badlands":
                     land_tiles.append((x, y))
 
         for name, stats in CRITTER_STATS.items():
@@ -506,6 +508,30 @@ class Game:
                 nx, ny = x + dx, y + dy
                 if 0 <= nx < self.map.width and 0 <= ny < self.map.height:
                     self.map.reveal(nx, ny)
+
+    def _apply_terrain_effects(self) -> None:
+        """Apply end-of-turn biome effects to the player and NPCs."""
+        terrain = self.map.terrain_at(self.x, self.y).name
+        if terrain == "toxic_badlands":
+            self.player.health = max(0.0, self.player.health - 20.0)
+            msg = "You take 20% damage from toxic fumes."
+            if self.player.health <= 0:
+                msg += " Game Over."
+            self.turn_messages.append(msg)
+
+        for y in range(self.map.height):
+            for x in range(self.map.width):
+                if self.map.terrain_at(x, y).name != "toxic_badlands":
+                    continue
+                for npc in list(self.map.animals[y][x]):
+                    if not npc.alive:
+                        continue
+                    npc.health = max(0.0, npc.health - 20.0)
+                    if npc.health <= 0:
+                        npc.alive = False
+                        npc.age = -1
+                        npc.fierceness = 0.0
+                        npc.speed = 0.0
 
     def _check_victory(self) -> Optional[str]:
         """Check if the player has enough living descendants."""
@@ -954,6 +980,8 @@ class Game:
             if not (0 <= nx < self.map.width and 0 <= ny < self.map.height):
                 continue
             terrain = self.map.terrain_at(nx, ny).name
+            if terrain == "toxic_badlands":
+                continue
             if not can_walk and terrain != "lake":
                 continue
             candidates.append(dname)
@@ -1632,6 +1660,7 @@ class Game:
 
         self._move_npcs()
         self.turn_messages.extend(self._update_npcs())
+        self._apply_terrain_effects()
         if action in ("stay", "drink"):
             attack = self._aggressive_attack_check()
             if attack:

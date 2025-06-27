@@ -9,7 +9,7 @@
       "forest": 0.03,
       "swamp": 0.02,
       "woodlands": 0.02,
-      "badlands": 0.005,
+      "desert": 0.005,
       "lake": 0.00,
       "mountain": 0.00
     }
@@ -24,7 +24,7 @@
       "forest": 0.04,
       "swamp": 0.01,
       "woodlands": 0.01,
-      "badlands": 0.002,
+      "desert": 0.002,
       "lake": 0.00,
       "mountain": 0.00
     }
@@ -39,7 +39,7 @@
       "forest": 0.01,
       "swamp": 0.01,
       "woodlands": 0.02,
-      "badlands": 0.005,
+      "desert": 0.005,
       "lake": 0.00,
       "mountain": 0.00
     }
@@ -54,7 +54,7 @@
       "forest": 0.01,
       "swamp": 0.01,
       "woodlands": 0.02,
-      "badlands": 0.001,
+      "desert": 0.001,
       "lake": 0.00,
       "mountain": 0.005
     }
