@@ -89,9 +89,9 @@ class Map:
                         m_level = humidity_order[-1]
 
                     biome_map = {
-                        ("arid", "low"): "badlands",
+                        ("arid", "low"): "desert",
                         ("arid", "normal"): "plains",
-                        ("arid", "mountain"): "mountain",
+                        ("arid", "mountain"): "toxic_badlands",
                         ("normal", "low"): "woodlands",
                         ("normal", "normal"): "forest",
                         ("normal", "mountain"): "mountain",

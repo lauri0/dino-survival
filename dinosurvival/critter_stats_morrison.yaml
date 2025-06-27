@@ -140,7 +140,7 @@
     "maximum_individuals": 20,
     "name": "Scorpion",
     "preferred_biomes": [
-      "badlands"
+      "desert"
     ]
   }
 }

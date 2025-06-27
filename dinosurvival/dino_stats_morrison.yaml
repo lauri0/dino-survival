@@ -24,7 +24,7 @@
     "num_eggs": 2,
     "preferred_biomes": [
       "woodlands",
-      "badlands"
+      "desert"
     ]
   },
   "Allosaurus": {
@@ -131,7 +131,7 @@
     "name": "Camarasaurus",
     "num_eggs": 2,
     "preferred_biomes": [
-      "badlands",
+      "desert",
       "woodlands"
     ]
   },
