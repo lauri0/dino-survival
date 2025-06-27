@@ -920,24 +920,26 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
                     fill=color,
                     outline="black",
                 )
-                if revealed and game.map.has_nest(x, y):
+                if (
+                    revealed
+                    and game.map.has_nest(x, y)
+                    and abs(game.x - x) + abs(game.y - y) == 1
+                ):
+                    canvas.create_oval(
+                        tile_size / 2 - 2,
+                        tile_size / 2 - 4,
+                        tile_size / 2 + 2,
+                        tile_size / 2 + 4,
+                        fill="white",
+                        outline="white",
+                    )
+                if revealed and game.map.has_burrow(x, y):
                     canvas.create_oval(
                         tile_size / 2 - 3,
                         tile_size / 2 - 3,
                         tile_size / 2 + 3,
                         tile_size / 2 + 3,
                         fill="black",
-                        outline="black",
-                    )
-                if revealed and game.map.has_burrow(x, y):
-                    canvas.create_polygon(
-                        tile_size / 2,
-                        tile_size / 2 - 4,
-                        tile_size / 2 - 4,
-                        tile_size / 2 + 4,
-                        tile_size / 2 + 4,
-                        tile_size / 2 + 4,
-                        fill="brown",
                         outline="black",
                     )
                 if (x, y) == (game.x, game.y):
