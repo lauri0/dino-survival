@@ -426,7 +426,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             font=("Helvetica", 12),
             anchor="w",
         ).pack(anchor="w")
-        fierce = game._stat_from_weight(npc.weight, stats, "hatchling_fierceness", "adult_fierceness")
+        fierce = game.npc_effective_fierceness(npc, stats, game.x, game.y)
         tk.Label(
             win,
             text=f"Fierceness: {fierce:.1f}/{stats.get('adult_fierceness', 0)}",
@@ -808,10 +808,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             disp_name = f"{npc.name} ({npc.id})"
             disp_name = f"{disp_name} W:{npc.weight:.1f}kg"
 
-            target_f = game._stat_from_weight(
-                npc.weight, stats, "hatchling_fierceness", "adult_fierceness"
-            )
-            target_f *= npc.health / 100.0
+            target_f = game.npc_effective_fierceness(npc, stats, game.x, game.y)
             target_s = game.npc_effective_speed(npc, stats)
             rel_f = target_f / player_f
             rel_s = target_s / player_s
@@ -997,9 +994,15 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
                 f"{game.player.adult_weight:.0f}kg ({pct:.1f}%)"
             )
         )
-        adj_f = game.player.fierceness * (game.player.health / 100.0)
-        fierce_label.config(text=f"Fierceness: {adj_f:.1f}")
-        speed_label.config(text=f"Speed: {game.player_effective_speed():.1f}")
+        adj_f = game.player_base_fierceness()
+        text = f"Fierceness: {adj_f:.1f}"
+        if game.player_pack_hunter_active():
+            text += " (Pack Hunter)"
+        fierce_label.config(text=text)
+        speed_text = f"Speed: {game.player_effective_speed():.1f}"
+        if "ambush" in game.player.abilities and game.player.ambush_streak > 0:
+            speed_text += " (Ambush)"
+        speed_label.config(text=speed_text)
         desc_label.config(
             text=f"Alive descendants: {game.descendant_count()}"
         )
