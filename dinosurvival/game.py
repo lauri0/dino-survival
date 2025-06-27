@@ -382,14 +382,23 @@ class Game:
             else self.player.adult_energy_drain
         )
 
-    def effective_fierceness(self) -> float:
-        base = self.player.fierceness * (self.player.health / 100.0)
-        if "pack_hunter" in self.player.abilities:
-            if any(
+    def player_pack_hunter_active(self) -> bool:
+        return (
+            "pack_hunter" in self.player.abilities
+            and any(
                 npc.alive and npc.name == self.player.name
                 for npc in self.map.animals[self.y][self.x]
-            ):
-                base *= 2
+            )
+        )
+
+    def player_base_fierceness(self) -> float:
+        base = self.player.fierceness * (self.player.health / 100.0)
+        if self.player_pack_hunter_active():
+            base *= 2
+        return base
+
+    def effective_fierceness(self) -> float:
+        base = self.player_base_fierceness()
         total = base
         stats = DINO_STATS.get(self.player.name, {})
         for j in self.pack:
