@@ -466,6 +466,12 @@ class Game:
         self._record_population()
         terrain = self.map.terrain_at(self.x, self.y).name
         self.biome_turns[terrain] = self.biome_turns.get(terrain, 0) + 1
+        self.turn_messages.extend(
+            self.map.update_volcanic_activity((self.x, self.y))
+        )
+        if self.map.terrain_at(self.x, self.y).name == "lava":
+            append_event_log(f"Player killed by lava at ({self.x},{self.y})")
+            return "\nYou are consumed by lava! Game Over."
         self.turn_messages.extend(self._update_eggs())
         self.map.grow_plants(PLANT_STATS, self.setting.formation)
         self._spawn_critters()

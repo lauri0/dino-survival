@@ -263,14 +263,17 @@ class Map:
     # Volcano and lava handling
     # ------------------------------------------------------------------
 
-    def start_volcano_eruption(self, x: int, y: int, size: str = "small") -> None:
+    def start_volcano_eruption(
+        self, x: int, y: int, size: str = "small", player_pos: Optional[Tuple[int, int]] = None
+    ) -> List[str]:
         """Trigger a volcanic eruption at ``(x, y)``.
 
         ``size`` may be ``"small"``, ``"medium"``, or ``"large"`` and
         controls how far the lava will spread.
         """
+        messages: List[str] = []
         if self.terrain_at(x, y).name != "volcano":
-            return
+            return messages
 
         steps_map = {"small": 0, "medium": 2, "large": 4}
         steps = steps_map.get(size, 0)
@@ -289,10 +292,14 @@ class Map:
             self.grid[ay][ax] = self.terrains["lava"]
             spread_steps = steps if (ax == x and ay == y) else max(steps - 1, 0)
             self.lava_info[ay][ax] = {"steps": spread_steps, "cooldown": 1}
+            if player_pos is not None and (ax, ay) == player_pos:
+                messages.append("A volcano erupts beneath you!")
+        return messages
 
-    def update_lava(self) -> None:
+    def update_lava(self, player_pos: Optional[Tuple[int, int]] = None) -> List[str]:
         """Advance lava spread and handle solidification."""
 
+        messages: List[str] = []
         new_lava: List[Tuple[int, int, int]] = []
         to_solidify: List[Tuple[int, int]] = []
 
@@ -324,14 +331,19 @@ class Map:
             self.burrows[ny][nx] = None
             self.grid[ny][nx] = self.terrains["lava"]
             self.lava_info[ny][nx] = {"steps": steps, "cooldown": 1}
+            if player_pos is not None and (nx, ny) == player_pos:
+                messages.append("Lava flows over you!")
 
         for x, y in to_solidify:
             self.grid[y][x] = self.terrains["solidified_lava_field"]
             self.lava_info[y][x] = None
             self.erupting[y][x] = False
 
-    def roll_volcanoes(self) -> None:
+        return messages
+
+    def roll_volcanoes(self, player_pos: Optional[Tuple[int, int]] = None) -> List[str]:
         """Randomly erupt dormant volcanoes."""
+        messages: List[str] = []
         for y in range(self.height):
             for x in range(self.width):
                 if self.terrain_at(x, y).name != "volcano":
@@ -344,12 +356,15 @@ class Map:
                         size = "medium"
                     else:
                         size = "small"
-                    self.start_volcano_eruption(x, y, size)
+                    messages.extend(self.start_volcano_eruption(x, y, size, player_pos))
+        return messages
 
-    def update_volcanic_activity(self) -> None:
+    def update_volcanic_activity(self, player_pos: Optional[Tuple[int, int]] = None) -> List[str]:
         """Run volcanic eruption checks and update lava spread."""
-        self.roll_volcanoes()
-        self.update_lava()
+        messages: List[str] = []
+        messages.extend(self.roll_volcanoes(player_pos))
+        messages.extend(self.update_lava(player_pos))
+        return messages
 
     def _generate_noise(self, width: int, height: int, scale: int = 3) -> List[List[float]]:
         """Create a simple value noise map for distributing biomes.
