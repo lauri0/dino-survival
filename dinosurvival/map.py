@@ -101,6 +101,8 @@ class Map:
                     }
 
                     terrain_name = biome_map.get((m_level, h_level), "plains")
+                    if terrain_name == "mountain" and random.random() < 0.5:
+                        terrain_name = "volcano"
                     terrain = terrains[terrain_name]
                     if terrain_name == "lake":
                         lake_count += 1
