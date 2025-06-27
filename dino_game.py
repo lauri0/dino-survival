@@ -207,8 +207,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     biome_images: dict[str, tk.PhotoImage] = {}
 
 
-    for tname in game.setting.terrains.keys():
-        fname = f"{game.setting.formation.lower().replace(' ', '_')}_{tname}.png"
+    for tname, fname in game.setting.biome_images.items():
         path = os.path.join(assets_dir, fname)
         img = load_scaled_image(path, 400, 250)
         if img:

@@ -9,6 +9,7 @@ class Setting:
     formation: str
     playable_dinos: Dict[str, Dict]
     terrains: Dict[str, Terrain]
+    biome_images: Dict[str, str]
     height_levels: Dict[str, float]
     humidity_levels: Dict[str, float]
     num_burrows: int = 0
@@ -24,14 +25,24 @@ MORRISON = Setting(
         "Ornitholestes": {"energy_threshold": 0, "growth_stages": 3},
     },
     terrains={
-        "desert": Terrain("desert", {"small_prey": 0.3, "large_prey": 0.7}),
-        "toxic_badlands": Terrain("toxic_badlands", {"small_prey": 0.3, "large_prey": 0.7}),
-        "plains": Terrain("plains", {"small_prey": 0.8, "large_prey": 0.2}),
-        "woodlands": Terrain("woodlands", {"small_prey": 0.6, "large_prey": 0.4}),
-        "forest": Terrain("forest", {"small_prey": 0.6, "large_prey": 0.4}),
-        "swamp": Terrain("swamp", {"small_prey": 0.7, "large_prey": 0.3}),
-        "lake": Terrain("lake", {"small_prey": 0.9, "large_prey": 0.1}),
-        "mountain": Terrain("mountain", {"small_prey": 0.4, "large_prey": 0.6}),
+        "desert": Terrain("desert", {}),
+        "toxic_badlands": Terrain("toxic_badlands", {}),
+        "plains": Terrain("plains", {}),
+        "woodlands": Terrain("woodlands", {}),
+        "forest": Terrain("forest", {}),
+        "swamp": Terrain("swamp", {}),
+        "lake": Terrain("lake", {}),
+        "mountain": Terrain("mountain", {}),
+    },
+    biome_images={
+        "desert": "desert.png",
+        "toxic_badlands": "badlands.png",
+        "plains": "plains.png",
+        "woodlands": "woodlands.png",
+        "forest": "forest.png",
+        "swamp": "swamp.png",
+        "lake": "lake.png",
+        "mountain": "mountain.png",
     },
     height_levels={"low": 0.3, "normal": 0.45, "mountain": 0.25},
     humidity_levels={"arid": 0.3, "normal": 0.4, "humid": 0.3},
@@ -47,14 +58,24 @@ HELL_CREEK = Setting(
         "Pectinodon": {"energy_threshold": 0, "growth_stages": 3},
     },
     terrains={
-        "desert": Terrain("desert", {"small_prey": 0.3, "large_prey": 0.7}),
-        "toxic_badlands": Terrain("toxic_badlands", {"small_prey": 0.3, "large_prey": 0.7}),
-        "plains": Terrain("plains", {"small_prey": 0.4, "large_prey": 0.6}),
-        "woodlands": Terrain("woodlands", {"small_prey": 0.6, "large_prey": 0.4}),
-        "forest": Terrain("forest", {"small_prey": 0.7, "large_prey": 0.3}),
-        "swamp": Terrain("swamp", {"small_prey": 0.7, "large_prey": 0.3}),
-        "lake": Terrain("lake", {"small_prey": 0.9, "large_prey": 0.1}),
-        "mountain": Terrain("mountain", {"small_prey": 0.4, "large_prey": 0.6}),
+        "desert": Terrain("desert", {}),
+        "toxic_badlands": Terrain("toxic_badlands", {}),
+        "plains": Terrain("plains", {}),
+        "woodlands": Terrain("woodlands", {}),
+        "forest": Terrain("forest", {}),
+        "swamp": Terrain("swamp", {}),
+        "lake": Terrain("lake", {}),
+        "mountain": Terrain("mountain", {}),
+    },
+    biome_images={
+        "desert": "desert.png",
+        "toxic_badlands": "badlands.png",
+        "plains": "plains.png",
+        "woodlands": "woodlands.png",
+        "forest": "forest.png",
+        "swamp": "swamp.png",
+        "lake": "lake.png",
+        "mountain": "mountain.png",
     },
     height_levels={"low": 0.3, "normal": 0.6, "mountain": 0.1},
     humidity_levels={"arid": 0.2, "normal": 0.5, "humid": 0.3},
