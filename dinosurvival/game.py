@@ -190,6 +190,7 @@ class Game:
             self.x = width // 2
             self.y = height // 2
         self.map.reveal(self.x, self.y)
+        self._reveal_cardinals(self.x, self.y)
         self._reveal_adjacent_mountains()
         self._energy_multiplier = 1.0
         self.current_encounters: list[EncounterEntry] = []
@@ -491,6 +492,13 @@ class Game:
         if regen and not message:
             self.player.health = min(100.0, self.player.health + regen)
         return message
+
+    def _reveal_cardinals(self, x: int, y: int) -> None:
+        """Reveal the four orthogonally adjacent tiles to ``(x, y)``."""
+        for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            nx, ny = x + dx, y + dy
+            if 0 <= nx < self.map.width and 0 <= ny < self.map.height:
+                self.map.reveal(nx, ny)
 
     def _reveal_adjacent_mountains(self) -> None:
         for dy in (-1, 0, 1):
@@ -1605,6 +1613,7 @@ class Game:
         ny = max(0, min(self.map.height - 1, self.y + dy))
         self.x, self.y = nx, ny
         self.map.reveal(self.x, self.y)
+        self._reveal_cardinals(self.x, self.y)
         if self.map.terrain_at(self.x, self.y).name == "mountain":
             self._reveal_surrounding(self.x, self.y)
 
