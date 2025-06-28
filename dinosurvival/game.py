@@ -331,6 +331,8 @@ class Game:
                 if not spawn_tiles:
                     break
                 x, y = random.choice(spawn_tiles)
+                if any(npc.name == name for npc in self.map.animals[y][x]):
+                    continue
                 self.map.animals[y][x].append(
                     NPCAnimal(
                         id=self.next_npc_id,
@@ -742,8 +744,9 @@ class Game:
                 abilities=stats.get("abilities", []),
                 last_action="spawned",
             )
-            self.map.animals[y][x].append(npc)
-            self.next_npc_id += 1
+            if not any(a.name == name for a in self.map.animals[y][x]):
+                self.map.animals[y][x].append(npc)
+                self.next_npc_id += 1
         return True
 
     def _can_player_lay_eggs(self) -> bool:

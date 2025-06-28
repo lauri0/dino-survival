@@ -4,11 +4,11 @@ A simple text-based dinosaur survival game inspired by the BBC "Big Al" game. Th
 
 ## Features
 
-- Turn based actions: move or hunt on each turn.
+- Turn based actions: explore the map as a hatchling carnivorous dinosaur. Find water, hunt, grow, evade natural disasters and reproduce.
+- NPC animals are persistently simulated and move around the map in search of food. They can hunt each other (and you) and lay eggs. 
 - Random terrain including forests, plains, swamps, woodlands, desert and lakes that affects the type of prey encountered.
-- Support for multiple settings such as the Morrison Formation or Hell Creek.
-- Volcanoes can erupt and flood nearby tiles with lava.
-- Hidden burrows may contain mammals that can be dug up.
+- Natural disasters like volcanic eruptions and floods
+![dino_survival](https://github.com/user-attachments/assets/e18ef895-6505-4440-9653-15dc9b8826be)
 
 ## Requirements
 
@@ -31,3 +31,4 @@ The stats panel also includes **Player Stats** alongside **Info** and
 successful hunts and total turns across every dinosaur you've played.
 
 Each dinosaur's base attributes are defined in `dinosurvival/dino_stats_morrison.yaml`.
+
