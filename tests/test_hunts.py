@@ -1,7 +1,7 @@
 import random
 import dinosurvival.game as game_mod
 from dinosurvival.dinosaur import NPCAnimal
-from dinosurvival.settings import MORRISON
+from dinosurvival.settings import MORRISON, HELL_CREEK
 
 
 def test_live_hunt_counts_kill():
@@ -23,3 +23,25 @@ def test_carcass_eat_not_counted_as_hunt():
     game.map.animals[game.y][game.x] = [carcass]
     game.hunt_npc(carcass.id)
     assert "Stegosaurus" not in game.hunt_stats
+
+
+def test_player_takes_damage_when_hunting_critter():
+    random.seed(0)
+    game = game_mod.Game(HELL_CREEK, "Tyrannosaurus", width=6, height=6)
+    game.player.health_regen = 0
+    game.map.animals = [[[] for _ in range(6)] for _ in range(6)]
+    critter = NPCAnimal(id=1, name="Didelphodon", sex=None, weight=5.0)
+    game.map.animals[game.y][game.x] = [critter]
+    game.hunt_npc(critter.id)
+    assert game.player.health < 100
+
+
+def test_npc_takes_damage_when_hunting_critter():
+    random.seed(0)
+    game = game_mod.Game(HELL_CREEK, "Tyrannosaurus", width=6, height=6)
+    game.map.animals = [[[] for _ in range(6)] for _ in range(6)]
+    predator = NPCAnimal(id=1, name="Acheroraptor", sex=None, weight=10.0, energy=50.0)
+    prey = NPCAnimal(id=2, name="Didelphodon", sex=None, weight=5.0)
+    game.map.animals[0][0] = [predator, prey]
+    game._update_npcs()
+    assert predator.health < 100
