@@ -36,6 +36,10 @@ def load_scaled_image(path: str, width: int, height: int, master=None, grayscale
         return ImageTk.PhotoImage(resized, master=master)
     return tk.PhotoImage(master=master, file=path)
 
+def format_biome_name(name: str) -> str:
+    """Return a human friendly biome name."""
+    return name.replace("_", " ").title()
+
 SETTINGS = {
     "morrison": MORRISON,
     "hell_creek": HELL_CREEK,
@@ -449,7 +453,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
 
     def update_biome() -> None:
         terrain = game.map.terrain_at(game.x, game.y)
-        label = terrain.name.capitalize()
+        label = format_biome_name(terrain.name)
         if game.map.has_nest(game.x, game.y):
             label += " (Nest)"
         label += f" ({game.x},{game.y})"
@@ -1112,7 +1116,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         ]
         for b in game.setting.terrains.keys():
             c = game.biome_turns.get(b, 0)
-            lines.append(f"- {b.capitalize()}: {c}")
+            lines.append(f"- {format_biome_name(b)}: {c}")
         lines.append("")
         lines.append("Hunts:")
         for a, (att, kill) in sorted(
