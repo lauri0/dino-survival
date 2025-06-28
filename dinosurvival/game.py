@@ -369,7 +369,9 @@ class Game:
             npc = entry.npc
             if not npc.alive:
                 continue
-            stats = DINO_STATS.get(npc.name, {})
+            stats = DINO_STATS.get(npc.name)
+            if not stats:
+                stats = CRITTER_STATS.get(npc.name, {})
             if not stats.get("aggressive"):
                 continue
             target_f = self.npc_effective_fierceness(npc, stats, self.x, self.y)
@@ -1208,7 +1210,9 @@ class Game:
                         for other in animals:
                             if other is npc or not other.alive:
                                 continue
-                            o_stats = DINO_STATS.get(other.name, {})
+                            o_stats = DINO_STATS.get(other.name)
+                            if not o_stats:
+                                o_stats = CRITTER_STATS.get(other.name, {})
                             o_f = self.npc_effective_fierceness(other, o_stats, x, y)
                             if o_f >= npc_f:
                                 continue
@@ -1286,7 +1290,9 @@ class Game:
             hunt = self.hunt_stats.setdefault(target.name, [0, 0])
             hunt[0] += 1
 
-        stats = DINO_STATS.get(target.name, {})
+        stats = DINO_STATS.get(target.name)
+        if not stats:
+            stats = CRITTER_STATS.get(target.name, {})
 
         player_speed = self.player_effective_speed()
 
