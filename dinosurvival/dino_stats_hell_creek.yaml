@@ -132,7 +132,7 @@
     "health_regen": 2.5,
     "hydration_drain": 2.5,
     "image": "assets/dinosaurs/pachycephalosaurus.png",
-    "initial_spawn_multiplier": 10,
+    "initial_spawn_multiplier": 12,
     "name": "Pachycephalosaurus",
     "num_eggs": 2,
     "preferred_biomes": [
