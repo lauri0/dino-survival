@@ -292,8 +292,13 @@ class Map:
             self.eggs[ay][ax] = []
             self.burrows[ay][ax] = None
 
-            self.grid[ay][ax] = self.terrains["lava"]
-            spread_steps = steps if (ax == x and ay == y) else max(steps - 1, 0)
+            if ax == x and ay == y:
+                self.grid[ay][ax] = self.terrains["volcano_erupting"]
+                spread_steps = steps
+            else:
+                self.grid[ay][ax] = self.terrains["lava"]
+                spread_steps = max(steps - 1, 0)
+
             self.lava_info[ay][ax] = {"steps": spread_steps, "cooldown": 1}
             if player_pos is not None and (ax, ay) == player_pos:
                 messages.append("A volcano erupts beneath you!")
@@ -320,7 +325,11 @@ class Map:
                         (x, y - 1),
                     ):
                         if 0 <= nx < self.width and 0 <= ny < self.height:
-                            if self.lava_info[ny][nx] is None:
+                            if (
+                                self.lava_info[ny][nx] is None
+                                and self.grid[ny][nx].name
+                                not in ("volcano", "volcano_erupting")
+                            ):
                                 new_lava.append((nx, ny, info["steps"] - 1))
                     info["steps"] -= 1
                 else:
@@ -338,7 +347,10 @@ class Map:
                 messages.append("Lava flows over you!")
 
         for x, y in to_solidify:
-            self.grid[y][x] = self.terrains["solidified_lava_field"]
+            if self.grid[y][x].name == "volcano_erupting":
+                self.grid[y][x] = self.terrains["volcano"]
+            else:
+                self.grid[y][x] = self.terrains["solidified_lava_field"]
             self.lava_info[y][x] = None
             self.erupting[y][x] = False
 
