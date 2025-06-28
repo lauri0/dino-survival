@@ -526,6 +526,9 @@ class Game:
     def _apply_terrain_effects(self) -> None:
         """Apply end-of-turn biome effects to the player and NPCs."""
         terrain = self.map.terrain_at(self.x, self.y).name
+        if terrain in ("lava", "volcano_erupting"):
+            self.player.health = 0.0
+            self.turn_messages.append("Game Over.")
         if terrain == "toxic_badlands":
             self.player.health = max(0.0, self.player.health - 20.0)
             msg = "You take 20% damage from toxic fumes."
@@ -535,7 +538,18 @@ class Game:
 
         for y in range(self.map.height):
             for x in range(self.map.width):
-                if self.map.terrain_at(x, y).name != "toxic_badlands":
+                tname = self.map.terrain_at(x, y).name
+                if tname in ("lava", "volcano_erupting"):
+                    for npc in self.map.animals[y][x]:
+                        npc.alive = False
+                        npc.age = -1
+                        npc.fierceness = 0.0
+                        npc.speed = 0.0
+                    self.map.eggs[y][x] = []
+                    self.map.burrows[y][x] = None
+                    self.map.plants[y][x] = []
+                    continue
+                if tname != "toxic_badlands":
                     continue
                 for npc in list(self.map.animals[y][x]):
                     if not npc.alive:
