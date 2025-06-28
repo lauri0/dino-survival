@@ -18,7 +18,7 @@
     "name": "Fruits",
     "formations": ["Morrison", "Hell Creek"],
     "image": "assets/plants/fruits.png",
-    "weight": 2.5,
+    "weight": 5.0,
     "growth_chance": {
       "plains": 0.005,
       "forest": 0.04,
