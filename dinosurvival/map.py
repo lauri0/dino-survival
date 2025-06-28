@@ -275,6 +275,9 @@ class Map:
         if self.terrain_at(x, y).name != "volcano":
             return messages
 
+        if player_pos is not None:
+            messages.append("You feel an earthquake.")
+
         steps_map = {"small": 0, "medium": 2, "large": 4}
         steps = steps_map.get(size, 0)
 
