@@ -41,7 +41,7 @@ class Map:
         self.height = height
         self.terrains = terrains
 
-        height_order = ["low", "normal", "mountain"]
+        height_order = ["low", "normal", "hilly", "mountain"]
         humidity_order = ["arid", "normal", "humid"]
 
         def build_thresholds(levels: Dict[str, float], order: List[str]) -> List[float]:
@@ -91,17 +91,20 @@ class Map:
                     biome_map = {
                         ("arid", "low"): "desert",
                         ("arid", "normal"): "plains",
-                        ("arid", "mountain"): "toxic_badlands",
+                        ("arid", "hilly"): "toxic_badlands",
+                        ("arid", "mountain"): "mountain",
                         ("normal", "low"): "woodlands",
                         ("normal", "normal"): "forest",
+                        ("normal", "hilly"): "highland_forest",
                         ("normal", "mountain"): "mountain",
                         ("humid", "low"): "lake",
                         ("humid", "normal"): "swamp",
+                        ("humid", "hilly"): "highland_forest",
                         ("humid", "mountain"): "mountain",
                     }
 
                     terrain_name = biome_map.get((m_level, h_level), "plains")
-                    if terrain_name == "mountain" and random.random() < 0.5:
+                    if terrain_name == "mountain" and random.random() < 0.45:
                         terrain_name = "volcano"
                     terrain = terrains[terrain_name]
                     if terrain_name == "lake":
