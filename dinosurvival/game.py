@@ -513,7 +513,11 @@ class Game:
                     continue
                 nx, ny = self.x + dx, self.y + dy
                 if 0 <= nx < self.map.width and 0 <= ny < self.map.height:
-                    if self.map.terrain_at(nx, ny).name == "mountain":
+                    if self.map.terrain_at(nx, ny).name in (
+                        "mountain",
+                        "volcano",
+                        "volcano_erupting",
+                    ):
                         self.map.reveal(nx, ny)
 
     def _reveal_surrounding(self, x: int, y: int) -> None:
@@ -1634,7 +1638,11 @@ class Game:
         self.x, self.y = nx, ny
         self.map.reveal(self.x, self.y)
         self._reveal_cardinals(self.x, self.y)
-        if self.map.terrain_at(self.x, self.y).name == "mountain":
+        if self.map.terrain_at(self.x, self.y).name in (
+            "mountain",
+            "volcano",
+            "volcano_erupting",
+        ):
             self._reveal_surrounding(self.x, self.y)
 
     def turn(self, action: str) -> str:
@@ -1670,7 +1678,11 @@ class Game:
             result = "Unknown action"
 
         multiplier = self._energy_multiplier
-        if moved and self.map.terrain_at(self.x, self.y).name == "mountain":
+        if moved and self.map.terrain_at(self.x, self.y).name in (
+            "mountain",
+            "volcano",
+            "volcano_erupting",
+        ):
             multiplier *= 3
         end_msg = self._apply_turn_costs(moved, multiplier)
         result += end_msg
