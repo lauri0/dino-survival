@@ -451,12 +451,12 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
 
     def show_encounter_help() -> None:
         text = [
-            "Encounters list animals or nests in your current biome.",
+            "The encounters list displays animals or nests in your current cell.",
             "W: prey weight, F: fierceness relative to you,",
             "S: speed relative to you (%) and E: energy available.",
             "Higher fierceness makes fights harder while higher speed",
-            "makes prey harder to catch.",
-            "Targets with fierceness over 1 can kill you outright."
+            "makes prey harder to catch. Targets with above 1 fierceness",
+            "are lethal."
         ]
         win = tk.Toplevel(root)
         win.title("Encounter Help")
@@ -469,10 +469,10 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             "Use the movement buttons to travel north, south, east or west.",
             "Stay will skip a turn and Drink restores hydration when water is present.",
             "Threaten can scare prey away. Lay Eggs lets you deposit eggs once ready.",
-            "Lay Eggs requires being fully grown with 80+ health and energy,",
-            "a short waiting period since your last clutch and few nearby animals.",
+            "Lay Eggs requires being fully grown with 80+ health and energy.",
+            "There is a short waiting period before eggs can be laid again after doing so.",
             "Health, Energy, Hydration, Weight, Fierceness and Speed describe your dinosaur.",
-            "Grow by hunting prey and survive long enough to lay eggs to win."
+            "Grow by hunting prey and once grown up lay eggs and hatch enough of them to win."
         ]
         win = tk.Toplevel(root)
         win.title("Game Help")
