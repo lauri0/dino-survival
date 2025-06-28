@@ -117,7 +117,7 @@ HELL_CREEK = Setting(
         "lava": "lava.png",
         "solidified_lava_field": "solidified_lava_field.png",
     },
-    height_levels={"low": 0.3, "normal": 0.55, "hilly": 0.1, "mountain": 0.05},
+    height_levels={"low": 0.3, "normal": 0.45, "hilly": 0.15, "mountain": 0.1},
     humidity_levels={"arid": 0.2, "normal": 0.5, "humid": 0.3},
     num_burrows=5,
 )
