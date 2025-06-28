@@ -449,10 +449,42 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         ).pack(anchor="w")
         tk.Button(win, text="Close", command=win.destroy).pack(pady=5)
 
+    def show_encounter_help() -> None:
+        text = [
+            "Encounters list animals or nests in your current biome.",
+            "W: prey weight, F: fierceness relative to you,",
+            "S: speed relative to you (%) and E: energy available.",
+            "Higher fierceness makes fights harder while higher speed",
+            "makes prey harder to catch.",
+            "Targets with fierceness over 1 can kill you outright."
+        ]
+        win = tk.Toplevel(root)
+        win.title("Encounter Help")
+        tk.Label(win, text="Encounters", font=("Helvetica", 18)).pack(pady=5)
+        tk.Label(win, text="\n".join(text), justify="left", font=("Helvetica", 12)).pack(padx=10, pady=5)
+        tk.Button(win, text="Close", command=win.destroy).pack(pady=5)
+
+    def show_game_help() -> None:
+        text = [
+            "Use the movement buttons to travel north, south, east or west.",
+            "Stay will skip a turn and Drink restores hydration when water is present.",
+            "Threaten can scare prey away. Lay Eggs lets you deposit eggs once ready.",
+            "Lay Eggs requires being fully grown with 80+ health and energy,",
+            "a short waiting period since your last clutch and few nearby animals.",
+            "Health, Energy, Hydration, Weight, Fierceness and Speed describe your dinosaur.",
+            "Grow by hunting prey and survive long enough to lay eggs to win."
+        ]
+        win = tk.Toplevel(root)
+        win.title("Game Help")
+        tk.Label(win, text="Game Help", font=("Helvetica", 18)).pack(pady=5)
+        tk.Label(win, text="\n".join(text), justify="left", font=("Helvetica", 12)).pack(padx=10, pady=5)
+        tk.Button(win, text="Close", command=win.destroy).pack(pady=5)
+
     button_row = tk.Frame(dino_frame)
     tk.Button(button_row, text="Info", command=show_dino_facts).pack(side="left", padx=2)
     tk.Button(button_row, text="Dinosaur Stats", command=show_legacy_stats).pack(side="left", padx=2)
     tk.Button(button_row, text="Player Stats", command=show_player_stats).pack(side="left", padx=2)
+    tk.Button(button_row, text="Help", command=show_game_help).pack(side="left", padx=2)
     button_row.pack(pady=5)
 
     def update_biome() -> None:
@@ -560,6 +592,11 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     encounter_frame = tk.Frame(main, width=500)
     encounter_frame.grid(row=1, column=2, rowspan=4, sticky="nsew", padx=10, pady=10)
     encounter_frame.grid_propagate(False)
+
+    header = tk.Frame(encounter_frame)
+    tk.Label(header, text="Encounters", font=("Helvetica", 14)).pack(side="left")
+    tk.Button(header, text="Help", command=show_encounter_help).pack(side="right")
+    header.pack(fill="x")
 
     encounter_canvas = tk.Canvas(encounter_frame)
     encounter_scroll = tk.Scrollbar(
@@ -902,6 +939,12 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             row.append(c)
         map_tiles.append(row)
 
+    tk.Label(
+        map_frame,
+        text="Map",
+        font=("Helvetica", 14),
+    ).grid(row=game.map.height, column=0, columnspan=game.map.width, pady=(5, 0))
+
     def update_map() -> None:
         color_map = {
             "forest": "green",
@@ -1152,17 +1195,18 @@ def launch_menu():
         frame.pack(expand=True)
 
         tk.Label(frame, text="Dinosaur Survival", font=("Helvetica", 24)).pack(pady=20)
+        tk.Label(frame, text="Select a setting to play in", font=("Helvetica", 16)).pack(pady=(0, 20))
 
         tk.Button(
             frame,
-            text="Morrison",
+            text="Morrison (North America, 150 MYA)",
             width=20,
             height=2,
             command=lambda: show_dino_menu(MORRISON, frame),
         ).pack(pady=10)
         tk.Button(
             frame,
-            text="Hell Creek",
+            text="Hell Creek (North America, 66 MYA)",
             width=20,
             height=2,
             command=lambda: show_dino_menu(HELL_CREEK, frame),
