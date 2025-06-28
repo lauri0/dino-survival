@@ -2,7 +2,9 @@ import tkinter as tk
 from tkinter import messagebox
 import random
 import os
+import colorsys
 import dinosurvival.game as game_module
+from dinosurvival.game import DESCENDANTS_TO_WIN
 from dinosurvival.settings import MORRISON, HELL_CREEK
 from dinosurvival.dinosaur import NPCAnimal
 from dinosurvival.logging_utils import (
@@ -208,7 +210,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     root.geometry("1700x1000")
     root.minsize(1700, 1000)
 
-    tile_size = 20
+    tile_size = 22
 
     # Preload biome images if available
     assets_dir = os.path.join(os.path.dirname(__file__), "assets", "biomes")
@@ -630,6 +632,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     population_frame = tk.Frame(main, width=200)
     population_frame.grid(row=0, column=3, rowspan=4, sticky="nsew", padx=10, pady=10)
     population_frame.grid_propagate(False)
+    tk.Label(population_frame, text="Global Population", font=("Helvetica", 14)).pack()
     population_list = tk.Frame(population_frame)
     population_list.pack(fill="both", expand=True)
     population_images: dict[str, tk.PhotoImage] = {}
@@ -1015,14 +1018,17 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
                         width=2,
                     )
 
-    def color_for(val: float) -> str:
-        if val <= 25:
-            return "red"
-        if val <= 50:
-            return "orange"
-        if val <= 75:
-            return "goldenrod"
-        return "green"
+    def gradient_color(val: float) -> str:
+        val = max(0.0, min(100.0, val))
+        h = (val / 100) * (120 / 360)
+        r, g, b = colorsys.hsv_to_rgb(h, 1.0, 1.0)
+        return f"#{int(r*255):02x}{int(g*255):02x}{int(b*255):02x}"
+
+    def update_bar(canvas: tk.Canvas, rect: int, text: int, val: float) -> None:
+        pct = max(0.0, min(100.0, val))
+        canvas.coords(rect, 0, 0, pct, 15)
+        canvas.itemconfig(rect, fill=gradient_color(pct))
+        canvas.itemconfig(text, text=f"{pct:.0f}%")
 
     def update_stats() -> None:
         stage = game.player_growth_stage()
@@ -1035,18 +1041,9 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         elif player_images.get("adult"):
             dino_image_label.configure(image=player_images["adult"])
             dino_image_label.image = player_images["adult"]
-        health_label.config(
-            text=f"Health: {game.player.health:.0f}%",
-            fg=color_for(game.player.health),
-        )
-        energy_label.config(
-            text=f"Energy: {game.player.energy:.0f}%",
-            fg=color_for(game.player.energy),
-        )
-        hydration_label.config(
-            text=f"Hydration: {game.player.hydration:.0f}%",
-            fg=color_for(game.player.hydration),
-        )
+        update_bar(health_canvas, health_rect, health_text, game.player.health)
+        update_bar(energy_canvas, energy_rect, energy_text, game.player.energy)
+        update_bar(hydration_canvas, hydration_rect, hydration_text, game.player.hydration)
         pct = 0.0
         growth_range = game.player.adult_weight - game.player.hatchling_weight
         if growth_range > 0:
@@ -1070,7 +1067,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             speed_text += " (Ambush)"
         speed_label.config(text=speed_text)
         desc_label.config(
-            text=f"Alive descendants: {game.descendant_count()}"
+            text=f"Alive descendants: {game.descendant_count()}/{DESCENDANTS_TO_WIN}"
         )
         turn_label.config(text=f"Turn: {game.turn_count}")
         update_lay_button()
@@ -1110,12 +1107,32 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
 
     name_var = tk.StringVar()
     tk.Label(stats_frame, textvariable=name_var, font=("Helvetica", 16)).pack()
-    health_label = tk.Label(stats_frame, font=("Helvetica", 14), anchor="w")
-    health_label.pack(anchor="w")
-    energy_label = tk.Label(stats_frame, font=("Helvetica", 14), anchor="w")
-    energy_label.pack(anchor="w")
-    hydration_label = tk.Label(stats_frame, font=("Helvetica", 14), anchor="w")
-    hydration_label.pack(anchor="w")
+    health_row = tk.Frame(stats_frame)
+    tk.Label(health_row, text="Health:", font=("Helvetica", 14)).pack(side="left")
+    health_canvas = tk.Canvas(health_row, width=100, height=15)
+    health_canvas.pack(side="left", padx=5)
+    health_canvas.create_rectangle(0, 0, 100, 15, outline="black")
+    health_rect = health_canvas.create_rectangle(0, 0, 0, 15, fill="red", width=0)
+    health_text = health_canvas.create_text(50, 7, text="100%")
+    health_row.pack(anchor="w")
+
+    energy_row = tk.Frame(stats_frame)
+    tk.Label(energy_row, text="Energy:", font=("Helvetica", 14)).pack(side="left")
+    energy_canvas = tk.Canvas(energy_row, width=100, height=15)
+    energy_canvas.pack(side="left", padx=5)
+    energy_canvas.create_rectangle(0, 0, 100, 15, outline="black")
+    energy_rect = energy_canvas.create_rectangle(0, 0, 0, 15, fill="red", width=0)
+    energy_text = energy_canvas.create_text(50, 7, text="100%")
+    energy_row.pack(anchor="w")
+
+    hydration_row = tk.Frame(stats_frame)
+    tk.Label(hydration_row, text="Hydration:", font=("Helvetica", 14)).pack(side="left")
+    hydration_canvas = tk.Canvas(hydration_row, width=100, height=15)
+    hydration_canvas.pack(side="left", padx=5)
+    hydration_canvas.create_rectangle(0, 0, 100, 15, outline="black")
+    hydration_rect = hydration_canvas.create_rectangle(0, 0, 0, 15, fill="red", width=0)
+    hydration_text = hydration_canvas.create_text(50, 7, text="100%")
+    hydration_row.pack(anchor="w")
     weight_label = tk.Label(stats_frame, font=("Helvetica", 14), anchor="w")
     weight_label.pack(anchor="w")
     fierce_label = tk.Label(stats_frame, font=("Helvetica", 14), anchor="w")

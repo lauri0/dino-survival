@@ -49,6 +49,9 @@ MIN_HATCHING_WEIGHT = _config.getfloat(
     "DEFAULT", "min_hatching_weight", fallback=2.0
 )
 
+# Number of living descendants required to win the game
+DESCENDANTS_TO_WIN = 2
+
 
 def _load_stats(formation: str) -> tuple[dict, dict[str, PlantStats], dict]:
     """Load dinosaur, plant and critter stats for the given formation."""
@@ -567,7 +570,7 @@ class Game:
 
     def _check_victory(self) -> Optional[str]:
         """Check if the player has enough living descendants."""
-        if not self.won and self.descendant_count() >= 2:
+        if not self.won and self.descendant_count() >= DESCENDANTS_TO_WIN:
             self.won = True
             return "\nYou have raised a thriving lineage! You win!"
         return None
