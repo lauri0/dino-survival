@@ -904,6 +904,10 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             "toxic_badlands": "magenta",
             "lake": "blue",
             "mountain": "darkgray",
+            "volcano": "black",
+            "volcano_erupting": "black",
+            "lava": "red",
+            "solidified_lava_field": "orange",
         }
         for y, r in enumerate(map_tiles):
             for x, canvas in enumerate(r):
@@ -940,6 +944,15 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
                         tile_size / 2 + 3,
                         fill="black",
                         outline="black",
+                    )
+                if revealed and terrain.name == "volcano_erupting":
+                    canvas.create_oval(
+                        tile_size / 2 - 3,
+                        tile_size / 2 - 3,
+                        tile_size / 2 + 3,
+                        tile_size / 2 + 3,
+                        fill="red",
+                        outline="red",
                     )
                 if (x, y) == (game.x, game.y):
                     canvas.create_rectangle(
