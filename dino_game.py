@@ -94,6 +94,10 @@ def choose_dinosaur_gui(root: tk.Tk, setting, on_select, on_back=None) -> None:
     closing the application.
     """
 
+    # Ensure the correct stats are loaded for the selected formation so that
+    # the information and statistics windows display properly.
+    game_module.set_stats_for_formation(setting.formation)
+
     frame = tk.Frame(root)
     frame.pack(expand=True)
 
