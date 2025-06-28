@@ -476,6 +476,9 @@ class Game:
         self.turn_messages.extend(
             self.map.update_volcanic_activity((self.x, self.y))
         )
+        self.turn_messages.extend(
+            self.map.update_flood(self.player, (self.x, self.y))
+        )
         if self.map.terrain_at(self.x, self.y).name in ("lava", "volcano_erupting"):
             append_event_log(f"Player killed by lava at ({self.x},{self.y})")
             return "\nYou are consumed by lava! Game Over."
