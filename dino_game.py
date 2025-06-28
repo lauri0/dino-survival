@@ -956,6 +956,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             "woodlands": "palegreen",
             "desert": "yellow",
             "toxic_badlands": "magenta",
+            "highland_forest": "darkgreen",
             "lake": "blue",
             "mountain": "darkgray",
             "volcano": "black",
