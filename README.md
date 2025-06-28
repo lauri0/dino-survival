@@ -8,7 +8,8 @@ A simple text-based dinosaur survival game inspired by the BBC "Big Al" game. Th
 - NPC animals are persistently simulated and move around the map in search of food. They can hunt each other (and you) and reproduce. 
 - Random terrain including forests, plains, swamps, woodlands, desert and lakes that affects the type of prey encountered.
 - Natural disasters like volcanic eruptions and floods
-![dino_survival](https://github.com/user-attachments/assets/59829804-66df-408c-9126-a691240e1f65)
+![dino_survival](https://github.com/user-attachments/assets/e18ef895-6505-4440-9653-15dc9b8826be)
+
 ## Requirements
 
 The game only requires Python 3.8+.
