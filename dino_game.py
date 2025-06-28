@@ -951,10 +951,15 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     def update_map() -> None:
         color_map = {
             "forest": "green",
+            "forest_flooded": "cadetblue",
             "plains": "yellowgreen",
+            "plains_flooded": "cadetblue",
             "swamp": "olivedrab",
+            "swamp_flooded": "cadetblue",
             "woodlands": "palegreen",
+            "woodlands_flooded": "cadetblue",
             "desert": "yellow",
+            "desert_flooded": "cadetblue",
             "toxic_badlands": "magenta",
             "highland_forest": "darkgreen",
             "lake": "blue",

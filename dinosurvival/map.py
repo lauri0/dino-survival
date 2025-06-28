@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Dict, Tuple, List, Optional
 from .plant import PlantStats, Plant
-from .dinosaur import NPCAnimal
+from .dinosaur import NPCAnimal, DinosaurStats
 import random
 
 @dataclass
@@ -149,6 +149,14 @@ class Map:
         self.erupting: List[List[bool]] = [
             [False for _ in range(width)] for _ in range(height)
         ]
+        # separate RNG for flooding so global random sequence is unaffected
+        self._flood_rng = random.Random()
+        # Track flooded tiles and their original terrain
+        self.flood_info: List[List[Optional[str]]] = [
+            [None for _ in range(width)] for _ in range(height)
+        ]
+        self.active_flood = False
+        self.flood_turn = 0
 
     def terrain_at(self, x: int, y: int) -> Terrain:
         return self.grid[y][x]
@@ -382,6 +390,122 @@ class Map:
         messages: List[str] = []
         messages.extend(self.roll_volcanoes(player_pos))
         messages.extend(self.update_lava(player_pos))
+        return messages
+
+    # ------------------------------------------------------------------
+    # Flood handling
+    # ------------------------------------------------------------------
+
+    def _flood_tile(
+        self,
+        x: int,
+        y: int,
+        player: "DinosaurStats",
+        player_pos: Tuple[int, int],
+        messages: List[str],
+    ) -> None:
+        name = self.grid[y][x].name
+        if (
+            name in (
+                "lake",
+                "lava",
+                "solidified_lava_field",
+                "volcano",
+                "volcano_erupting",
+                "mountain",
+                "highland_forest",
+                "toxic_badlands",
+            )
+            or name.endswith("_flooded")
+        ):
+            return
+
+        flooded_name = f"{name}_flooded"
+        if flooded_name not in self.terrains:
+            return
+
+        self.flood_info[y][x] = name
+        self.grid[y][x] = self.terrains[flooded_name]
+        for npc in list(self.animals[y][x]):
+            if npc.alive:
+                npc.health = max(0.0, npc.health - 50.0)
+                if npc.health <= 0:
+                    npc.alive = False
+                    npc.age = -1
+                    npc.fierceness = 0.0
+                    npc.speed = 0.0
+        self.plants[y][x] = []
+        if (x, y) == player_pos:
+            player.health = max(0.0, player.health - 50.0)
+            messages.append("Flood waters sweep over you!")
+
+    def _initiate_flood(
+        self, player: "DinosaurStats", player_pos: Tuple[int, int]
+    ) -> List[str]:
+        messages: List[str] = []
+        for y in range(self.height):
+            for x in range(self.width):
+                if self.grid[y][x].name != "lake":
+                    continue
+                for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                    nx, ny = x + dx, y + dy
+                    if 0 <= nx < self.width and 0 <= ny < self.height:
+                        self._flood_tile(nx, ny, player, player_pos, messages)
+        return messages
+
+    def _spread_flood(
+        self, player: "DinosaurStats", player_pos: Tuple[int, int]
+    ) -> List[str]:
+        messages: List[str] = []
+        current = [
+            (x, y)
+            for y in range(self.height)
+            for x in range(self.width)
+            if self.flood_info[y][x] is not None
+        ]
+        to_flood: List[Tuple[int, int]] = []
+        for x, y in current:
+            for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                nx, ny = x + dx, y + dy
+                if not (0 <= nx < self.width and 0 <= ny < self.height):
+                    continue
+                if self.flood_info[ny][nx] is not None:
+                    continue
+                to_flood.append((nx, ny))
+        for nx, ny in to_flood:
+            self._flood_tile(nx, ny, player, player_pos, messages)
+        return messages
+
+    def _clear_flood(self) -> None:
+        for y in range(self.height):
+            for x in range(self.width):
+                orig = self.flood_info[y][x]
+                if orig is None:
+                    continue
+                self.grid[y][x] = self.terrains[orig]
+                self.flood_info[y][x] = None
+
+    def update_flood(
+        self, player: "DinosaurStats", player_pos: Tuple[int, int]
+    ) -> List[str]:
+        messages: List[str] = []
+        if not self.active_flood:
+            if self._flood_rng.random() < 0.01:
+                self.active_flood = True
+                self.flood_turn = 0
+                messages.append(
+                    "Recent heavy rains might be causing lakes and riverbanks to start overflowing."
+                )
+                messages.extend(self._initiate_flood(player, player_pos))
+            return messages
+
+        self.flood_turn += 1
+        if self.flood_turn == 1:
+            messages.extend(self._spread_flood(player, player_pos))
+        elif self.flood_turn >= 3:
+            self._clear_flood()
+            self.active_flood = False
+            self.flood_turn = 0
         return messages
 
     def _generate_noise(self, width: int, height: int, scale: int = 3) -> List[List[float]]:
