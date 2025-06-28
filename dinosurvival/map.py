@@ -149,6 +149,14 @@ class Map:
         self.erupting: List[List[bool]] = [
             [False for _ in range(width)] for _ in range(height)
         ]
+        # Remember the terrain underneath lava so it can be restored later
+        self.lava_orig: List[List[Optional[str]]] = [
+            [None for _ in range(width)] for _ in range(height)
+        ]
+        # Track how long each solidified lava tile has been cooling
+        self.solidified_turns: List[List[int]] = [
+            [0 for _ in range(width)] for _ in range(height)
+        ]
         # separate RNG for flooding so global random sequence is unaffected
         self._flood_rng = random.Random()
         # Track flooded tiles and their original terrain
@@ -307,6 +315,9 @@ class Map:
                 self.grid[ay][ax] = self.terrains["volcano_erupting"]
                 spread_steps = steps
             else:
+                if self.lava_orig[ay][ax] is None:
+                    self.lava_orig[ay][ax] = self.grid[ay][ax].name
+                self.solidified_turns[ay][ax] = 0
                 self.grid[ay][ax] = self.terrains["lava"]
                 spread_steps = max(steps - 1, 0)
 
@@ -352,6 +363,9 @@ class Map:
             self.animals[ny][nx] = []
             self.eggs[ny][nx] = []
             self.burrows[ny][nx] = None
+            if self.lava_orig[ny][nx] is None:
+                self.lava_orig[ny][nx] = self.grid[ny][nx].name
+            self.solidified_turns[ny][nx] = 0
             self.grid[ny][nx] = self.terrains["lava"]
             self.lava_info[ny][nx] = {"steps": steps, "cooldown": 1}
             if player_pos is not None and (nx, ny) == player_pos:
@@ -362,6 +376,7 @@ class Map:
                 self.grid[y][x] = self.terrains["volcano"]
             else:
                 self.grid[y][x] = self.terrains["solidified_lava_field"]
+                self.solidified_turns[y][x] = 100
             self.lava_info[y][x] = None
             self.erupting[y][x] = False
 
@@ -390,7 +405,22 @@ class Map:
         messages: List[str] = []
         messages.extend(self.roll_volcanoes(player_pos))
         messages.extend(self.update_lava(player_pos))
+        self.update_solidified_lava()
         return messages
+
+    def update_solidified_lava(self) -> None:
+        """Countdown solidified lava tiles and restore terrain when cool."""
+        for y in range(self.height):
+            for x in range(self.width):
+                turns = self.solidified_turns[y][x]
+                if turns <= 0:
+                    continue
+                self.solidified_turns[y][x] -= 1
+                if self.solidified_turns[y][x] <= 0:
+                    prev = self.lava_orig[y][x]
+                    if prev is not None and prev in self.terrains:
+                        self.grid[y][x] = self.terrains[prev]
+                    self.lava_orig[y][x] = None
 
     # ------------------------------------------------------------------
     # Flood handling
