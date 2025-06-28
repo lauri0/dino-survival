@@ -7,6 +7,8 @@ A simple text-based dinosaur survival game inspired by the BBC "Big Al" game. Th
 - Turn based actions: move or hunt on each turn.
 - Random terrain including forests, plains, swamps, woodlands, desert and lakes that affects the type of prey encountered.
 - Support for multiple settings such as the Morrison Formation or Hell Creek.
+- Volcanoes can erupt and flood nearby tiles with lava.
+- Hidden burrows may contain mammals that can be dug up.
 
 ## Requirements
 
