@@ -23,7 +23,7 @@ def test_player_dies_on_volcano_eruption():
     random.seed(SEED_ERUPT)
     result = game._start_turn()
     assert "Game Over" in result
-    assert game.map.grid[3][3].name == "lava"
+    assert game.map.grid[3][3].name == "volcano_erupting"
     game._apply_terrain_effects()
     assert game.player.health == 0.0
 
@@ -34,6 +34,6 @@ def test_player_dies_adjacent_volcano_eruption():
     result = game._start_turn()
     assert "Game Over" in result
     assert game.map.grid[2][3].name == "lava"
-    assert game.map.grid[3][3].name == "lava"
+    assert game.map.grid[3][3].name == "volcano_erupting"
     game._apply_terrain_effects()
     assert game.player.health == 0.0
