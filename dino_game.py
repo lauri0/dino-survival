@@ -1217,18 +1217,18 @@ def launch_menu():
         tk.Button(
             frame,
             text="Morrison (North America, 150 MYA)",
-            width=20,
+            width=40,
             height=2,
             command=lambda: show_dino_menu(MORRISON, frame),
         ).pack(pady=10)
         tk.Button(
             frame,
             text="Hell Creek (North America, 66 MYA)",
-            width=20,
+            width=40,
             height=2,
             command=lambda: show_dino_menu(HELL_CREEK, frame),
         ).pack(pady=10)
-        tk.Button(frame, text="Quit", width=20, height=2, command=root.destroy).pack(pady=10)
+        tk.Button(frame, text="Quit", width=40, height=2, command=root.destroy).pack(pady=10)
 
     def show_dino_menu(setting, prev_frame):
         prev_frame.destroy()
