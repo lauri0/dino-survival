@@ -647,7 +647,6 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     weather_frame = tk.Frame(main, width=200)
     weather_frame.grid(row=0, column=3, sticky="nsew", padx=10, pady=10)
     weather_frame.grid_propagate(False)
-    tk.Label(weather_frame, text="Weather", font=("Helvetica", 14)).pack()
     weather_img_label = tk.Label(weather_frame)
     weather_img_label.pack(pady=5)
     weather_var = tk.StringVar()
