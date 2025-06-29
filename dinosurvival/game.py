@@ -288,6 +288,9 @@ class Game:
         self.turn_history: list[int] = []
         self._record_population()
 
+        self.last_hydration_loss = 0.0
+        self.last_energy_loss = 0.0
+
         self._weather_rng = random.Random()
         self.weather = self._choose_weather()
         self.weather_turns = 0
@@ -569,11 +572,10 @@ class Game:
         self.map.refresh_burrows()
         if getattr(self.player, "turns_until_lay_eggs", 0) > 0:
             self.player.turns_until_lay_eggs -= 1
-        self.player.hydration = max(
-            0.0,
-            self.player.hydration
-            - self.player.hydration_drain * self.weather.player_hydration_mult,
-        )
+        drain = self.player.hydration_drain * self.weather.player_hydration_mult
+        prev_h = self.player.hydration
+        self.player.hydration = max(0.0, self.player.hydration - drain)
+        self.last_hydration_loss = prev_h - self.player.hydration
         if self.player.is_dehydrated():
             return "\nYou have perished from dehydration! Game Over."
         return ""
@@ -584,7 +586,9 @@ class Game:
             drain *= WALKING_ENERGY_DRAIN_MULTIPLIER
         drain *= multiplier
         drain *= self.weather.player_energy_mult
+        prev_e = self.player.energy
         self.player.energy = max(0.0, self.player.energy - drain)
+        self.last_energy_loss = prev_e - self.player.energy
         message = ""
         if self.player.is_exhausted():
             message = "\nYou have collapsed from exhaustion! Game Over."
@@ -722,10 +726,7 @@ class Game:
         if self.player.adult_weight > 0:
             pct = self.player.weight / self.player.adult_weight
             pct = max(0.0, min(pct, 1.0))
-            self.player.fierceness = (
-                self.player.hatchling_fierceness
-                + pct * (self.player.adult_fierceness - self.player.hatchling_fierceness)
-            )
+            self.player.fierceness = self.player.adult_fierceness * pct
             self.player.speed = (
                 self.player.hatchling_speed
                 + pct * (self.player.adult_speed - self.player.hatchling_speed)
@@ -757,6 +758,8 @@ class Game:
         pct = max(0.0, min(pct, 1.0))
         h_val = stats.get(hatch_key, 0.0)
         a_val = stats.get(adult_key, 0.0)
+        if adult_key == "adult_fierceness":
+            return a_val * pct
         return h_val + pct * (a_val - h_val)
 
     def _npc_apply_growth(
@@ -1793,6 +1796,8 @@ class Game:
         ):
             multiplier *= 3
         end_msg = self._apply_turn_costs(moved, multiplier)
+        if action == "stay":
+            result += f" (-{self.last_hydration_loss:.1f} hydration, -{self.last_energy_loss:.1f} energy)"
         result += end_msg
         win = self._check_victory()
         if win:
