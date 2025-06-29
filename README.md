@@ -12,7 +12,7 @@ A simple text-based dinosaur survival game inspired by the BBC "Big Al" game. Th
 
 ## Requirements
 
-The game only requires Python 3.8+.
+The game requires Python 3.8+. If the image scaling doesn't work and the game opens with a huge dinosaur image covering the window then you will need to install pillow: pip install pillow.
 
 ## Running the Game
 
