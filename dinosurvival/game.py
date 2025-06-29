@@ -128,6 +128,78 @@ class EncounterEntry:
     eggs: EggCluster | None = None
     burrow: Burrow | None = None
 
+
+@dataclass
+class Weather:
+    name: str
+    icon: str
+    flood_chance: float
+    player_hydration_mult: float = 1.0
+    player_energy_mult: float = 1.0
+    npc_energy_mult: float = 1.0
+
+
+WEATHER_TABLE: list[tuple[Weather, float]] = [
+    (
+        Weather(
+            "Cloudy",
+            os.path.join("assets", "weather", "clouds.png"),
+            0.0,
+        ),
+        0.30,
+    ),
+    (
+        Weather(
+            "Sunny",
+            os.path.join("assets", "weather", "sun.png"),
+            0.0,
+            player_hydration_mult=1.2,
+        ),
+        0.25,
+    ),
+    (
+        Weather(
+            "Heatwave",
+            os.path.join("assets", "weather", "heatwave.png"),
+            0.0,
+            player_hydration_mult=1.5,
+        ),
+        0.10,
+    ),
+    (
+        Weather(
+            "Light Rain",
+            os.path.join("assets", "weather", "light_rain.png"),
+            0.01,
+            player_hydration_mult=0.9,
+            player_energy_mult=1.1,
+            npc_energy_mult=1.1,
+        ),
+        0.20,
+    ),
+    (
+        Weather(
+            "Heavy Rain",
+            os.path.join("assets", "weather", "heavy_rain.png"),
+            0.10,
+            player_hydration_mult=0.8,
+            player_energy_mult=1.2,
+            npc_energy_mult=1.2,
+        ),
+        0.15,
+    ),
+    (
+        Weather(
+            "Freezing",
+            os.path.join("assets", "weather", "freeze.png"),
+            0.0,
+            player_energy_mult=1.3,
+            npc_energy_mult=1.3,
+        ),
+        0.0,
+    ),
+]
+
 # Load default stats for the Morrison formation
 set_stats_for_formation("Morrison")
 
@@ -215,6 +287,10 @@ class Game:
         }
         self.turn_history: list[int] = []
         self._record_population()
+
+        self._weather_rng = random.Random()
+        self.weather = self._choose_weather()
+        self.weather_turns = 0
 
     def _npc_label(self, npc: NPCAnimal) -> str:
         """Return the formatted name with ID for logging."""
@@ -465,6 +541,11 @@ class Game:
     def _start_turn(self) -> str:
         self.turn_messages = []
         self.turn_count += 1
+        if self.weather_turns >= 10:
+            self.weather = self._choose_weather()
+            self.weather_turns = 0
+            self.turn_messages.append(f"The weather changes to {self.weather.name}.")
+        self.weather_turns += 1
         if "ambush" in self.player.abilities:
             if self.last_action == "stay":
                 self.player.ambush_streak = min(self.player.ambush_streak + 1, 3)
@@ -477,7 +558,7 @@ class Game:
             self.map.update_volcanic_activity((self.x, self.y))
         )
         self.turn_messages.extend(
-            self.map.update_flood(self.player, (self.x, self.y))
+            self.map.update_flood(self.player, (self.x, self.y), self.weather.flood_chance)
         )
         if self.map.terrain_at(self.x, self.y).name in ("lava", "volcano_erupting"):
             append_event_log(f"Player killed by lava at ({self.x},{self.y})")
@@ -489,7 +570,9 @@ class Game:
         if getattr(self.player, "turns_until_lay_eggs", 0) > 0:
             self.player.turns_until_lay_eggs -= 1
         self.player.hydration = max(
-            0.0, self.player.hydration - self.player.hydration_drain
+            0.0,
+            self.player.hydration
+            - self.player.hydration_drain * self.weather.player_hydration_mult,
         )
         if self.player.is_dehydrated():
             return "\nYou have perished from dehydration! Game Over."
@@ -500,6 +583,7 @@ class Game:
         if moved:
             drain *= WALKING_ENERGY_DRAIN_MULTIPLIER
         drain *= multiplier
+        drain *= self.weather.player_energy_mult
         self.player.energy = max(0.0, self.player.energy - drain)
         message = ""
         if self.player.is_exhausted():
@@ -982,6 +1066,11 @@ class Game:
             self.population_history[name].append(counts.get(name, 0))
         self.turn_history.append(self.turn_count)
 
+    def _choose_weather(self) -> Weather:
+        weathers = [w for w, _ in WEATHER_TABLE]
+        weights = [p for _, p in WEATHER_TABLE]
+        return self._weather_rng.choices(weathers, weights=weights, k=1)[0]
+
     def _move_npcs(self) -> None:
         moves: list[tuple[int,int,int,int,NPCAnimal]] = []
         directions = {
@@ -1077,7 +1166,11 @@ class Game:
                     npc.next_move = "None"
                     if npc.turns_until_lay_eggs > 0:
                         npc.turns_until_lay_eggs -= 1
-                    base_drain = stats.get("adult_energy_drain", 0.0) * 0.5
+                    base_drain = (
+                        stats.get("adult_energy_drain", 0.0)
+                        * 0.5
+                        * self.weather.npc_energy_mult
+                    )
                     npc.energy = max(0.0, npc.energy - base_drain)
                     if npc.energy <= 0:
                         npc.alive = False

@@ -506,6 +506,21 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         update_drink_button()
         update_lay_button()
 
+    def update_weather() -> None:
+        w = game.weather
+        weather_var.set(w.name)
+        img = weather_images.get(w.name)
+        if img is None and w.icon:
+            abs_path = os.path.join(os.path.dirname(__file__), w.icon)
+            weather_images[w.name] = load_scaled_image(abs_path, 256, 256)
+            img = weather_images.get(w.name)
+        if img:
+            weather_img_label.configure(image=img)
+            weather_img_label.image = img
+        else:
+            weather_img_label.configure(image="")
+            weather_img_label.image = None
+
     def update_drink_button() -> None:
         terrain = game.map.terrain_at(game.x, game.y)
         state = "normal" if terrain.name == "lake" else "disabled"
@@ -628,9 +643,20 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     plant_rows = []
     plant_images: dict[str, tk.PhotoImage] = {}
 
-    # Population tracker on the right
+    # Weather display above population tracker
+    weather_frame = tk.Frame(main, width=200)
+    weather_frame.grid(row=0, column=3, sticky="nsew", padx=10, pady=10)
+    weather_frame.grid_propagate(False)
+    tk.Label(weather_frame, text="Weather", font=("Helvetica", 14)).pack()
+    weather_img_label = tk.Label(weather_frame)
+    weather_img_label.pack(pady=5)
+    weather_var = tk.StringVar()
+    tk.Label(weather_frame, textvariable=weather_var, font=("Helvetica", 12)).pack()
+    weather_images: dict[str, tk.PhotoImage] = {}
+
+    # Population tracker on the right below weather
     population_frame = tk.Frame(main, width=200)
-    population_frame.grid(row=0, column=3, rowspan=4, sticky="nsew", padx=10, pady=10)
+    population_frame.grid(row=1, column=3, rowspan=2, sticky="nsew", padx=10, pady=10)
     population_frame.grid_propagate(False)
     tk.Label(population_frame, text="Global Population", font=("Helvetica", 14)).pack()
     population_list = tk.Frame(population_frame)
@@ -1077,6 +1103,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         )
         turn_label.config(text=f"Turn: {game.turn_count}")
         update_lay_button()
+        update_weather()
 
     def update_population() -> None:
         for child in population_list.winfo_children():
@@ -1198,6 +1225,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     update_biome()
     update_map()
     update_stats()
+    update_weather()
     update_encounters()
     update_plants()
     update_population()

@@ -516,11 +516,11 @@ class Map:
                 self.flood_info[y][x] = None
 
     def update_flood(
-        self, player: "DinosaurStats", player_pos: Tuple[int, int]
+        self, player: "DinosaurStats", player_pos: Tuple[int, int], chance: float = 0.0
     ) -> List[str]:
         messages: List[str] = []
         if not self.active_flood:
-            if self._flood_rng.random() < 0.01:
+            if chance > 0 and self._flood_rng.random() < chance:
                 self.active_flood = True
                 self.flood_turn = 0
                 messages.append(
