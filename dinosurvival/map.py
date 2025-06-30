@@ -471,7 +471,6 @@ class Map:
                 if npc.health <= 0:
                     npc.alive = False
                     npc.age = -1
-                    npc.fierceness = 0.0
                     npc.speed = 0.0
         self.plants[y][x] = []
         if (x, y) == player_pos:

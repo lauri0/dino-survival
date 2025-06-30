@@ -1,7 +1,6 @@
 {
   "Acheroraptor": {
     "adult_energy_drain": 5.0,
-    "adult_fierceness": 45.0,
     "adult_speed": 100,
     "adult_weight": 30.0,
     "aggressive": true,
@@ -28,11 +27,12 @@
       "forest",
       "swamp",
       "plains"
-    ]
+    ],
+    "attack": 8.04,
+    "hp": 16.08
   },
   "Ankylosaurus": {
     "adult_energy_drain": 1.5,
-    "adult_fierceness": 7200,
     "adult_speed": 15,
     "adult_weight": 6800.0,
     "aggressive": false,
@@ -55,11 +55,12 @@
     "preferred_biomes": [
       "forest",
       "desert"
-    ]
+    ],
+    "attack": 1285.71,
+    "hp": 2571.42
   },
   "Edmontosaurus": {
     "adult_energy_drain": 2.0,
-    "adult_fierceness": 3000,
     "adult_speed": 25,
     "adult_weight": 6000.0,
     "aggressive": false,
@@ -83,11 +84,12 @@
     "preferred_biomes": [
       "swamp",
       "plains"
-    ]
+    ],
+    "attack": 535.71,
+    "hp": 1071.42
   },
   "Leptoceratops": {
     "adult_energy_drain": 3.5,
-    "adult_fierceness": 45,
     "adult_speed": 40,
     "adult_weight": 80.0,
     "aggressive": false,
@@ -110,11 +112,12 @@
     "preferred_biomes": [
       "forest",
       "swamp"
-    ]
+    ],
+    "attack": 8.04,
+    "hp": 16.08
   },
   "Pachycephalosaurus": {
     "adult_energy_drain": 5.0,
-    "adult_fierceness": 250,
     "adult_speed": 40,
     "adult_weight": 450.0,
     "aggressive": false,
@@ -138,11 +141,12 @@
     "preferred_biomes": [
       "woodlands",
       "forest"
-    ]
+    ],
+    "attack": 44.64,
+    "hp": 89.28
   },
   "Pectinodon": {
     "adult_energy_drain": 5.0,
-    "adult_fierceness": 18.0,
     "adult_speed": 160,
     "adult_weight": 25.0,
     "aggressive": true,
@@ -169,11 +173,12 @@
       "woodlands",
       "swamp",
       "plains"
-    ]
+    ],
+    "attack": 3.21,
+    "hp": 6.42
   },
   "Thescelosaurus": {
     "adult_energy_drain": 4.0,
-    "adult_fierceness": 150,
     "adult_speed": 50,
     "adult_weight": 300.0,
     "aggressive": false,
@@ -196,11 +201,12 @@
     "preferred_biomes": [
       "woodlands",
       "plains"
-    ]
+    ],
+    "attack": 26.79,
+    "hp": 53.58
   },
   "Triceratops": {
     "adult_energy_drain": 2.0,
-    "adult_fierceness": 6000,
     "adult_speed": 18,
     "adult_weight": 8000.0,
     "aggressive": false,
@@ -223,14 +229,15 @@
     "preferred_biomes": [
       "woodlands",
       "plains"
-    ]
+    ],
+    "attack": 1071.43,
+    "hp": 2142.86
   },
   "Tyrannosaurus": {
     "abilities": [
       "ambush"
     ],
     "adult_energy_drain": 4.0,
-    "adult_fierceness": 8000.0,
     "adult_speed": 38,
     "adult_weight": 8000.0,
     "aggressive": true,
@@ -255,6 +262,8 @@
       "forest",
       "swamp",
       "plains"
-    ]
+    ],
+    "attack": 1428.57,
+    "hp": 2857.14
   }
 }
