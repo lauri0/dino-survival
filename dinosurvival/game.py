@@ -217,8 +217,12 @@ class Game:
         if self.player.adult_weight > 0:
             pct = self.player.weight / self.player.adult_weight
             pct = max(0.0, min(pct, 1.0))
-        self.player.attack = filtered.get("attack", 0.0) * pct
-        self.player.hp = filtered.get("hp", 0.0) * pct
+        self.player.adult_attack = filtered.get("attack", 0.0)
+        self.player.hatchling_attack = self.player.adult_attack * pct
+        self.player.attack = self.player.hatchling_attack
+        self.player.adult_hp = filtered.get("hp", 0.0)
+        self.player.hatchling_hp = self.player.adult_hp * pct
+        self.player.hp = self.player.hatchling_hp
         self.player.speed = self._stat_from_weight(
             self.player.weight,
             filtered,
