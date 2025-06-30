@@ -577,12 +577,15 @@ class Map:
         """Public helper to ignite a fire at ``(x, y)``."""
         messages: List[str] = []
         self._start_fire(x, y, player_pos, messages)
+        if self.grid[y][x].name in ("forest_fire", "highland_forest_fire"):
+            messages.append("There is a smell of burning in the air.")
         return messages
 
     def update_forest_fire(
         self, weather: "Weather", player_pos: Optional[Tuple[int, int]] = None
     ) -> List[str]:
         messages: List[str] = []
+        started_fire = False
 
         start_chance = 0.0
         if weather.name == "Sunny":
@@ -599,6 +602,7 @@ class Map:
                 if candidates:
                     cx, cy = self._fire_rng.choice(candidates)
                     self._start_fire(cx, cy, player_pos, messages)
+                    started_fire = True
 
         if weather.name == "Heatwave":
             spread_chance = 0.30
@@ -630,6 +634,7 @@ class Map:
 
         for nx, ny in to_spread:
             self._start_fire(nx, ny, player_pos, messages)
+            started_fire = True
 
         for x, y in to_burnt:
             name = self.grid[y][x].name
@@ -651,6 +656,9 @@ class Map:
                         elif name == "highland_forest_burnt":
                             self.grid[y][x] = self.terrains["highland_forest"]
 
+        if started_fire:
+            messages.append("There is a smell of burning in the air.")
+        
         return messages
 
     def _generate_noise(self, width: int, height: int, scale: int = 3) -> List[List[float]]:
