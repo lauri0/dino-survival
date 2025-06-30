@@ -512,7 +512,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         img = weather_images.get(w.name)
         if img is None and w.icon:
             abs_path = os.path.join(os.path.dirname(__file__), w.icon)
-            weather_images[w.name] = load_scaled_image(abs_path, 256, 256)
+            weather_images[w.name] = load_scaled_image(abs_path, 128, 128)
             img = weather_images.get(w.name)
         if img:
             weather_img_label.configure(image=img)
@@ -520,6 +520,14 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         else:
             weather_img_label.configure(image="")
             weather_img_label.image = None
+        effects: list[str] = []
+        if abs(w.player_hydration_mult - 1.0) > 0.01:
+            effects.append(f"Hydration x{w.player_hydration_mult:.2g}")
+        if abs(w.player_energy_mult - 1.0) > 0.01:
+            effects.append(f"Energy x{w.player_energy_mult:.2g}")
+        if w.flood_chance > 0:
+            effects.append(f"Flood {int(w.flood_chance * 100)}%")
+        weather_effect_var.set("\n".join(effects) if effects else "")
 
     def update_drink_button() -> None:
         terrain = game.map.terrain_at(game.x, game.y)
@@ -651,6 +659,8 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     weather_img_label.pack(pady=5)
     weather_var = tk.StringVar()
     tk.Label(weather_frame, textvariable=weather_var, font=("Helvetica", 12)).pack()
+    weather_effect_var = tk.StringVar()
+    tk.Label(weather_frame, textvariable=weather_effect_var, font=("Helvetica", 10)).pack()
     weather_images: dict[str, tk.PhotoImage] = {}
 
     # Population tracker on the right below weather
