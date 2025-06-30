@@ -1,6 +1,5 @@
 {
   "Centipede": {
-    "adult_fierceness": 0.0,
     "adult_speed": 55,
     "adult_weight": 1.0,
     "aggressive": false,
@@ -15,10 +14,11 @@
     "name": "Centipede",
     "preferred_biomes": [
       "forest"
-    ]
+    ],
+    "attack": 0.0,
+    "hp": 0.0
   },
   "Ceratodus": {
-    "adult_fierceness": 5.0,
     "adult_speed": 55,
     "adult_weight": 12.0,
     "aggressive": false,
@@ -33,10 +33,11 @@
     "name": "Ceratodus",
     "preferred_biomes": [
       "lake"
-    ]
+    ],
+    "attack": 0.89,
+    "hp": 1.78
   },
   "Dragonfly": {
-    "adult_fierceness": 0.0,
     "adult_speed": 75,
     "adult_weight": 0.5,
     "aggressive": false,
@@ -51,10 +52,11 @@
     "name": "Dragonfly",
     "preferred_biomes": [
       "forest"
-    ]
+    ],
+    "attack": 0.0,
+    "hp": 0.0
   },
   "Frog": {
-    "adult_fierceness": 0.0,
     "adult_speed": 45,
     "adult_weight": 2.5,
     "aggressive": false,
@@ -69,10 +71,11 @@
     "name": "Frog",
     "preferred_biomes": [
       "swamp"
-    ]
+    ],
+    "attack": 0.0,
+    "hp": 0.0
   },
   "Glyptops": {
-    "adult_fierceness": 3,
     "adult_speed": 45,
     "adult_weight": 5.0,
     "aggressive": false,
@@ -87,10 +90,11 @@
     "name": "Glyptops",
     "preferred_biomes": [
       "swamp"
-    ]
+    ],
+    "attack": 0.54,
+    "hp": 1.08
   },
   "Lizard": {
-    "adult_fierceness": 5.0,
     "adult_speed": 55,
     "adult_weight": 4.0,
     "aggressive": false,
@@ -105,10 +109,11 @@
     "name": "Lizard",
     "preferred_biomes": [
       "swamp"
-    ]
+    ],
+    "attack": 0.89,
+    "hp": 1.78
   },
   "Morrolepis": {
-    "adult_fierceness": 0,
     "adult_speed": 65,
     "adult_weight": 2.0,
     "aggressive": false,
@@ -123,10 +128,11 @@
     "name": "Morrolepis",
     "preferred_biomes": [
       "lake"
-    ]
+    ],
+    "attack": 0.0,
+    "hp": 0.0
   },
   "Scorpion": {
-    "adult_fierceness": 5.5,
     "adult_speed": 65,
     "adult_weight": 2.0,
     "aggressive": true,
@@ -141,6 +147,8 @@
     "name": "Scorpion",
     "preferred_biomes": [
       "desert"
-    ]
+    ],
+    "attack": 0.98,
+    "hp": 1.96
   }
 }

@@ -159,7 +159,8 @@ def choose_dinosaur_gui(root: tk.Tk, setting, on_select, on_back=None) -> None:
         tk.Label(win, text=dname, font=("Helvetica", 18)).pack(pady=5)
         lines = []
         lines.append(f"Weight: {info.get('adult_weight', 0)} kg")
-        lines.append(f"Fierceness: {info.get('adult_fierceness', 0)}")
+        lines.append(f"Attack: {info.get('attack', 0)}")
+        lines.append(f"HP: {info.get('hp', 0)}")
         lines.append(f"Speed: {info.get('adult_speed', 0)}")
         lines.append(f"Energy drain per turn: {info.get('adult_energy_drain', 0)}")
         pref_biomes = ", ".join(info.get("preferred_biomes", []))
@@ -357,7 +358,8 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         tk.Label(win, text=name, font=("Helvetica", 18)).pack(pady=5)
         lines = []
         lines.append(f"Weight: {info.get('adult_weight', 0)} kg")
-        lines.append(f"Fierceness: {info.get('adult_fierceness', 0)}")
+        lines.append(f"Attack: {info.get('attack', 0)}")
+        lines.append(f"HP: {info.get('hp', 0)}")
         lines.append(f"Speed: {info.get('adult_speed', 0)}")
         lines.append(f"Energy drain per turn: {info.get('adult_energy_drain', 0)}")
         pref_biomes = ", ".join(info.get("preferred_biomes", []))
@@ -435,10 +437,17 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             font=("Helvetica", 12),
             anchor="w",
         ).pack(anchor="w")
-        fierce = game.npc_effective_fierceness(npc, stats, game.x, game.y)
+        atk = game.npc_effective_attack(npc, stats, game.x, game.y)
         tk.Label(
             win,
-            text=f"Fierceness: {fierce:.1f}/{stats.get('adult_fierceness', 0)}",
+            text=f"Attack: {atk:.1f}/{stats.get('attack', 0)}",
+            font=("Helvetica", 12),
+            anchor="w",
+        ).pack(anchor="w")
+        hp_max = game._scale_by_weight(npc.weight, stats, "hp")
+        tk.Label(
+            win,
+            text=f"HP: {hp_max * npc.health/100:.1f}/{stats.get('hp', 0)}",
             font=("Helvetica", 12),
             anchor="w",
         ).pack(anchor="w")
@@ -454,11 +463,10 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     def show_encounter_help() -> None:
         text = [
             "The encounters list displays animals or nests in your current cell.",
-            "W: prey weight, F: fierceness relative to you,",
+            "W: prey weight, A: attack power, HP: health points,",
             "S: speed relative to you (%) and E: energy available.",
-            "Higher fierceness makes fights harder while higher speed",
-            "makes prey harder to catch. Targets with above 1 fierceness",
-            "are lethal."
+            "Higher attack deals more damage while higher speed",
+            "makes prey harder to catch."
         ]
         win = tk.Toplevel(root)
         win.title("Encounter Help")
@@ -473,7 +481,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             "Threaten can scare prey away. Lay Eggs lets you deposit eggs once ready.",
             "Lay Eggs requires being fully grown with 80+ health and energy.",
             "There is a short waiting period before eggs can be laid again after doing so.",
-            "Health, Energy, Hydration, Weight, Fierceness and Speed describe your dinosaur.",
+            "Health, Energy, Hydration, Weight, Attack and Speed describe your dinosaur.",
             "Grow by hunting prey and once grown up lay eggs and hatch enough of them to win."
         ]
         win = tk.Toplevel(root)
@@ -836,7 +844,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             name_lbl.pack(anchor="w")
             stats_lbl.pack(anchor="w")
             info_btn = tk.Button(row, text="Stats", width=4, height=3)
-            btn = tk.Button(row, text="Hunt", width=4, height=3)
+            btn = tk.Button(row, text="Attack", width=6, height=3)
             img.grid(row=0, column=0, rowspan=2, sticky="w")
             info_frame.grid(row=0, column=1, sticky="w", padx=5)
             info_btn.grid(row=0, column=2, rowspan=2, sticky="e")
@@ -890,9 +898,8 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             disp_name = f"{npc.name} ({npc.id})"
             disp_name = f"{disp_name} W:{npc.weight:.1f}kg"
 
-            target_f = game.npc_effective_fierceness(npc, stats, game.x, game.y)
+            target_a = game.npc_effective_attack(npc, stats, game.x, game.y)
             target_s = game.npc_effective_speed(npc, stats)
-            rel_f = target_f / player_f
             rel_s = target_s / player_s
             catch = game_module.calculate_catch_chance(rel_s)
 
@@ -912,14 +919,15 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
                 slot["img"].image = None
 
             slot["name"].configure(text=disp_name)
+            hp_max = game._scale_by_weight(npc.weight, stats, "hp")
             slot["stats"].configure(
                 text=(
-                    f"F:{rel_f:.2f} S:{rel_s:.2f} "
-                    f"({int(round(catch * 100))}%) "
+                    f"A:{target_a:.0f} HP:{hp_max * npc.health/100:.0f} "
+                    f"S:{rel_s:.2f} ({int(round(catch * 100))}%) "
                     f"E:{npc.energy:.0f}% "
                 )
             )
-            label = "Hunt" if npc.alive else "Eat"
+            label = "Attack" if npc.alive else "Eat"
             slot["btn"].configure(command=lambda i=npc.id: do_hunt(i), text=label)
             slot["info"].configure(command=lambda n=npc: show_npc_stats(n))
             slot["info"].grid()
@@ -1102,11 +1110,13 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
                 f"{game.player.adult_weight:.0f}kg ({pct:.1f}%)"
             )
         )
-        adj_f = game.player_base_fierceness()
-        text = f"Fierceness: {adj_f:.1f}"
+        atk = game.player_effective_attack()
+        text = f"Attack: {atk:.1f}"
         if game.player_pack_hunter_active():
             text += " (Pack Hunter)"
         fierce_label.config(text=text)
+        hp_max = game._scale_by_weight(game.player.weight, DINO_STATS[game.player.name], "hp")
+        hp_label.config(text=f"HP: {hp_max * game.player.health/100:.1f}/{hp_max:.0f}")
         speed_text = f"Speed: {game.player_effective_speed():.1f}"
         if "ambush" in game.player.abilities and game.player.ambush_streak > 0:
             speed_text += " (Ambush)"
@@ -1183,6 +1193,8 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     weight_label.pack(anchor="w")
     fierce_label = tk.Label(stats_frame, font=("Helvetica", 14), anchor="w")
     fierce_label.pack(anchor="w")
+    hp_label = tk.Label(stats_frame, font=("Helvetica", 14), anchor="w")
+    hp_label.pack(anchor="w")
     speed_label = tk.Label(stats_frame, font=("Helvetica", 14), anchor="w")
     speed_label.pack(anchor="w")
     desc_label = tk.Label(stats_frame, font=("Helvetica", 14), anchor="w")

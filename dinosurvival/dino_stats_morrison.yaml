@@ -1,7 +1,6 @@
 {
   "Alcovasaurus": {
     "adult_energy_drain": 5.0,
-    "adult_fierceness": 2800,
     "adult_speed": 20,
     "adult_weight": 3500.0,
     "aggressive": false,
@@ -25,11 +24,12 @@
     "preferred_biomes": [
       "woodlands",
       "desert"
-    ]
+    ],
+    "attack": 500.0,
+    "hp": 1000.0
   },
   "Allosaurus": {
     "adult_energy_drain": 5.0,
-    "adult_fierceness": 2800.0,
     "adult_speed": 30,
     "adult_weight": 3000.0,
     "aggressive": true,
@@ -52,11 +52,12 @@
     "preferred_biomes": [
       "plains",
       "woodlands"
-    ]
+    ],
+    "attack": 500.0,
+    "hp": 1000.0
   },
   "Amphicotylus": {
     "adult_energy_drain": 1.5,
-    "adult_fierceness": 280,
     "adult_speed": 50,
     "adult_weight": 250.0,
     "aggressive": true,
@@ -78,11 +79,12 @@
     "num_eggs": 2,
     "preferred_biomes": [
       "lake"
-    ]
+    ],
+    "attack": 50.0,
+    "hp": 100.0
   },
   "Brachiosaurus": {
     "adult_energy_drain": 1.2,
-    "adult_fierceness": 12000,
     "adult_speed": 11,
     "adult_weight": 45000.0,
     "aggressive": false,
@@ -105,11 +107,12 @@
     "preferred_biomes": [
       "plains",
       "woodlands"
-    ]
+    ],
+    "attack": 2142.86,
+    "hp": 4285.72
   },
   "Camarasaurus": {
     "adult_energy_drain": 1.6,
-    "adult_fierceness": 5400,
     "adult_speed": 15,
     "adult_weight": 15000.0,
     "aggressive": false,
@@ -133,11 +136,12 @@
     "preferred_biomes": [
       "desert",
       "woodlands"
-    ]
+    ],
+    "attack": 964.29,
+    "hp": 1928.58
   },
   "Camptosaurus": {
     "adult_energy_drain": 3.6,
-    "adult_fierceness": 350,
     "adult_speed": 35,
     "adult_weight": 700.0,
     "aggressive": false,
@@ -159,11 +163,12 @@
     "num_eggs": 2,
     "preferred_biomes": [
       "woodlands"
-    ]
+    ],
+    "attack": 62.5,
+    "hp": 125.0
   },
   "Ceratosaurus": {
     "adult_energy_drain": 4,
-    "adult_fierceness": 1000.0,
     "adult_speed": 45,
     "adult_weight": 900.0,
     "aggressive": true,
@@ -186,11 +191,12 @@
     "preferred_biomes": [
       "forest",
       "swamp"
-    ]
+    ],
+    "attack": 178.57,
+    "hp": 357.14
   },
   "Diplodocus": {
     "adult_energy_drain": 1.2,
-    "adult_fierceness": 8000,
     "adult_speed": 12,
     "adult_weight": 25000.0,
     "aggressive": false,
@@ -213,11 +219,12 @@
     "num_eggs": 2,
     "preferred_biomes": [
       "plains"
-    ]
+    ],
+    "attack": 1428.57,
+    "hp": 2857.14
   },
   "Dryosaurus": {
     "adult_energy_drain": 5.0,
-    "adult_fierceness": 50.0,
     "adult_speed": 40,
     "adult_weight": 80.0,
     "aggressive": false,
@@ -241,11 +248,12 @@
     "preferred_biomes": [
       "forest",
       "woodlands"
-    ]
+    ],
+    "attack": 8.93,
+    "hp": 17.86
   },
   "Fruitadens": {
     "adult_energy_drain": 8.0,
-    "adult_fierceness": 2.5,
     "adult_speed": 60,
     "adult_weight": 5.0,
     "aggressive": false,
@@ -268,11 +276,12 @@
     "num_eggs": 2,
     "preferred_biomes": [
       "swamp"
-    ]
+    ],
+    "attack": 0.45,
+    "hp": 0.9
   },
   "Gargoyleosaurus": {
     "adult_energy_drain": 5.0,
-    "adult_fierceness": 1000,
     "adult_speed": 20,
     "adult_weight": 1000.0,
     "aggressive": false,
@@ -294,11 +303,12 @@
     "num_eggs": 2,
     "preferred_biomes": [
       "forest"
-    ]
+    ],
+    "attack": 178.57,
+    "hp": 357.14
   },
   "Mymoorapelta": {
     "adult_energy_drain": 5.0,
-    "adult_fierceness": 550,
     "adult_speed": 22,
     "adult_weight": 500.0,
     "aggressive": false,
@@ -321,11 +331,12 @@
     "preferred_biomes": [
       "plains",
       "woodlands"
-    ]
+    ],
+    "attack": 98.21,
+    "hp": 196.42
   },
   "Nanosaurus": {
     "adult_energy_drain": 7.0,
-    "adult_fierceness": 6.0,
     "adult_speed": 50,
     "adult_weight": 10.0,
     "aggressive": false,
@@ -347,11 +358,12 @@
     "num_eggs": 2,
     "preferred_biomes": [
       "forest"
-    ]
+    ],
+    "attack": 1.07,
+    "hp": 2.14
   },
   "Ornitholestes": {
     "adult_energy_drain": 4.0,
-    "adult_fierceness": 25.0,
     "adult_speed": 50,
     "adult_weight": 20.0,
     "aggressive": true,
@@ -373,11 +385,12 @@
     "num_eggs": 2,
     "preferred_biomes": [
       "forest"
-    ]
+    ],
+    "attack": 4.46,
+    "hp": 8.92
   },
   "Stegosaurus": {
     "adult_energy_drain": 3.0,
-    "adult_fierceness": 2600,
     "adult_speed": 20,
     "adult_weight": 4000.0,
     "aggressive": false,
@@ -402,11 +415,12 @@
       "woodlands",
       "forest",
       "plains"
-    ]
+    ],
+    "attack": 464.29,
+    "hp": 928.58
   },
   "Torvosaurus": {
     "adult_energy_drain": 4.0,
-    "adult_fierceness": 2600.0,
     "adult_speed": 35,
     "adult_weight": 2400.0,
     "aggressive": true,
@@ -429,6 +443,8 @@
     "preferred_biomes": [
       "woodlands",
       "forest"
-    ]
+    ],
+    "attack": 464.29,
+    "hp": 928.58
   }
 }
