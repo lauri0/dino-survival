@@ -827,7 +827,6 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         for child in encounter_list.winfo_children():
             child.destroy()
         encounter_rows.clear()
-        player_f = game.effective_fierceness() or 1
         player_s = game.player_effective_speed() or 1
         entries = game.current_encounters
         for entry in entries:
@@ -1114,7 +1113,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         text = f"Attack: {atk:.1f}"
         if game.player_pack_hunter_active():
             text += " (Pack Hunter)"
-        fierce_label.config(text=text)
+        attack_label.config(text=text)
         hp_max = game._scale_by_weight(
             game.player.weight,
             game_module.DINO_STATS[game.player.name],
@@ -1195,8 +1194,8 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     hydration_row.pack(anchor="w")
     weight_label = tk.Label(stats_frame, font=("Helvetica", 14), anchor="w")
     weight_label.pack(anchor="w")
-    fierce_label = tk.Label(stats_frame, font=("Helvetica", 14), anchor="w")
-    fierce_label.pack(anchor="w")
+    attack_label = tk.Label(stats_frame, font=("Helvetica", 14), anchor="w")
+    attack_label.pack(anchor="w")
     hp_label = tk.Label(stats_frame, font=("Helvetica", 14), anchor="w")
     hp_label.pack(anchor="w")
     speed_label = tk.Label(stats_frame, font=("Helvetica", 14), anchor="w")
