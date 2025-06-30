@@ -1115,7 +1115,11 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         if game.player_pack_hunter_active():
             text += " (Pack Hunter)"
         fierce_label.config(text=text)
-        hp_max = game._scale_by_weight(game.player.weight, DINO_STATS[game.player.name], "hp")
+        hp_max = game._scale_by_weight(
+            game.player.weight,
+            game_module.DINO_STATS[game.player.name],
+            "hp",
+        )
         hp_label.config(text=f"HP: {hp_max * game.player.health/100:.1f}/{hp_max:.0f}")
         speed_text = f"Speed: {game.player_effective_speed():.1f}"
         if "ambush" in game.player.abilities and game.player.ambush_streak > 0:
