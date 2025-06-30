@@ -992,7 +992,11 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             "volcano": "black",
             "volcano_erupting": "black",
             "lava": "red",
-            "solidified_lava_field": "orange",
+            "solidified_lava_field": "dimgray",
+            "forest_fire": "orange",
+            "highland_forest_fire": "orange",
+            "forest_burnt": "darkseagreen",
+            "highland_forest_burnt": "darkseagreen",
         }
         for y, r in enumerate(map_tiles):
             for x, canvas in enumerate(r):

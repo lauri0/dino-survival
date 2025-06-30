@@ -291,7 +291,7 @@ class Game:
         self.last_hydration_loss = 0.0
         self.last_energy_loss = 0.0
 
-        self._weather_rng = random.Random()
+        self._weather_rng = random.Random(1)
         self.weather = self._choose_weather()
         self.weather_turns = 0
 
@@ -563,6 +563,9 @@ class Game:
         self.turn_messages.extend(
             self.map.update_flood(self.player, (self.x, self.y), self.weather.flood_chance)
         )
+        self.turn_messages.extend(
+            self.map.update_forest_fire(self.weather, (self.x, self.y))
+        )
         if self.map.terrain_at(self.x, self.y).name in ("lava", "volcano_erupting"):
             append_event_log(f"Player killed by lava at ({self.x},{self.y})")
             return "\nYou are consumed by lava! Game Over."
@@ -628,7 +631,7 @@ class Game:
     def _apply_terrain_effects(self) -> None:
         """Apply end-of-turn biome effects to the player and NPCs."""
         terrain = self.map.terrain_at(self.x, self.y).name
-        if terrain in ("lava", "volcano_erupting"):
+        if terrain in ("lava", "volcano_erupting", "forest_fire", "highland_forest_fire"):
             self.player.health = 0.0
             self.turn_messages.append("Game Over.")
         if terrain == "toxic_badlands":
@@ -641,7 +644,7 @@ class Game:
         for y in range(self.map.height):
             for x in range(self.map.width):
                 tname = self.map.terrain_at(x, y).name
-                if tname in ("lava", "volcano_erupting"):
+                if tname in ("lava", "volcano_erupting", "forest_fire", "highland_forest_fire"):
                     for npc in self.map.animals[y][x]:
                         npc.alive = False
                         npc.age = -1

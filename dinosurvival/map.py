@@ -157,8 +157,17 @@ class Map:
         self.solidified_turns: List[List[int]] = [
             [0 for _ in range(width)] for _ in range(height)
         ]
+        # Track burning tiles and burnt terrain recovery
+        self.fire_turns: List[List[int]] = [
+            [0 for _ in range(width)] for _ in range(height)
+        ]
+        self.burnt_turns: List[List[int]] = [
+            [0 for _ in range(width)] for _ in range(height)
+        ]
         # separate RNG for flooding so global random sequence is unaffected
         self._flood_rng = random.Random()
+        # separate RNG for forest fires so global random sequence is unaffected
+        self._fire_rng = random.Random()
         # Track flooded tiles and their original terrain
         self.flood_info: List[List[Optional[str]]] = [
             [None for _ in range(width)] for _ in range(height)
@@ -536,6 +545,112 @@ class Map:
             self._clear_flood()
             self.active_flood = False
             self.flood_turn = 0
+        return messages
+
+    # ------------------------------------------------------------------
+    # Forest fire handling
+    # ------------------------------------------------------------------
+
+    def _start_fire(
+        self, x: int, y: int, player_pos: Optional[Tuple[int, int]], messages: List[str]
+    ) -> None:
+        name = self.grid[y][x].name
+        if name == "forest":
+            self.grid[y][x] = self.terrains["forest_fire"]
+        elif name == "highland_forest":
+            self.grid[y][x] = self.terrains["highland_forest_fire"]
+        else:
+            return
+        self.fire_turns[y][x] = 5
+        self.burnt_turns[y][x] = 0
+        self.animals[y][x] = []
+        self.eggs[y][x] = []
+        self.burrows[y][x] = None
+        self.plants[y][x] = []
+        if player_pos is not None and (x, y) == player_pos:
+            messages.append("You are caught in a forest fire!")
+            # Player death handled in _apply_terrain_effects
+
+    def start_forest_fire(
+        self, x: int, y: int, player_pos: Optional[Tuple[int, int]] = None
+    ) -> List[str]:
+        """Public helper to ignite a fire at ``(x, y)``."""
+        messages: List[str] = []
+        self._start_fire(x, y, player_pos, messages)
+        return messages
+
+    def update_forest_fire(
+        self, weather: "Weather", player_pos: Optional[Tuple[int, int]] = None
+    ) -> List[str]:
+        messages: List[str] = []
+
+        start_chance = 0.0
+        if weather.name == "Sunny":
+            start_chance = 0.002
+        elif weather.name == "Heatwave":
+            start_chance = 0.02
+        if start_chance > 0:
+            if self._fire_rng.random() < start_chance:
+                candidates: List[Tuple[int, int]] = []
+                for y in range(self.height):
+                    for x in range(self.width):
+                        if self.grid[y][x].name in ("forest", "highland_forest"):
+                            candidates.append((x, y))
+                if candidates:
+                    cx, cy = self._fire_rng.choice(candidates)
+                    self._start_fire(cx, cy, player_pos, messages)
+
+        if weather.name == "Heatwave":
+            spread_chance = 0.30
+        elif weather.name == "Light Rain":
+            spread_chance = 0.10
+        elif weather.name == "Heavy Rain":
+            spread_chance = 0.05
+        else:
+            spread_chance = 0.20
+
+        to_spread: List[Tuple[int, int]] = []
+        to_burnt: List[Tuple[int, int]] = []
+
+        for y in range(self.height):
+            for x in range(self.width):
+                if self.fire_turns[y][x] > 0:
+                    if self._fire_rng.random() < spread_chance:
+                        dx, dy = self._fire_rng.choice([(1, 0), (-1, 0), (0, 1), (0, -1)])
+                        nx, ny = x + dx, y + dy
+                        if 0 <= nx < self.width and 0 <= ny < self.height:
+                            if self.grid[ny][nx].name in (
+                                "forest",
+                                "highland_forest",
+                            ):
+                                to_spread.append((nx, ny))
+                    self.fire_turns[y][x] -= 1
+                    if self.fire_turns[y][x] <= 0:
+                        to_burnt.append((x, y))
+
+        for nx, ny in to_spread:
+            self._start_fire(nx, ny, player_pos, messages)
+
+        for x, y in to_burnt:
+            name = self.grid[y][x].name
+            if name == "forest_fire":
+                self.grid[y][x] = self.terrains["forest_burnt"]
+            elif name == "highland_forest_fire":
+                self.grid[y][x] = self.terrains["highland_forest_burnt"]
+            self.fire_turns[y][x] = 0
+            self.burnt_turns[y][x] = 50
+
+        for y in range(self.height):
+            for x in range(self.width):
+                if self.burnt_turns[y][x] > 0:
+                    self.burnt_turns[y][x] -= 1
+                    if self.burnt_turns[y][x] <= 0:
+                        name = self.grid[y][x].name
+                        if name == "forest_burnt":
+                            self.grid[y][x] = self.terrains["forest"]
+                        elif name == "highland_forest_burnt":
+                            self.grid[y][x] = self.terrains["highland_forest"]
+
         return messages
 
     def _generate_noise(self, width: int, height: int, scale: int = 3) -> List[List[float]]:
