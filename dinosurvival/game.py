@@ -1064,8 +1064,10 @@ class Game:
                 for npc in list(animals):
                     if not npc.alive:
                         before = npc.weight
-                        npc.weight -= npc.weight * 0.10 + 2
-                        lost = max(0.0, before - npc.weight)
+                        spoiled = npc.weight * 0.10 + 2
+                        after = max(0.0, npc.weight - spoiled)
+                        npc.weight = after
+                        lost = before - after
                         if lost > 0 and x == self.x and y == self.y:
                             messages.append(
                                 f"The {self._npc_label(npc)} carcass lost {lost:.1f}kg to spoilage."

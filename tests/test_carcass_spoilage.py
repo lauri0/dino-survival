@@ -40,3 +40,17 @@ def test_spoilage_occurs_after_turn():
     assert carcass.weight == 1.0
     game.turn("stay")
     assert carcass not in game.map.animals[game.y][game.x]
+
+
+def test_spoilage_message_clamped_to_remaining_weight():
+    random.seed(0)
+    game = game_mod.Game(MORRISON, "Allosaurus", width=6, height=6)
+    game.map.animals = [[[] for _ in range(6)] for _ in range(6)]
+    carcass = NPCAnimal(id=4, name="Stegosaurus", sex=None, alive=False, weight=1.0)
+    game.map.animals[game.y][game.x] = [carcass]
+
+    messages = game._spoil_carcasses()
+
+    expected = f"The {game._npc_label(carcass)} carcass lost 1.0kg to spoilage."
+    assert messages == [expected]
+    assert carcass not in game.map.animals[game.y][game.x]
