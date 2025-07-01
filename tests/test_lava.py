@@ -12,7 +12,7 @@ def test_player_dies_on_lava_tile():
     game.map.grid[game.y][game.x] = MORRISON.terrains["lava"]
     game.turn_messages = []
     game._apply_terrain_effects()
-    assert game.player.health == 0.0
+    assert game.player.hp == 0.0
     assert any("Game Over" in m for m in game.turn_messages)
 
 

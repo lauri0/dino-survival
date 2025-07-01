@@ -27,9 +27,9 @@ class DinosaurStats:
     growth_rate: float = 0.35
     walking_energy_drain_multiplier: float = 1.0
     attack: float = 0.0
-    hp: float = 0.0
+    max_hp: float = 100.0
+    hp: float = 100.0
     speed: float = 0.0
-    health: float = 100.0
     energy: float = 100.0
     weight: float = 0.0
     health_regen: float = 0.0
@@ -60,10 +60,10 @@ class NPCAnimal:
     weight: float = 0.0
     age: int = 0
     energy: float = 100.0
-    health: float = 100.0
+    max_hp: float = 100.0
+    hp: float = 100.0
     alive: bool = True
     attack: float = 0.0
-    hp: float = 0.0
     speed: float = 0.0
     next_move: str = "None"
     turns_until_lay_eggs: int = 0

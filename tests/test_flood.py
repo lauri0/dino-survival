@@ -23,7 +23,7 @@ def test_flood_spread_and_revert():
     game.map._initiate_flood(game.player, (game.x, game.y))
     assert game.map.active_flood
     assert game.map.grid[2][1].name == "plains_flooded"
-    assert npc.health == 50.0
+    assert npc.hp == 50.0
 
     game.map.update_flood(game.player, (game.x, game.y))
     assert game.map.grid[2][0].name == "plains_flooded"

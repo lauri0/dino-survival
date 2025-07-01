@@ -33,7 +33,7 @@ def test_player_takes_damage_when_hunting_critter():
     critter = NPCAnimal(id=1, name="Didelphodon", sex=None, weight=5.0)
     game.map.animals[game.y][game.x] = [critter]
     game.hunt_npc(critter.id)
-    assert game.player.health < 100
+    assert game.player.hp < game.player.max_hp
 
 
 def test_npc_takes_damage_when_hunting_critter():
@@ -44,4 +44,4 @@ def test_npc_takes_damage_when_hunting_critter():
     prey = NPCAnimal(id=2, name="Didelphodon", sex=None, weight=5.0)
     game.map.animals[0][0] = [predator, prey]
     game._update_npcs()
-    assert predator.health < 100
+    assert predator.hp < predator.max_hp

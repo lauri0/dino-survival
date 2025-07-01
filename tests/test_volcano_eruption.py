@@ -25,7 +25,7 @@ def test_player_dies_on_volcano_eruption():
     assert "Game Over" in result
     assert game.map.grid[3][3].name == "volcano_erupting"
     game._apply_terrain_effects()
-    assert game.player.health == 0.0
+    assert game.player.hp == 0.0
 
 
 def test_player_dies_adjacent_volcano_eruption():
@@ -36,4 +36,4 @@ def test_player_dies_adjacent_volcano_eruption():
     assert game.map.grid[2][3].name == "lava"
     assert game.map.grid[3][3].name == "volcano_erupting"
     game._apply_terrain_effects()
-    assert game.player.health == 0.0
+    assert game.player.hp == 0.0

@@ -467,14 +467,15 @@ class Map:
         self.grid[y][x] = self.terrains[flooded_name]
         for npc in list(self.animals[y][x]):
             if npc.alive:
-                npc.health = max(0.0, npc.health - 50.0)
-                if npc.health <= 0:
+                dmg = npc.max_hp * 0.5
+                npc.hp = max(0.0, npc.hp - dmg)
+                if npc.hp <= 0:
                     npc.alive = False
                     npc.age = -1
                     npc.speed = 0.0
         self.plants[y][x] = []
         if (x, y) == player_pos:
-            player.health = max(0.0, player.health - 50.0)
+            player.hp = max(0.0, player.hp - player.max_hp * 0.5)
             messages.append("Flood waters sweep over you!")
 
     def _initiate_flood(
