@@ -237,7 +237,8 @@ class Game:
         self.player.attack = self.player.hatchling_attack
         self.player.adult_hp = filtered.get("hp", 0.0)
         self.player.hatchling_hp = self.player.adult_hp * pct
-        self.player.hp = self.player.hatchling_hp
+        self.player.max_hp = self.player.hatchling_hp
+        self.player.hp = self.player.max_hp
         self.player.speed = self._stat_from_weight(
             self.player.weight,
             filtered,
@@ -372,12 +373,15 @@ class Game:
                 else:
                     weight = stats.get("adult_weight", 0.0)
                 if i < spawn_count:
+                    max_hp = self._scale_by_weight(weight, stats, "hp")
                     self.map.animals[y][x].append(
                         NPCAnimal(
                             id=self.next_npc_id,
                             name=name,
                             sex=sex,
                             weight=weight,
+                            max_hp=max_hp,
+                            hp=max_hp,
                             abilities=stats.get("abilities", []),
                         )
                     )
@@ -425,12 +429,16 @@ class Game:
                 x, y = random.choice(spawn_tiles)
                 if any(npc.name == name for npc in self.map.animals[y][x]):
                     continue
+                weight = stats.get("adult_weight", 0.0)
+                max_hp = self._scale_by_weight(weight, stats, "hp")
                 self.map.animals[y][x].append(
                     NPCAnimal(
                         id=self.next_npc_id,
                         name=name,
                         sex=None,
-                        weight=stats.get("adult_weight", 0.0),
+                        weight=weight,
+                        max_hp=max_hp,
+                        hp=max_hp,
                         abilities=stats.get("abilities", []),
                     )
                 )
@@ -471,7 +479,7 @@ class Game:
             target_a = self.npc_effective_attack(npc, stats, self.x, self.y)
             rel_a = target_a / player_a
             if rel_a > 2.0 and random.random() < 0.5:
-                self.player.health = 0
+                self.player.hp = 0
                 return (
                     f"A fierce {self._npc_label(npc)} attacks and kills you! Game Over."
                 )
@@ -592,7 +600,7 @@ class Game:
             message = "\nYou have collapsed from exhaustion! Game Over."
         regen = getattr(self.player, "health_regen", 0.0)
         if regen and not message:
-            self.player.health = min(100.0, self.player.health + regen)
+            self.player.hp = min(self.player.max_hp, self.player.hp + self.player.max_hp * regen / 100.0)
         return message
 
     def _reveal_cardinals(self, x: int, y: int) -> None:
@@ -627,12 +635,12 @@ class Game:
         """Apply end-of-turn biome effects to the player and NPCs."""
         terrain = self.map.terrain_at(self.x, self.y).name
         if terrain in ("lava", "volcano_erupting", "forest_fire", "highland_forest_fire"):
-            self.player.health = 0.0
+            self.player.hp = 0.0
             self.turn_messages.append("Game Over.")
         if terrain == "toxic_badlands":
-            self.player.health = max(0.0, self.player.health - 20.0)
+            self.player.hp = max(0.0, self.player.hp - self.player.max_hp * 0.2)
             msg = "You take 20% damage from toxic fumes."
-            if self.player.health <= 0:
+            if self.player.hp <= 0:
                 msg += " Game Over."
             self.turn_messages.append(msg)
 
@@ -653,8 +661,8 @@ class Game:
                 for npc in list(self.map.animals[y][x]):
                     if not npc.alive:
                         continue
-                    npc.health = max(0.0, npc.health - 20.0)
-                    if npc.health <= 0:
+                    npc.hp = max(0.0, npc.hp - npc.max_hp * 0.2)
+                    if npc.hp <= 0:
                         npc.alive = False
                         npc.age = -1
                         npc.speed = 0.0
@@ -717,13 +725,18 @@ class Game:
         """
         max_gain = self._max_growth_gain()
         weight_gain = min(available_meat, max_gain)
+        old_weight = self.player.weight
         self.player.weight = min(self.player.weight + weight_gain, self.player.adult_weight)
 
         if self.player.adult_weight > 0:
             pct = self.player.weight / self.player.adult_weight
             pct = max(0.0, min(pct, 1.0))
             self.player.attack = self.player.adult_attack * pct
-            self.player.hp = self.player.adult_hp * pct
+            old_max = self._scale_by_weight(old_weight, DINO_STATS[self.player.name], "hp")
+            new_max = self._scale_by_weight(self.player.weight, DINO_STATS[self.player.name], "hp")
+            ratio = 1.0 if old_max <= 0 else self.player.hp / old_max
+            self.player.max_hp = new_max
+            self.player.hp = new_max * ratio
             self.player.speed = (
                 self.player.hatchling_speed
                 + pct * (self.player.adult_speed - self.player.hatchling_speed)
@@ -772,10 +785,11 @@ class Game:
 
         Returns True if the target died."""
         max_hp = self._scale_by_weight(getattr(animal, "weight", 0.0), stats, "hp")
-        curr = max_hp * (animal.health / 100.0)
-        curr -= damage
-        animal.health = 0.0 if max_hp <= 0 else max(0.0, curr / max_hp * 100.0)
-        died = curr <= 0
+        animal.max_hp = max_hp
+        if animal.hp > max_hp:
+            animal.hp = max_hp
+        animal.hp = max(0.0, animal.hp - damage)
+        died = animal.hp <= 0
         if died and isinstance(animal, NPCAnimal):
             animal.alive = False
             animal.age = -1
@@ -787,6 +801,7 @@ class Game:
     ) -> tuple[float, float]:
         max_gain = self._npc_max_growth_gain(npc.weight, stats)
         weight_gain = min(available_food, max_gain)
+        old_weight = npc.weight
         npc.weight = min(npc.weight + weight_gain, stats.get("adult_weight", 0.0))
         pct = 1.0
         aw = stats.get("adult_weight", 0.0)
@@ -794,7 +809,11 @@ class Game:
             pct = npc.weight / aw
             pct = max(0.0, min(pct, 1.0))
         npc.attack = stats.get("attack", 0.0) * pct
-        npc.hp = stats.get("hp", 0.0) * pct
+        old_max = self._scale_by_weight(old_weight, stats, "hp")
+        new_max = self._scale_by_weight(npc.weight, stats, "hp")
+        ratio = 1.0 if old_max <= 0 else npc.hp / old_max
+        npc.max_hp = new_max
+        npc.hp = new_max * ratio
         return weight_gain, max_gain
 
     def _npc_consume_plant(self, npc: NPCAnimal, plant: Plant, stats: dict) -> float:
@@ -853,11 +872,15 @@ class Game:
         if self.mammal_species:
             name = random.choice(self.mammal_species)
             stats = CRITTER_STATS.get(name, {})
+            weight = stats.get("adult_weight", 0.0)
+            max_hp = self._scale_by_weight(weight, stats, "hp")
             npc = NPCAnimal(
                 id=self.next_npc_id,
                 name=name,
                 sex=None,
-                weight=stats.get("adult_weight", 0.0),
+                weight=weight,
+                max_hp=max_hp,
+                hp=max_hp,
                 abilities=stats.get("abilities", []),
                 last_action="spawned",
             )
@@ -873,7 +896,7 @@ class Game:
             self.player.weight >= self.player.adult_weight
             and stats.get("can_be_juvenile", True)
             and self.player.energy >= 80
-            and self.player.health >= 80
+            and self.player.hp >= self.player.max_hp * 0.8
             and getattr(self.player, "turns_until_lay_eggs", 0) == 0
             and len(animals) < 4
         )
@@ -963,7 +986,7 @@ class Game:
                 "attacks and kills you! Game Over."
             )
             end_msg = self._apply_turn_costs(False, 2.0)
-            self.player.health = 0
+            self.player.hp = 0
             msg += end_msg
             append_event_log(
                 f"Player threatened and was killed by {self._npc_label(attacker)} "
@@ -1069,12 +1092,15 @@ class Game:
                         )
                         hatch_w = max(hatch_w, MIN_HATCHING_WEIGHT)
                         for _ in range(egg.number):
+                            max_hp = self._scale_by_weight(hatch_w, stats, "hp")
                             self.map.animals[y][x].append(
                                 NPCAnimal(
                                     id=self.next_npc_id,
                                     name=egg.species,
                                     sex=None,
                                     weight=hatch_w,
+                                    max_hp=max_hp,
+                                    hp=max_hp,
                                     abilities=DINO_STATS.get(egg.species, {}).get("abilities", []),
                                     is_descendant=egg.is_descendant,
                                 )
@@ -1170,6 +1196,11 @@ class Game:
                         if npc in animals:
                             animals.remove(npc)
                         continue
+                    if npc.hp <= 0 and npc.alive:
+                        npc.alive = False
+                        npc.age = -1
+                        npc.speed = 0.0
+                        continue
                     if not npc.alive:
                         # Spoilage is applied after all creatures, including the
                         # player, have had a chance to eat. Dead animals simply
@@ -1208,14 +1239,14 @@ class Game:
                         npc.speed = 0.0
                         continue
                     regen = stats.get("health_regen", 0.0)
-                    if npc.health < 100.0 and regen:
-                        npc.health = min(100.0, npc.health + regen)
+                    if regen and npc.hp < npc.max_hp:
+                        npc.hp = min(npc.max_hp, npc.hp + npc.max_hp * regen / 100.0)
 
                     if (
                         npc.weight >= stats.get("adult_weight", 0.0)
                         and stats.get("can_be_juvenile", True)
                         and npc.energy >= 80
-                        and npc.health >= 80
+                        and npc.hp >= npc.max_hp * 0.8
                         and npc.turns_until_lay_eggs == 0
                     ):
                         if len(animals) >= 4:
@@ -1355,19 +1386,19 @@ class Game:
                             target, t_speed, t_atk, t_hp, t_stats = random.choice(potential)
                             rel_speed = t_speed / max(npc_speed, 0.1)
                             if random.random() <= calculate_catch_chance(rel_speed):
-                                before = npc.health
+                                before = npc.hp
                                 dmg_val = damage_after_armor(t_atk, t_stats, stats)
                                 self._apply_damage(dmg_val, npc, stats)
-                                dmg = before - npc.health
+                                dmg = before - npc.hp
                                 if x == self.x and y == self.y and dmg > 0:
                                     messages.append(
                                         f"The {self._npc_label(target)} deals {dmg:.0f} damage to {self._npc_label(npc)}."
                                     )
 
-                                before_t = target.health
+                                before_t = target.hp
                                 dmg_val2 = damage_after_armor(npc_atk, stats, t_stats)
                                 killed = self._apply_damage(dmg_val2, target, t_stats)
-                                dmg2 = before_t - target.health
+                                dmg2 = before_t - target.hp
                                 if x == self.x and y == self.y and dmg2 > 0:
                                     messages.append(
                                         f"The {self._npc_label(npc)} deals {dmg2:.0f} damage to {self._npc_label(target)}."
@@ -1381,7 +1412,7 @@ class Game:
                                         )
                                     if target.weight <= 0:
                                         animals.remove(target)
-                                if npc.health <= 0:
+                                if npc.hp <= 0:
                                     npc.alive = False
                                     npc.age = -1
                                     npc.speed = 0.0
@@ -1475,7 +1506,7 @@ class Game:
         player_attack = self.player_effective_attack()
         died_player = False
         if target.alive:
-            before = self.player.health
+            before = self.player.hp
             dmg_from_target = damage_after_armor(
                 target_attack,
                 stats,
@@ -1484,19 +1515,19 @@ class Game:
             died_player = self._apply_damage(
                 dmg_from_target, self.player, DINO_STATS.get(self.player.name, {})
             )
-            player_damage = before - self.player.health
+            player_damage = before - self.player.hp
             if player_damage > 0:
                 self.turn_messages.append(
                     f"The {self._npc_label(target)} deals {player_damage:.0f} damage to you."
                 )
-            before_t = target.health
+            before_t = target.hp
             dmg_to_target = damage_after_armor(
                 player_attack,
                 DINO_STATS.get(self.player.name, {}),
                 stats,
             )
             target_died = self._apply_damage(dmg_to_target, target, stats)
-            dealt = before_t - target.health
+            dealt = before_t - target.hp
             if dealt > 0:
                 self.turn_messages.append(
                     f"You deal {dealt:.0f} damage to the {self._npc_label(target)}."
@@ -1512,14 +1543,14 @@ class Game:
                 )
         else:
             player_damage = 0.0
-            before_t = target.health
+            before_t = target.hp
             dmg_to_target = damage_after_armor(
                 player_attack,
                 DINO_STATS.get(self.player.name, {}),
                 stats,
             )
             target_died = self._apply_damage(dmg_to_target, target, stats)
-            dealt = before_t - target.health
+            dealt = before_t - target.hp
             if dealt > 0:
                 self.turn_messages.append(
                     f"You deal {dealt:.0f} damage to the {self._npc_label(target)}."
@@ -1562,7 +1593,7 @@ class Game:
 
         msg = (
             f"You caught and defeated the {self._npc_label(target)} "
-            f"but lost {player_damage:.0f}% health. "
+            f"but lost {player_damage:.0f} HP. "
             f"Energy +{actual_energy_gain:.1f}%, "
             f"Weight +{weight_gain:.1f}kg (max {max_gain:.1f}kg)."
         )
@@ -1767,11 +1798,15 @@ class Game:
             if self.mammal_species:
                 name = random.choice(self.mammal_species)
                 stats = CRITTER_STATS.get(name, {})
+                weight = stats.get("adult_weight", 0.0)
+                max_hp = self._scale_by_weight(weight, stats, "hp")
                 npc = NPCAnimal(
                     id=self.next_npc_id,
                     name=name,
                     sex=None,
-                    weight=stats.get("adult_weight", 0.0),
+                    weight=weight,
+                    max_hp=max_hp,
+                    hp=max_hp,
                     abilities=stats.get("abilities", []),
                     last_action="spawned",
                 )

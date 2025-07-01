@@ -413,7 +413,9 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             lbl.pack()
         tk.Label(win, text=npc.name, font=("Helvetica", 18)).pack(pady=5)
         tk.Label(win, text=f"Age: {npc.age} turns", font=("Helvetica", 12), anchor="w").pack(anchor="w")
-        tk.Label(win, text=f"Health: {npc.health:.0f}%", font=("Helvetica", 12), anchor="w").pack(anchor="w")
+        hp_max = game._scale_by_weight(npc.weight, stats, "hp")
+        pct = 0 if hp_max <= 0 else npc.hp / hp_max * 100
+        tk.Label(win, text=f"Health: {npc.hp:.1f}/{hp_max:.1f} ({pct:.0f}%)", font=("Helvetica", 12), anchor="w").pack(anchor="w")
         tk.Label(win, text=f"Energy: {npc.energy:.0f}%", font=("Helvetica", 12), anchor="w").pack(anchor="w")
         abil = "None"
         if "ambush" in npc.abilities:
@@ -441,13 +443,6 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         tk.Label(
             win,
             text=f"Attack: {atk:.1f}/{stats.get('attack', 0)}",
-            font=("Helvetica", 12),
-            anchor="w",
-        ).pack(anchor="w")
-        hp_max = game._scale_by_weight(npc.weight, stats, "hp")
-        tk.Label(
-            win,
-            text=f"HP: {hp_max * npc.health/100:.1f}/{stats.get('hp', 0)}",
             font=("Helvetica", 12),
             anchor="w",
         ).pack(anchor="w")
@@ -919,9 +914,11 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
 
             slot["name"].configure(text=disp_name)
             hp_max = game._scale_by_weight(npc.weight, stats, "hp")
+            hp_val = npc.hp
+            pct = 0 if hp_max <= 0 else hp_val / hp_max * 100
             slot["stats"].configure(
                 text=(
-                    f"A:{target_a:.0f} HP:{hp_max * npc.health/100:.0f} "
+                    f"A:{target_a:.0f} HP:{hp_val:.0f}/{hp_max:.0f} ({pct:.0f}%) "
                     f"S:{rel_s:.2f} ({int(round(catch * 100))}%) "
                     f"E:{npc.energy:.0f}% "
                 )
@@ -1093,7 +1090,13 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         elif player_images.get("adult"):
             dino_image_label.configure(image=player_images["adult"])
             dino_image_label.image = player_images["adult"]
-        update_bar(health_canvas, health_rect, health_text, game.player.health)
+        hp_max = game._scale_by_weight(
+            game.player.weight,
+            game_module.DINO_STATS[game.player.name],
+            "hp",
+        )
+        hp_pct = 0 if hp_max <= 0 else game.player.hp / hp_max * 100
+        update_bar(health_canvas, health_rect, health_text, hp_pct)
         update_bar(energy_canvas, energy_rect, energy_text, game.player.energy)
         update_bar(hydration_canvas, hydration_rect, hydration_text, game.player.hydration)
         pct = 0.0
@@ -1114,12 +1117,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         if game.player_pack_hunter_active():
             text += " (Pack Hunter)"
         attack_label.config(text=text)
-        hp_max = game._scale_by_weight(
-            game.player.weight,
-            game_module.DINO_STATS[game.player.name],
-            "hp",
-        )
-        hp_label.config(text=f"HP: {hp_max * game.player.health/100:.1f}/{hp_max:.0f}")
+        hp_label_value.config(text=f"Health: {game.player.hp:.1f}/{hp_max:.1f}")
         speed_text = f"Speed: {game.player_effective_speed():.1f}"
         if "ambush" in game.player.abilities and game.player.ambush_streak > 0:
             speed_text += " (Ambush)"
@@ -1168,6 +1166,8 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     tk.Label(stats_frame, textvariable=name_var, font=("Helvetica", 16)).pack()
     health_row = tk.Frame(stats_frame)
     tk.Label(health_row, text="Health:", font=("Helvetica", 14)).pack(side="left")
+    hp_label_value = tk.Label(health_row, font=("Helvetica", 14))
+    hp_label_value.pack(side="left")
     health_canvas = tk.Canvas(health_row, width=100, height=15)
     health_canvas.pack(side="left", padx=5)
     health_canvas.create_rectangle(0, 0, 100, 15, outline="black")
@@ -1196,8 +1196,6 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     weight_label.pack(anchor="w")
     attack_label = tk.Label(stats_frame, font=("Helvetica", 14), anchor="w")
     attack_label.pack(anchor="w")
-    hp_label = tk.Label(stats_frame, font=("Helvetica", 14), anchor="w")
-    hp_label.pack(anchor="w")
     speed_label = tk.Label(stats_frame, font=("Helvetica", 14), anchor="w")
     speed_label.pack(anchor="w")
     desc_label = tk.Label(stats_frame, font=("Helvetica", 14), anchor="w")

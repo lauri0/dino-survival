@@ -125,7 +125,7 @@ def test_npc_initial_state():
         for cell in row:
             for npc in cell:
                 assert npc.energy == 100.0
-                assert npc.health == 100.0
+                assert npc.hp == npc.max_hp
                 stats = game_mod.DINO_STATS.get(npc.name)
                 if stats is None:
                     stats = game_mod.CRITTER_STATS[npc.name]

@@ -30,6 +30,6 @@ def test_threaten_killed_by_stronger():
     strong = NPCAnimal(id=1, name="Allosaurus", sex=None, weight=3000.0)
     game.map.animals[2][2] = [strong]
     game.threaten()
-    assert game.player.health == 0
+    assert game.player.hp == 0
 
 

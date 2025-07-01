@@ -17,7 +17,7 @@
       "woodlands"
     ],
     "attack": 0.0,
-    "hp": 0.0,
+    "hp": 1.0,
     "armor": 0,
     "armor_penetration": 0
   },

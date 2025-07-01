@@ -19,7 +19,7 @@ def test_overcrowded_laying_moves():
         sex="F",
         weight=stats.get("adult_weight", 0.0),
         energy=100.0,
-        health=100.0,
+        hp=100.0,
         turns_until_lay_eggs=0,
     )
     game.map.animals[0][0].append(ready)

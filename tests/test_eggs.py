@@ -24,7 +24,7 @@ def test_egg_weight_equals_hatchling_weight_times_number():
     stats = game_mod.DINO_STATS["Allosaurus"]
     game.player.weight = stats.get("adult_weight", 0.0)
     game.player.energy = 100.0
-    game.player.health = 100.0
+    game.player.hp = game.player.max_hp
     game.player.turns_until_lay_eggs = 0
     game.lay_eggs()
     egg = game.map.eggs[game.y][game.x][0]
