@@ -1560,7 +1560,7 @@ class Game:
 
         if not target_died:
             end_msg = self._apply_turn_costs(False)
-            msg = f"You attack the {self._npc_label(target)} dealing {player_attack:.0f} damage." + end_msg
+            msg = end_msg
             self.last_action = "hunt"
             self.turn_messages.extend(self._update_npcs())
             self._move_npcs()
