@@ -26,7 +26,9 @@
       "desert"
     ],
     "attack": 500.0,
-    "hp": 1000.0
+    "hp": 1000.0,
+    "armor": 0,
+    "armor_penetration": 0
   },
   "Allosaurus": {
     "adult_energy_drain": 5.0,
@@ -54,7 +56,9 @@
       "woodlands"
     ],
     "attack": 500.0,
-    "hp": 1000.0
+    "hp": 1000.0,
+    "armor": 0,
+    "armor_penetration": 0
   },
   "Amphicotylus": {
     "adult_energy_drain": 1.5,
@@ -81,7 +85,9 @@
       "lake"
     ],
     "attack": 50.0,
-    "hp": 100.0
+    "hp": 100.0,
+    "armor": 0,
+    "armor_penetration": 0
   },
   "Brachiosaurus": {
     "adult_energy_drain": 1.2,
@@ -109,7 +115,9 @@
       "woodlands"
     ],
     "attack": 2142.86,
-    "hp": 4285.72
+    "hp": 4285.72,
+    "armor": 0,
+    "armor_penetration": 0
   },
   "Camarasaurus": {
     "adult_energy_drain": 1.6,
@@ -138,7 +146,9 @@
       "woodlands"
     ],
     "attack": 964.29,
-    "hp": 1928.58
+    "hp": 1928.58,
+    "armor": 0,
+    "armor_penetration": 0
   },
   "Camptosaurus": {
     "adult_energy_drain": 3.6,
@@ -165,7 +175,9 @@
       "woodlands"
     ],
     "attack": 62.5,
-    "hp": 125.0
+    "hp": 125.0,
+    "armor": 0,
+    "armor_penetration": 0
   },
   "Ceratosaurus": {
     "adult_energy_drain": 4,
@@ -193,7 +205,9 @@
       "swamp"
     ],
     "attack": 178.57,
-    "hp": 357.14
+    "hp": 357.14,
+    "armor": 0,
+    "armor_penetration": 0
   },
   "Diplodocus": {
     "adult_energy_drain": 1.2,
@@ -221,7 +235,9 @@
       "plains"
     ],
     "attack": 1428.57,
-    "hp": 2857.14
+    "hp": 2857.14,
+    "armor": 0,
+    "armor_penetration": 0
   },
   "Dryosaurus": {
     "adult_energy_drain": 5.0,
@@ -250,7 +266,9 @@
       "woodlands"
     ],
     "attack": 8.93,
-    "hp": 17.86
+    "hp": 17.86,
+    "armor": 0,
+    "armor_penetration": 0
   },
   "Fruitadens": {
     "adult_energy_drain": 8.0,
@@ -278,7 +296,9 @@
       "swamp"
     ],
     "attack": 0.45,
-    "hp": 0.9
+    "hp": 0.9,
+    "armor": 0,
+    "armor_penetration": 0
   },
   "Gargoyleosaurus": {
     "adult_energy_drain": 5.0,
@@ -305,7 +325,9 @@
       "forest"
     ],
     "attack": 178.57,
-    "hp": 357.14
+    "hp": 357.14,
+    "armor": 40,
+    "armor_penetration": 0
   },
   "Mymoorapelta": {
     "adult_energy_drain": 5.0,
@@ -333,7 +355,9 @@
       "woodlands"
     ],
     "attack": 98.21,
-    "hp": 196.42
+    "hp": 196.42,
+    "armor": 40,
+    "armor_penetration": 0
   },
   "Nanosaurus": {
     "adult_energy_drain": 7.0,
@@ -360,7 +384,9 @@
       "forest"
     ],
     "attack": 1.07,
-    "hp": 2.14
+    "hp": 2.14,
+    "armor": 0,
+    "armor_penetration": 0
   },
   "Ornitholestes": {
     "adult_energy_drain": 4.0,
@@ -387,7 +413,9 @@
       "forest"
     ],
     "attack": 4.46,
-    "hp": 8.92
+    "hp": 8.92,
+    "armor": 0,
+    "armor_penetration": 0
   },
   "Stegosaurus": {
     "adult_energy_drain": 3.0,
@@ -417,7 +445,9 @@
       "plains"
     ],
     "attack": 464.29,
-    "hp": 928.58
+    "hp": 928.58,
+    "armor": 20,
+    "armor_penetration": 0
   },
   "Torvosaurus": {
     "adult_energy_drain": 4.0,
@@ -445,6 +475,8 @@
       "forest"
     ],
     "attack": 464.29,
-    "hp": 928.58
+    "hp": 928.58,
+    "armor": 0,
+    "armor_penetration": 10
   }
 }
