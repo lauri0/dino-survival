@@ -525,11 +525,11 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             weather_img_label.image = None
         effects: list[str] = []
         if abs(w.player_hydration_mult - 1.0) > 0.01:
-            effects.append(f"Hydration x{w.player_hydration_mult:.2g}")
+            effects.append(f"Hydration loss x{w.player_hydration_mult:.2g}")
         if abs(w.player_energy_mult - 1.0) > 0.01:
-            effects.append(f"Energy x{w.player_energy_mult:.2g}")
+            effects.append(f"Energy loss x{w.player_energy_mult:.2g}")
         if w.flood_chance > 0:
-            effects.append(f"Flood {int(w.flood_chance * 100)}%")
+            effects.append(f"Flood chance {int(w.flood_chance * 100)}%")
         weather_effect_var.set("\n".join(effects) if effects else "")
 
     def update_drink_button() -> None:
@@ -918,9 +918,8 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             pct = 0 if hp_max <= 0 else hp_val / hp_max * 100
             slot["stats"].configure(
                 text=(
-                    f"A:{target_a:.0f} HP:{hp_val:.0f}/{hp_max:.0f} ({pct:.0f}%) "
+                    f"A:{target_a:.1f} HP:{hp_val:.1f} ({pct:.0f}%) "
                     f"S:{rel_s:.2f} ({int(round(catch * 100))}%) "
-                    f"E:{npc.energy:.0f}% "
                 )
             )
             label = "Attack" if npc.alive else "Eat"
@@ -1117,7 +1116,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         if game.player_pack_hunter_active():
             text += " (Pack Hunter)"
         attack_label.config(text=text)
-        hp_label_value.config(text=f"Health: {game.player.hp:.1f}/{hp_max:.1f}")
+        hp_label_value.config(text=f"{game.player.hp:.1f}/{hp_max:.1f}")
         speed_text = f"Speed: {game.player_effective_speed():.1f}"
         if "ambush" in game.player.abilities and game.player.ambush_streak > 0:
             speed_text += " (Ambush)"
