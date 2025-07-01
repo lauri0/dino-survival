@@ -1338,8 +1338,21 @@ class Game:
                             target, t_speed, t_atk, t_hp, t_stats = random.choice(potential)
                             rel_speed = t_speed / max(npc_speed, 0.1)
                             if random.random() <= calculate_catch_chance(rel_speed):
+                                before = npc.health
                                 self._apply_damage(t_atk, npc, stats)
+                                dmg = before - npc.health
+                                if x == self.x and y == self.y and dmg > 0:
+                                    messages.append(
+                                        f"The {self._npc_label(target)} deals {dmg:.0f} damage to {self._npc_label(npc)}."
+                                    )
+
+                                before_t = target.health
                                 killed = self._apply_damage(npc_atk, target, t_stats)
+                                dmg2 = before_t - target.health
+                                if x == self.x and y == self.y and dmg2 > 0:
+                                    messages.append(
+                                        f"The {self._npc_label(npc)} deals {dmg2:.0f} damage to {self._npc_label(target)}."
+                                    )
                                 if killed:
                                     npc.hunts[target.name] = npc.hunts.get(target.name, 0) + 1
                                     eaten = self._npc_consume_meat(npc, target, stats)
@@ -1446,7 +1459,17 @@ class Game:
             before = self.player.health
             died_player = self._apply_damage(target_attack, self.player, DINO_STATS.get(self.player.name, {}))
             player_damage = before - self.player.health
+            if player_damage > 0:
+                self.turn_messages.append(
+                    f"The {self._npc_label(target)} deals {player_damage:.0f} damage to you."
+                )
+            before_t = target.health
             target_died = self._apply_damage(player_attack, target, stats)
+            dealt = before_t - target.health
+            if dealt > 0:
+                self.turn_messages.append(
+                    f"You deal {dealt:.0f} damage to the {self._npc_label(target)}."
+                )
         if died_player:
                 self.turn_messages.extend(self._update_npcs())
                 self._move_npcs()
@@ -1458,7 +1481,13 @@ class Game:
                 )
         else:
             player_damage = 0.0
+            before_t = target.health
             target_died = self._apply_damage(player_attack, target, stats)
+            dealt = before_t - target.health
+            if dealt > 0:
+                self.turn_messages.append(
+                    f"You deal {dealt:.0f} damage to the {self._npc_label(target)}."
+                )
 
         if not target_died:
             end_msg = self._apply_turn_costs(False)
