@@ -46,6 +46,21 @@ MIN_HATCHING_WEIGHT = _config.getfloat(
     "DEFAULT", "min_hatching_weight", fallback=2.0
 )
 
+# Armor mechanics
+def effective_armor(target_stats: dict, attacker_stats: dict) -> float:
+    """Return the effective armor percentage for ``target_stats``."""
+    base = target_stats.get("armor", 0.0)
+    penetration = attacker_stats.get("armor_penetration", 0.0)
+    return max(0.0, base - penetration)
+
+
+def damage_after_armor(
+    damage: float, attacker_stats: dict, target_stats: dict
+) -> float:
+    """Apply armor reduction to ``damage`` and return reduced value."""
+    eff = effective_armor(target_stats, attacker_stats)
+    return damage * max(0.0, 1.0 - eff / 100.0)
+
 # Number of living descendants required to win the game
 DESCENDANTS_TO_WIN = 2
 
@@ -1326,7 +1341,9 @@ class Game:
                             o_stats = DINO_STATS.get(other.name) or CRITTER_STATS.get(other.name, {})
                             o_atk = self.npc_effective_attack(other, o_stats, x, y)
                             o_hp = self._scale_by_weight(other.weight, o_stats, "hp")
-                            if o_atk / max(npc_hp, 0.1) >= npc_atk / max(o_hp, 0.1):
+                            npc_dmg = damage_after_armor(npc_atk, stats, o_stats)
+                            other_dmg = damage_after_armor(o_atk, o_stats, stats)
+                            if other_dmg / max(npc_hp, 0.1) >= npc_dmg / max(o_hp, 0.1):
                                 continue
                             o_speed = self._stat_from_weight(other.weight, o_stats, "hatchling_speed", "adult_speed")
                             if o_speed >= npc_speed:
@@ -1339,7 +1356,8 @@ class Game:
                             rel_speed = t_speed / max(npc_speed, 0.1)
                             if random.random() <= calculate_catch_chance(rel_speed):
                                 before = npc.health
-                                self._apply_damage(t_atk, npc, stats)
+                                dmg_val = damage_after_armor(t_atk, t_stats, stats)
+                                self._apply_damage(dmg_val, npc, stats)
                                 dmg = before - npc.health
                                 if x == self.x and y == self.y and dmg > 0:
                                     messages.append(
@@ -1347,7 +1365,8 @@ class Game:
                                     )
 
                                 before_t = target.health
-                                killed = self._apply_damage(npc_atk, target, t_stats)
+                                dmg_val2 = damage_after_armor(npc_atk, stats, t_stats)
+                                killed = self._apply_damage(dmg_val2, target, t_stats)
                                 dmg2 = before_t - target.health
                                 if x == self.x and y == self.y and dmg2 > 0:
                                     messages.append(
@@ -1457,14 +1476,26 @@ class Game:
         died_player = False
         if target.alive:
             before = self.player.health
-            died_player = self._apply_damage(target_attack, self.player, DINO_STATS.get(self.player.name, {}))
+            dmg_from_target = damage_after_armor(
+                target_attack,
+                stats,
+                DINO_STATS.get(self.player.name, {}),
+            )
+            died_player = self._apply_damage(
+                dmg_from_target, self.player, DINO_STATS.get(self.player.name, {})
+            )
             player_damage = before - self.player.health
             if player_damage > 0:
                 self.turn_messages.append(
                     f"The {self._npc_label(target)} deals {player_damage:.0f} damage to you."
                 )
             before_t = target.health
-            target_died = self._apply_damage(player_attack, target, stats)
+            dmg_to_target = damage_after_armor(
+                player_attack,
+                DINO_STATS.get(self.player.name, {}),
+                stats,
+            )
+            target_died = self._apply_damage(dmg_to_target, target, stats)
             dealt = before_t - target.health
             if dealt > 0:
                 self.turn_messages.append(
@@ -1482,7 +1513,12 @@ class Game:
         else:
             player_damage = 0.0
             before_t = target.health
-            target_died = self._apply_damage(player_attack, target, stats)
+            dmg_to_target = damage_after_armor(
+                player_attack,
+                DINO_STATS.get(self.player.name, {}),
+                stats,
+            )
+            target_died = self._apply_damage(dmg_to_target, target, stats)
             dealt = before_t - target.health
             if dealt > 0:
                 self.turn_messages.append(

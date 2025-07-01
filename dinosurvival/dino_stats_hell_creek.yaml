@@ -29,7 +29,9 @@
       "plains"
     ],
     "attack": 8.04,
-    "hp": 16.08
+    "hp": 16.08,
+    "armor": 0,
+    "armor_penetration": 0
   },
   "Ankylosaurus": {
     "adult_energy_drain": 1.5,
@@ -57,7 +59,9 @@
       "desert"
     ],
     "attack": 1285.71,
-    "hp": 2571.42
+    "hp": 2571.42,
+    "armor": 40,
+    "armor_penetration": 0
   },
   "Edmontosaurus": {
     "adult_energy_drain": 2.0,
@@ -86,7 +90,9 @@
       "plains"
     ],
     "attack": 535.71,
-    "hp": 1071.42
+    "hp": 1071.42,
+    "armor": 0,
+    "armor_penetration": 0
   },
   "Leptoceratops": {
     "adult_energy_drain": 3.5,
@@ -114,7 +120,9 @@
       "swamp"
     ],
     "attack": 8.04,
-    "hp": 16.08
+    "hp": 16.08,
+    "armor": 0,
+    "armor_penetration": 0
   },
   "Pachycephalosaurus": {
     "adult_energy_drain": 5.0,
@@ -143,7 +151,9 @@
       "forest"
     ],
     "attack": 44.64,
-    "hp": 89.28
+    "hp": 89.28,
+    "armor": 0,
+    "armor_penetration": 0
   },
   "Pectinodon": {
     "adult_energy_drain": 5.0,
@@ -175,7 +185,9 @@
       "plains"
     ],
     "attack": 3.21,
-    "hp": 6.42
+    "hp": 6.42,
+    "armor": 0,
+    "armor_penetration": 0
   },
   "Thescelosaurus": {
     "adult_energy_drain": 4.0,
@@ -203,7 +215,9 @@
       "plains"
     ],
     "attack": 26.79,
-    "hp": 53.58
+    "hp": 53.58,
+    "armor": 0,
+    "armor_penetration": 0
   },
   "Triceratops": {
     "adult_energy_drain": 2.0,
@@ -231,7 +245,9 @@
       "plains"
     ],
     "attack": 1071.43,
-    "hp": 2142.86
+    "hp": 2142.86,
+    "armor": 0,
+    "armor_penetration": 0
   },
   "Tyrannosaurus": {
     "abilities": [
@@ -264,6 +280,8 @@
       "plains"
     ],
     "attack": 1428.57,
-    "hp": 2857.14
+    "hp": 2857.14,
+    "armor": 0,
+    "armor_penetration": 20
   }
 }

@@ -17,7 +17,9 @@
       "woodlands"
     ],
     "attack": 0.0,
-    "hp": 0.0
+    "hp": 0.0,
+    "armor": 0,
+    "armor_penetration": 0
   },
   "Didelphodon": {
     "adult_speed": 60,
@@ -36,6 +38,8 @@
       "forest"
     ],
     "attack": 0.36,
-    "hp": 0.72
+    "hp": 0.72,
+    "armor": 0,
+    "armor_penetration": 0
   }
 }
