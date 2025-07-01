@@ -1505,6 +1505,7 @@ class Game:
 
         player_attack = self.player_effective_attack()
         died_player = False
+        target_died = False
         if target.alive:
             before = self.player.hp
             dmg_from_target = damage_after_armor(
@@ -1532,15 +1533,6 @@ class Game:
                 self.turn_messages.append(
                     f"You deal {dealt:.0f} damage to the {self._npc_label(target)}."
                 )
-        if died_player:
-                self.turn_messages.extend(self._update_npcs())
-                self._move_npcs()
-                self.turn_messages.extend(self._spoil_carcasses())
-                self._generate_encounters()
-                self._reveal_adjacent_mountains()
-                return self._finish_turn(
-                    f"You fought the {self._npc_label(target)} but received fatal injuries. Game Over."
-                )
         else:
             player_damage = 0.0
             before_t = target.hp
@@ -1554,6 +1546,16 @@ class Game:
             if dealt > 0:
                 self.turn_messages.append(
                     f"You deal {dealt:.0f} damage to the {self._npc_label(target)}."
+                )
+
+        if died_player:
+                self.turn_messages.extend(self._update_npcs())
+                self._move_npcs()
+                self.turn_messages.extend(self._spoil_carcasses())
+                self._generate_encounters()
+                self._reveal_adjacent_mountains()
+                return self._finish_turn(
+                    f"You fought the {self._npc_label(target)} but received fatal injuries. Game Over."
                 )
 
         if not target_died:
