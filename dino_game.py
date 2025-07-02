@@ -907,7 +907,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             if stats is None:
                 stats = game_module.CRITTER_STATS.get(npc.name, {})
             disp_name = f"{npc.name} ({npc.id})"
-            disp_name = f"{disp_name} W:{npc.weight:.1f}kg"
+            disp_name = f"{disp_name}"
 
             target_a = game.npc_effective_attack(npc, stats, game.x, game.y)
             target_s = game.npc_effective_speed(npc, stats)
