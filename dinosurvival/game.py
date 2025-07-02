@@ -605,16 +605,7 @@ class Game:
         if self.player.is_exhausted():
             message = "\nYou have collapsed from exhaustion! Game Over."
         regen = getattr(self.player, "health_regen", 0.0)
-        if self.player.bleeding > 0:
-            self.player.hp = max(
-                0.0, self.player.hp - self.player.max_hp * 0.05
-            )
-            self.player.bleeding -= 1
-        elif regen and not message:
-            self.player.hp = min(
-                self.player.max_hp,
-                self.player.hp + self.player.max_hp * regen / 100.0,
-            )
+        self._apply_bleed_and_regen(self.player, regen, allow_regen=not message)
         return message
 
     def _reveal_cardinals(self, x: int, y: int) -> None:
@@ -809,6 +800,26 @@ class Game:
             animal.age = -1
             animal.speed = 0.0
         return died
+
+    def _apply_bleed_and_regen(
+        self, entity, regen: float, allow_regen: bool = True
+    ) -> bool:
+        """Apply bleed damage and health regeneration.
+
+        Returns True if ``entity`` died from bleeding."""
+
+        if getattr(entity, "bleeding", 0) > 0:
+            entity.hp = max(0.0, entity.hp - entity.max_hp * 0.05)
+            entity.bleeding -= 1
+            if entity.hp <= 0:
+                if isinstance(entity, NPCAnimal):
+                    entity.alive = False
+                    entity.age = -1
+                    entity.speed = 0.0
+                return True
+        elif regen and allow_regen and entity.hp < entity.max_hp:
+            entity.hp = min(entity.max_hp, entity.hp + entity.max_hp * regen / 100.0)
+        return False
 
     def _npc_apply_growth(
         self, npc: NPCAnimal, available_food: float, stats: dict
@@ -1239,6 +1250,10 @@ class Game:
                         npc.next_move = "None"
                         if cstats is not None:
                             self._npc_choose_move(x, y, npc, cstats)
+                            regen = cstats.get("health_regen", 0.0)
+                            died = self._apply_bleed_and_regen(npc, regen)
+                            if died:
+                                continue
                         continue
                     npc.next_move = "None"
                     if npc.turns_until_lay_eggs > 0:
@@ -1255,18 +1270,9 @@ class Game:
                         npc.speed = 0.0
                         continue
                     regen = stats.get("health_regen", 0.0)
-                    if npc.bleeding > 0:
-                        npc.hp = max(0.0, npc.hp - npc.max_hp * 0.05)
-                        npc.bleeding -= 1
-                        if npc.hp <= 0:
-                            npc.alive = False
-                            npc.age = -1
-                            npc.speed = 0.0
-                            continue
-                    elif regen and npc.hp < npc.max_hp:
-                        npc.hp = min(
-                            npc.max_hp, npc.hp + npc.max_hp * regen / 100.0
-                        )
+                    died = self._apply_bleed_and_regen(npc, regen)
+                    if died:
+                        continue
 
                     if (
                         npc.weight >= stats.get("adult_weight", 0.0)
