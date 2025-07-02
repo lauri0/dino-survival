@@ -605,8 +605,16 @@ class Game:
         if self.player.is_exhausted():
             message = "\nYou have collapsed from exhaustion! Game Over."
         regen = getattr(self.player, "health_regen", 0.0)
-        if regen and not message:
-            self.player.hp = min(self.player.max_hp, self.player.hp + self.player.max_hp * regen / 100.0)
+        if self.player.bleeding > 0:
+            self.player.hp = max(
+                0.0, self.player.hp - self.player.max_hp * 0.05
+            )
+            self.player.bleeding -= 1
+        elif regen and not message:
+            self.player.hp = min(
+                self.player.max_hp,
+                self.player.hp + self.player.max_hp * regen / 100.0,
+            )
         return message
 
     def _reveal_cardinals(self, x: int, y: int) -> None:
@@ -1247,8 +1255,18 @@ class Game:
                         npc.speed = 0.0
                         continue
                     regen = stats.get("health_regen", 0.0)
-                    if regen and npc.hp < npc.max_hp:
-                        npc.hp = min(npc.max_hp, npc.hp + npc.max_hp * regen / 100.0)
+                    if npc.bleeding > 0:
+                        npc.hp = max(0.0, npc.hp - npc.max_hp * 0.05)
+                        npc.bleeding -= 1
+                        if npc.hp <= 0:
+                            npc.alive = False
+                            npc.age = -1
+                            npc.speed = 0.0
+                            continue
+                    elif regen and npc.hp < npc.max_hp:
+                        npc.hp = min(
+                            npc.max_hp, npc.hp + npc.max_hp * regen / 100.0
+                        )
 
                     if (
                         npc.weight >= stats.get("adult_weight", 0.0)
@@ -1398,6 +1416,8 @@ class Game:
                                 dmg_val = damage_after_armor(t_atk, t_stats, stats)
                                 self._apply_damage(dmg_val, npc, stats)
                                 dmg = before - npc.hp
+                                if dmg > 0 and "bleed" in target.abilities and npc.alive:
+                                    npc.bleeding = 5
                                 if x == self.x and y == self.y and dmg > 0:
                                     messages.append(
                                         f"The {self._npc_label(target)} deals {dmg:.0f} damage to {self._npc_label(npc)}."
@@ -1407,6 +1427,8 @@ class Game:
                                 dmg_val2 = damage_after_armor(npc_atk, stats, t_stats)
                                 killed = self._apply_damage(dmg_val2, target, t_stats)
                                 dmg2 = before_t - target.hp
+                                if dmg2 > 0 and "bleed" in npc.abilities and target.alive:
+                                    target.bleeding = 5
                                 if x == self.x and y == self.y and dmg2 > 0:
                                     messages.append(
                                         f"The {self._npc_label(npc)} deals {dmg2:.0f} damage to {self._npc_label(target)}."
@@ -1524,6 +1546,8 @@ class Game:
             died_player = self._apply_damage(
                 dmg_from_target, self.player, DINO_STATS.get(self.player.name, {})
             )
+            if dmg_from_target > 0 and "bleed" in target.abilities and self.player.hp > 0:
+                self.player.bleeding = 5
             player_damage = before - self.player.hp
             if player_damage > 0:
                 self.turn_messages.append(
@@ -1536,6 +1560,8 @@ class Game:
                 stats,
             )
             target_died = self._apply_damage(dmg_to_target, target, stats)
+            if dmg_to_target > 0 and "bleed" in self.player.abilities and target.hp > 0:
+                target.bleeding = 5
             dealt = before_t - target.hp
             if dealt > 0:
                 self.turn_messages.append(
@@ -1550,6 +1576,8 @@ class Game:
                 stats,
             )
             target_died = self._apply_damage(dmg_to_target, target, stats)
+            if dmg_to_target > 0 and "bleed" in self.player.abilities and target.hp > 0:
+                target.bleeding = 5
             dealt = before_t - target.hp
             if dealt > 0:
                 self.turn_messages.append(

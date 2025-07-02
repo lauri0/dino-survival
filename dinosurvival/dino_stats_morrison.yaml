@@ -42,6 +42,9 @@
     "diet": [
       "meat"
     ],
+    "abilities": [
+      "bleed"
+    ],
     "egg_laying_interval": 10,
     "forms_packs": true,
     "growth_rate": 0.35,
