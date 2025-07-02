@@ -505,7 +505,10 @@ class Game:
         atk = self.player.attack
         if self.player_pack_hunter_active():
             atk *= 3
-        return atk
+        hp_pct = 1.0
+        if self.player.max_hp > 0:
+            hp_pct = max(0.0, min(self.player.hp / self.player.max_hp, 1.0))
+        return atk * hp_pct
 
     def player_effective_speed(self) -> float:
         speed = self.player.speed
@@ -542,7 +545,10 @@ class Game:
         atk = self._scale_by_weight(npc.weight, stats, "attack")
         if "pack_hunter" in npc.abilities and self._npc_has_packmate(npc, x, y):
             atk *= 3
-        return atk
+        hp_pct = 1.0
+        if npc.max_hp > 0:
+            hp_pct = max(0.0, min(npc.hp / npc.max_hp, 1.0))
+        return atk * hp_pct
 
     def _start_turn(self) -> str:
         self.turn_messages = []
