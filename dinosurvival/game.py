@@ -1601,12 +1601,19 @@ class Game:
         if was_alive and hunt is not None:
             hunt[1] += 1
 
-        msg = (
-            f"You caught and defeated the {self._npc_label(target)} "
-            f"but lost {player_damage:.0f} HP. "
-            f"Energy +{actual_energy_gain:.1f}%, "
-            f"Weight +{weight_gain:.1f}kg (max {max_gain:.1f}kg)."
-        )
+        if was_alive:
+            msg = (
+                f"You caught and defeated the {self._npc_label(target)} "
+                f"but lost {player_damage:.0f} HP. "
+                f"Energy +{actual_energy_gain:.1f}%, "
+                f"Weight +{weight_gain:.1f}kg (max {max_gain:.1f}kg)."
+            )
+        else:
+            msg = (
+                f"You ate from the carcass of the {self._npc_label(target)}. "
+                f"Energy +{actual_energy_gain:.1f}%, "
+                f"Weight +{weight_gain:.1f}kg (max {max_gain:.1f}kg)."
+            )
         end_msg = self._apply_turn_costs(False)
         msg += end_msg
         win = self._check_victory()
