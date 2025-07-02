@@ -237,7 +237,17 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     # Load icon images used throughout the UI
     icon_dir = os.path.join(os.path.dirname(__file__), "assets", "icons")
     icons: dict[str, tk.PhotoImage | None] = {}
-    for name in ("attack", "health", "speed", "turn", "weight"):
+    for name in (
+        "attack",
+        "health",
+        "speed",
+        "turn",
+        "weight",
+        "energy",
+        "hydration",
+        "descendant",
+        "bleed",
+    ):
         path = os.path.join(icon_dir, f"{name}.png")
         icons[name] = load_scaled_image(path, 20, 20)
 
@@ -435,7 +445,12 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             lbl.image = icons["health"]
         lbl.configure(text=f"{npc.hp:.1f}/{hp_max:.1f} ({pct:.0f}%)")
         lbl.pack(anchor="w")
-        tk.Label(win, text=f"Energy: {npc.energy:.0f}%", font=("Helvetica", 12), anchor="w").pack(anchor="w")
+        lbl_e = tk.Label(win, font=("Helvetica", 12), anchor="w")
+        if icons.get("energy"):
+            lbl_e.configure(image=icons["energy"], compound="left")
+            lbl_e.image = icons["energy"]
+        lbl_e.configure(text=f"{npc.energy:.0f}%")
+        lbl_e.pack(anchor="w")
         abil = "None"
         if "ambush" in npc.abilities:
             bonus = min(npc.ambush_streak, 3) * 5
@@ -929,7 +944,14 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
                 slot["img"].configure(image="")
                 slot["img"].image = None
 
-            slot["name"].configure(text=disp_name)
+            if npc.bleeding > 0 and icons.get("bleed"):
+                slot["name"].configure(
+                    text=f"{disp_name} {npc.bleeding}",
+                    image=icons["bleed"],
+                    compound="right",
+                )
+            else:
+                slot["name"].configure(text=disp_name, image="")
             hp_max = game._scale_by_weight(npc.weight, stats, "hp")
             hp_val = npc.hp
             pct = 0 if hp_max <= 0 else hp_val / hp_max * 100
@@ -1087,6 +1109,18 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
                         fill="red",
                         outline="red",
                     )
+                if (
+                    abs(game.x - x) + abs(game.y - y) == 1
+                    and any(n.alive and getattr(n, "bleeding", 0) > 0 for n in game.map.animals[y][x])
+                ):
+                    canvas.create_oval(
+                        tile_size / 2 - 2,
+                        tile_size / 2 - 2,
+                        tile_size / 2 + 2,
+                        tile_size / 2 + 2,
+                        fill="red",
+                        outline="red",
+                    )
                 if (x, y) == (game.x, game.y):
                     canvas.create_rectangle(
                         2,
@@ -1111,7 +1145,15 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
 
     def update_stats() -> None:
         stage = game.player_growth_stage()
-        name_var.set(f"{dinosaur_name} \u2640 ({stage})")
+        base_name = f"{dinosaur_name} \u2640 ({stage})"
+        if game.player.bleeding > 0 and icons.get("bleed"):
+            name_label.configure(
+                image=icons["bleed"],
+                compound="right",
+                text=f"{base_name} {game.player.bleeding}",
+            )
+        else:
+            name_label.configure(image="", text=base_name)
         img_key = stage.lower() if stage.lower() in ("hatchling", "juvenile") else "adult"
         img = player_images.get(img_key)
         if img:
@@ -1153,7 +1195,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             speed_text += " (Ambush)"
         speed_label.config(text=speed_text)
         desc_label.config(
-            text=f"Alive descendants: {game.descendant_count()}/{DESCENDANTS_TO_WIN}"
+            text=f"{game.descendant_count()}/{DESCENDANTS_TO_WIN}"
         )
         turn_label.config(text=f"{game.turn_count}")
         update_lay_button()
@@ -1192,8 +1234,8 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     stats_frame = tk.Frame(main)
     stats_frame.grid(row=1, column=0, sticky="nsew", padx=10, pady=10)
 
-    name_var = tk.StringVar()
-    tk.Label(stats_frame, textvariable=name_var, font=("Helvetica", 16)).pack()
+    name_label = tk.Label(stats_frame, font=("Helvetica", 16))
+    name_label.pack()
     health_row = tk.Frame(stats_frame)
     health_icon = tk.Label(health_row)
     if icons.get("health"):
@@ -1210,7 +1252,11 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     health_row.pack(anchor="w")
 
     energy_row = tk.Frame(stats_frame)
-    tk.Label(energy_row, text="Energy:", font=("Helvetica", 14)).pack(side="left")
+    energy_icon_lbl = tk.Label(energy_row)
+    if icons.get("energy"):
+        energy_icon_lbl.configure(image=icons["energy"])
+        energy_icon_lbl.image = icons["energy"]
+    energy_icon_lbl.pack(side="left")
     energy_canvas = tk.Canvas(energy_row, width=100, height=15)
     energy_canvas.pack(side="left", padx=5)
     energy_canvas.create_rectangle(0, 0, 100, 15, outline="black")
@@ -1219,7 +1265,11 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     energy_row.pack(anchor="w")
 
     hydration_row = tk.Frame(stats_frame)
-    tk.Label(hydration_row, text="Hydration:", font=("Helvetica", 14)).pack(side="left")
+    hydration_icon_lbl = tk.Label(hydration_row)
+    if icons.get("hydration"):
+        hydration_icon_lbl.configure(image=icons["hydration"])
+        hydration_icon_lbl.image = icons["hydration"]
+    hydration_icon_lbl.pack(side="left")
     hydration_canvas = tk.Canvas(hydration_row, width=100, height=15)
     hydration_canvas.pack(side="left", padx=5)
     hydration_canvas.create_rectangle(0, 0, 100, 15, outline="black")
@@ -1256,8 +1306,15 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     speed_label = tk.Label(speed_row, font=("Helvetica", 14), anchor="w")
     speed_label.pack(side="left")
     speed_row.pack(anchor="w")
-    desc_label = tk.Label(stats_frame, font=("Helvetica", 14), anchor="w")
-    desc_label.pack(anchor="w")
+    desc_row = tk.Frame(stats_frame)
+    desc_icon_lbl = tk.Label(desc_row)
+    if icons.get("descendant"):
+        desc_icon_lbl.configure(image=icons["descendant"])
+        desc_icon_lbl.image = icons["descendant"]
+    desc_icon_lbl.pack(side="left")
+    desc_label = tk.Label(desc_row, font=("Helvetica", 14), anchor="w")
+    desc_label.pack(side="left")
+    desc_row.pack(anchor="w")
 
     turn_row = tk.Frame(stats_frame)
     turn_icon = tk.Label(turn_row)
