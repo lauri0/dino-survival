@@ -1618,8 +1618,8 @@ class Game:
                                         or "heavy_armor" in target.abilities
                                     ) else 5
                                     target.bleeding = bleed_turns
-                                    if npc.energy >= 70 and not killed:
-                                        npc.bleed_wait_turns = 2
+                                    if npc.energy >= 30 and not killed:
+                                        npc.bleed_wait_turns = 4
                                         npc.bleed_wait_target = target.id
                                 if (
                                     dmg2 > 0
