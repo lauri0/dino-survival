@@ -525,10 +525,16 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             lbl_e.image = icons["energy"]
         lbl_e.configure(text=f"{npc.energy:.0f}%")
         lbl_e.pack(anchor="w")
-        abil = "None"
-        if "ambush" in npc.abilities:
-            bonus = min(npc.ambush_streak, 3) * 5
-            abil = f"Ambush ({npc.ambush_streak} stacks) +{bonus}% speed"
+        abilities = []
+        for ability in npc.abilities:
+            if ability == "ambush":
+                bonus = min(npc.ambush_streak, 3) * 5
+                abilities.append(
+                    f"Ambush ({npc.ambush_streak} stacks) +{bonus}% speed"
+                )
+            else:
+                abilities.append(ability)
+        abil = ", ".join(abilities) if abilities else "None"
         tk.Label(
             win, text=f"Abilities: {abil}", font=("Helvetica", 12), anchor="w"
         ).pack(anchor="w")
