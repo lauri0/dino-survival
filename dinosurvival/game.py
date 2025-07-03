@@ -1451,7 +1451,7 @@ class Game:
                             target
                             and target.alive
                             and getattr(target, "bleeding", 0) > 0
-                            and npc.energy >= 70
+                            and npc.energy >= 30
                         ):
                             npc.bleed_wait_turns -= 1
                             npc.next_move = "None"
@@ -1618,7 +1618,7 @@ class Game:
                                         or "heavy_armor" in target.abilities
                                     ) else 5
                                     target.bleeding = bleed_turns
-                                    if npc.energy >= 30 and not killed:
+                                    if npc.energy >= 30 and not killed and target.bleeding == 5:
                                         npc.bleed_wait_turns = 4
                                         npc.bleed_wait_target = target.id
                                 if (
