@@ -27,8 +27,8 @@ def test_npc_target_selection():
 def test_damage_after_armor_function():
     dmg = game_mod.damage_after_armor(
         100,
-        {"armor_penetration": 20},
-        {"armor": 40},
+        {"abilities": ["bone_break"]},
+        {"abilities": ["heavy_armor"]},
     )
     assert dmg == 80
 

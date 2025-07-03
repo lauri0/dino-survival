@@ -49,10 +49,25 @@ MIN_HATCHING_WEIGHT = _config.getfloat("DEFAULT", "min_hatching_weight", fallbac
 
 # Armor mechanics
 def effective_armor(target_stats: dict, attacker_stats: dict) -> float:
-    """Return the effective armor percentage for ``target_stats``."""
-    base = target_stats.get("armor", 0.0)
-    penetration = attacker_stats.get("armor_penetration", 0.0)
-    return max(0.0, base - penetration)
+    """Return the effective armor percentage for ``target_stats``.
+
+    Armor values are derived from abilities. ``light_armor`` grants 20% damage
+    reduction while ``heavy_armor`` grants 40%. If the attacker has the
+    ``bone_break`` ability the target's armor is halved for this attack.
+    """
+
+    abilities = target_stats.get("abilities", [])
+    base = 0.0
+    if "heavy_armor" in abilities:
+        base = 40.0
+    elif "light_armor" in abilities:
+        base = 20.0
+
+    attacker_abilities = attacker_stats.get("abilities", [])
+    if "bone_break" in attacker_abilities:
+        base *= 0.5
+
+    return max(0.0, base)
 
 
 def damage_after_armor(
@@ -1471,7 +1486,11 @@ class Game:
                                     and "bleed" in target.abilities
                                     and npc.alive
                                 ):
-                                    npc.bleeding = 5
+                                    bleed_turns = 2 if (
+                                        "light_armor" in npc.abilities
+                                        or "heavy_armor" in npc.abilities
+                                    ) else 5
+                                    npc.bleeding = bleed_turns
                                 if (
                                     dmg > 0
                                     and "bone_break" in target.abilities
@@ -1493,7 +1512,11 @@ class Game:
                                     and "bleed" in npc.abilities
                                     and target.alive
                                 ):
-                                    target.bleeding = 5
+                                    bleed_turns = 2 if (
+                                        "light_armor" in target.abilities
+                                        or "heavy_armor" in target.abilities
+                                    ) else 5
+                                    target.bleeding = bleed_turns
                                 if (
                                     dmg2 > 0
                                     and "bone_break" in npc.abilities
@@ -1628,7 +1651,11 @@ class Game:
                 and "bleed" in target.abilities
                 and self.player.hp > 0
             ):
-                self.player.bleeding = 5
+                bleed_turns = 2 if (
+                    "light_armor" in self.player.abilities
+                    or "heavy_armor" in self.player.abilities
+                ) else 5
+                self.player.bleeding = bleed_turns
             if (
                 dmg_from_target > 0
                 and "bone_break" in target.abilities
@@ -1649,7 +1676,11 @@ class Game:
             )
             target_died = self._apply_damage(dmg_to_target, target, stats)
             if dmg_to_target > 0 and "bleed" in self.player.abilities and target.hp > 0:
-                target.bleeding = 5
+                bleed_turns = 2 if (
+                    "light_armor" in target.abilities
+                    or "heavy_armor" in target.abilities
+                ) else 5
+                target.bleeding = bleed_turns
             if (
                 dmg_to_target > 0
                 and "bone_break" in self.player.abilities
@@ -1672,7 +1703,11 @@ class Game:
             )
             target_died = self._apply_damage(dmg_to_target, target, stats)
             if dmg_to_target > 0 and "bleed" in self.player.abilities and target.hp > 0:
-                target.bleeding = 5
+                bleed_turns = 2 if (
+                    "light_armor" in target.abilities
+                    or "heavy_armor" in target.abilities
+                ) else 5
+                target.bleeding = bleed_turns
             if (
                 dmg_to_target > 0
                 and "bone_break" in self.player.abilities
