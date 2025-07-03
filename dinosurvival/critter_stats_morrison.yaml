@@ -41,27 +41,6 @@
     "armor": 0,
     "armor_penetration": 0
   },
-  "Dragonfly": {
-    "adult_speed": 75,
-    "adult_weight": 0.5,
-    "aggressive": false,
-    "aquatic_boost": 0.0,
-    "avg_spawned_per_turn": 1.0,
-    "can_be_juvenile": false,
-    "can_walk": true,
-    "class": "insect",
-    "health_regen": 2.5,
-    "image": "assets/dinosaurs/dragonfly.png",
-    "maximum_individuals": 20,
-    "name": "Dragonfly",
-    "preferred_biomes": [
-      "forest"
-    ],
-    "attack": 0.0,
-    "hp": 1.0,
-    "armor": 0,
-    "armor_penetration": 0
-  },
   "Frog": {
     "adult_speed": 45,
     "adult_weight": 2.5,
@@ -122,27 +101,6 @@
     ],
     "attack": 0.89,
     "hp": 1.78,
-    "armor": 0,
-    "armor_penetration": 0
-  },
-  "Morrolepis": {
-    "adult_speed": 65,
-    "adult_weight": 2.0,
-    "aggressive": false,
-    "aquatic_boost": 0.0,
-    "avg_spawned_per_turn": 1.0,
-    "can_be_juvenile": false,
-    "can_walk": false,
-    "class": "fish",
-    "health_regen": 2.5,
-    "image": "assets/dinosaurs/morrolepis.png",
-    "maximum_individuals": 20,
-    "name": "Morrolepis",
-    "preferred_biomes": [
-      "lake"
-    ],
-    "attack": 0.0,
-    "hp": 1.0,
     "armor": 0,
     "armor_penetration": 0
   },
