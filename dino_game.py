@@ -22,7 +22,9 @@ except Exception:
     ImageTk = None  # type: ignore
 
 
-def load_scaled_image(path: str, width: int, height: int, master=None, grayscale: bool = False) -> tk.PhotoImage | None:
+def load_scaled_image(
+    path: str, width: int, height: int, master=None, grayscale: bool = False
+) -> tk.PhotoImage | None:
     if not os.path.exists(path):
         return None
     if Image and ImageTk:
@@ -48,9 +50,11 @@ def load_scaled_image(path: str, width: int, height: int, master=None, grayscale
         return ImageTk.PhotoImage(resized, master=master)
     return tk.PhotoImage(master=master, file=path)
 
+
 def format_biome_name(name: str) -> str:
     """Return a human friendly biome name."""
     return name.replace("_", " ").title()
+
 
 SETTINGS = {
     "morrison": MORRISON,
@@ -92,7 +96,9 @@ def display_legacy_stats(parent: tk.Widget, formation: str, dname: str) -> None:
     if pairs:
         for prey, count in pairs:
             if count > 0:
-                tk.Label(win, text=f"{prey}: {count}", font=("Helvetica", 12), anchor="w").pack(anchor="w")
+                tk.Label(
+                    win, text=f"{prey}: {count}", font=("Helvetica", 12), anchor="w"
+                ).pack(anchor="w")
     else:
         tk.Label(win, text="No recorded hunts.", font=("Helvetica", 12)).pack()
 
@@ -175,9 +181,14 @@ def choose_dinosaur_gui(root: tk.Tk, setting, on_select, on_back=None) -> None:
         lines.append(f"Energy drain per turn: {info.get('adult_energy_drain', 0)}")
         pref_biomes = ", ".join(info.get("preferred_biomes", []))
         lines.append(f"Preferred biomes: {pref_biomes}")
-        diet_items = [d.value if hasattr(d, 'value') else d for d in info.get('diet', [])]
+        diet_items = [
+            d.value if hasattr(d, "value") else d for d in info.get("diet", [])
+        ]
         diet = ", ".join(diet_items)
         lines.append(f"Diet: {diet}")
+        abilities = ", ".join(info.get("abilities", []))
+        if abilities:
+            lines.append(f"Abilities: {abilities}")
         interval = info.get("egg_laying_interval")
         if interval is not None:
             lines.append(f"Egg laying interval: {interval} turns")
@@ -185,7 +196,9 @@ def choose_dinosaur_gui(root: tk.Tk, setting, on_select, on_back=None) -> None:
         if num_eggs is not None:
             lines.append(f"Eggs laid at once: {num_eggs}")
         for line in lines:
-            tk.Label(win, text=line, font=("Helvetica", 12), anchor="w", justify="left").pack(anchor="w")
+            tk.Label(
+                win, text=line, font=("Helvetica", 12), anchor="w", justify="left"
+            ).pack(anchor="w")
         tk.Button(win, text="Close", command=win.destroy).pack(pady=5)
 
     for dino in setting.playable_dinos.keys():
@@ -198,14 +211,26 @@ def choose_dinosaur_gui(root: tk.Tk, setting, on_select, on_back=None) -> None:
             command=lambda d=dino: choose(d),
         )
         btn.pack(side="left", padx=5)
-        tk.Button(row, text="Info", command=lambda d=dino: show_info(d)).pack(side="left")
-        tk.Button(row, text="Dinosaur Stats", command=lambda d=dino: show_legacy(d)).pack(side="left")
+        tk.Button(row, text="Info", command=lambda d=dino: show_info(d)).pack(
+            side="left"
+        )
+        tk.Button(
+            row, text="Dinosaur Stats", command=lambda d=dino: show_legacy(d)
+        ).pack(side="left")
         row.pack(pady=5)
 
     btn_row = tk.Frame(frame)
     btn_row.pack(pady=10)
-    tk.Button(btn_row, text="Back", width=20, height=2, command=lambda: (frame.destroy(), on_back() if on_back else None)).pack(side="left", padx=5)
-    tk.Button(btn_row, text="Quit", width=20, height=2, command=root.destroy).pack(side="left", padx=5)
+    tk.Button(
+        btn_row,
+        text="Back",
+        width=20,
+        height=2,
+        command=lambda: (frame.destroy(), on_back() if on_back else None),
+    ).pack(side="left", padx=5)
+    tk.Button(btn_row, text="Quit", width=20, height=2, command=root.destroy).pack(
+        side="left", padx=5
+    )
 
     # This function does not start a new main loop; the provided root must already
     # be running. The window will be destroyed when a dinosaur is chosen.
@@ -227,7 +252,6 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     assets_dir = os.path.join(os.path.dirname(__file__), "assets", "biomes")
     biome_images: dict[str, tk.PhotoImage] = {}
 
-
     for tname, fname in game.setting.biome_images.items():
         path = os.path.join(assets_dir, fname)
         img = load_scaled_image(path, 400, 250)
@@ -235,13 +259,19 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             biome_images[tname] = img
 
     # Load player dinosaur images for different growth stages if available
-    player_images: dict[str, tk.PhotoImage | None] = {"adult": None, "hatchling": None, "juvenile": None}
+    player_images: dict[str, tk.PhotoImage | None] = {
+        "adult": None,
+        "hatchling": None,
+        "juvenile": None,
+    }
     dino_image_path = game_module.DINO_STATS.get(dinosaur_name, {}).get("image")
     if dino_image_path:
         abs_path = os.path.join(os.path.dirname(__file__), dino_image_path)
         base, ext = os.path.splitext(abs_path)
         player_images["adult"] = load_scaled_image(abs_path, 400, 250)
-        player_images["hatchling"] = load_scaled_image(f"{base}_hatchling{ext}", 400, 250)
+        player_images["hatchling"] = load_scaled_image(
+            f"{base}_hatchling{ext}", 400, 250
+        )
         player_images["juvenile"] = load_scaled_image(f"{base}_juvenile{ext}", 400, 250)
 
     # Load icon images used throughout the UI
@@ -257,6 +287,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         "hydration",
         "descendant",
         "bleed",
+        "broken_bone",
     ):
         path = os.path.join(icon_dir, f"{name}.png")
         icons[name] = load_scaled_image(path, 20, 20)
@@ -339,15 +370,25 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             max_c = max(max_c, 1)
             step = width / max(len(counts) - 1, 1)
             canvas.create_line(margin, top_pad, margin, top_pad + height)
-            canvas.create_line(margin, top_pad + height, margin + width, top_pad + height)
+            canvas.create_line(
+                margin, top_pad + height, margin + width, top_pad + height
+            )
             for i in range(1, len(counts)):
                 x1 = margin + (i - 1) * step
                 y1 = top_pad + height - counts[i - 1] / max_c * height
                 x2 = margin + i * step
                 y2 = top_pad + height - counts[i] / max_c * height
                 canvas.create_line(x1, y1, x2, y2, fill="blue")
-            canvas.create_text(margin - 5, top_pad + height, text="0", anchor="e", font=("Helvetica", 8))
-            canvas.create_text(margin - 5, top_pad, text=str(max_c), anchor="e", font=("Helvetica", 8))
+            canvas.create_text(
+                margin - 5,
+                top_pad + height,
+                text="0",
+                anchor="e",
+                font=("Helvetica", 8),
+            )
+            canvas.create_text(
+                margin - 5, top_pad, text=str(max_c), anchor="e", font=("Helvetica", 8)
+            )
             turns = game.turn_history
             if turns:
                 canvas.create_text(
@@ -399,16 +440,35 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         icon_label(win, "speed", f"{info.get('adult_speed', 0)}")
         icon_label(win, "turn", f"Energy drain: {info.get('adult_energy_drain', 0)}")
         pref_biomes = ", ".join(info.get("preferred_biomes", []))
-        tk.Label(win, text=f"Preferred biomes: {pref_biomes}", font=("Helvetica", 12), anchor="w").pack(anchor="w")
-        diet_items = [d.value if hasattr(d, 'value') else d for d in info.get('diet', [])]
+        tk.Label(
+            win,
+            text=f"Preferred biomes: {pref_biomes}",
+            font=("Helvetica", 12),
+            anchor="w",
+        ).pack(anchor="w")
+        diet_items = [
+            d.value if hasattr(d, "value") else d for d in info.get("diet", [])
+        ]
         diet = ", ".join(diet_items)
-        tk.Label(win, text=f"Diet: {diet}", font=("Helvetica", 12), anchor="w").pack(anchor="w")
+        tk.Label(win, text=f"Diet: {diet}", font=("Helvetica", 12), anchor="w").pack(
+            anchor="w"
+        )
         interval = info.get("egg_laying_interval")
         if interval is not None:
-            tk.Label(win, text=f"Egg laying interval: {interval} turns", font=("Helvetica", 12), anchor="w").pack(anchor="w")
+            tk.Label(
+                win,
+                text=f"Egg laying interval: {interval} turns",
+                font=("Helvetica", 12),
+                anchor="w",
+            ).pack(anchor="w")
         num_eggs = info.get("num_eggs")
         if num_eggs is not None:
-            tk.Label(win, text=f"Eggs laid at once: {num_eggs}", font=("Helvetica", 12), anchor="w").pack(anchor="w")
+            tk.Label(
+                win,
+                text=f"Eggs laid at once: {num_eggs}",
+                font=("Helvetica", 12),
+                anchor="w",
+            ).pack(anchor="w")
         tk.Button(win, text="Close", command=win.destroy).pack(pady=5)
 
     def show_legacy_stats() -> None:
@@ -439,14 +499,18 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         img_path = stats.get("image")
         if img_path and img is None:
             abs_path = os.path.join(os.path.dirname(__file__), img_path)
-            npc_images[npc.name] = load_scaled_image(abs_path, 400, 250, master=win, grayscale=not npc.alive)
+            npc_images[npc.name] = load_scaled_image(
+                abs_path, 400, 250, master=win, grayscale=not npc.alive
+            )
             img = npc_images.get(npc.name)
         if img:
             lbl = tk.Label(win, image=img)
             lbl.image = img
             lbl.pack()
         tk.Label(win, text=npc.name, font=("Helvetica", 18)).pack(pady=5)
-        tk.Label(win, text=f"Age: {npc.age} turns", font=("Helvetica", 12), anchor="w").pack(anchor="w")
+        tk.Label(
+            win, text=f"Age: {npc.age} turns", font=("Helvetica", 12), anchor="w"
+        ).pack(anchor="w")
         hp_max = game._scale_by_weight(npc.weight, stats, "hp")
         pct = 0 if hp_max <= 0 else npc.hp / hp_max * 100
         lbl = tk.Label(win, font=("Helvetica", 12), anchor="w")
@@ -465,16 +529,29 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         if "ambush" in npc.abilities:
             bonus = min(npc.ambush_streak, 3) * 5
             abil = f"Ambush ({npc.ambush_streak} stacks) +{bonus}% speed"
-        tk.Label(win, text=f"Abilities: {abil}", font=("Helvetica", 12), anchor="w").pack(anchor="w")
+        tk.Label(
+            win, text=f"Abilities: {abil}", font=("Helvetica", 12), anchor="w"
+        ).pack(anchor="w")
         sep = tk.Frame(win, height=2, bd=1, relief="sunken")
         sep.pack(fill="x", pady=5)
         if npc.hunts:
-            tk.Label(win, text="Successful Hunts:", font=("Helvetica", 12), anchor="w").pack(anchor="w")
+            tk.Label(
+                win, text="Successful Hunts:", font=("Helvetica", 12), anchor="w"
+            ).pack(anchor="w")
             for prey, count in sorted(npc.hunts.items()):
-                tk.Label(win, text=f"  {prey}: {count}", font=("Helvetica", 12), anchor="w").pack(anchor="w")
+                tk.Label(
+                    win, text=f"  {prey}: {count}", font=("Helvetica", 12), anchor="w"
+                ).pack(anchor="w")
         else:
-            tk.Label(win, text="Successful Hunts: None", font=("Helvetica", 12), anchor="w").pack(anchor="w")
-        tk.Label(win, text=f"Egg clusters eaten: {npc.egg_clusters_eaten}", font=("Helvetica", 12), anchor="w").pack(anchor="w")
+            tk.Label(
+                win, text="Successful Hunts: None", font=("Helvetica", 12), anchor="w"
+            ).pack(anchor="w")
+        tk.Label(
+            win,
+            text=f"Egg clusters eaten: {npc.egg_clusters_eaten}",
+            font=("Helvetica", 12),
+            anchor="w",
+        ).pack(anchor="w")
         sep = tk.Frame(win, height=2, bd=1, relief="sunken")
         sep.pack(fill="x", pady=5)
         lbl = tk.Label(win, font=("Helvetica", 12), anchor="w")
@@ -505,12 +582,14 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             "W: prey weight, A: attack power, HP: health points,",
             "S: speed relative to you (%) and E: energy available.",
             "Higher attack deals more damage while higher speed",
-            "makes prey harder to catch."
+            "makes prey harder to catch.",
         ]
         win = tk.Toplevel(root)
         win.title("Encounter Help")
         tk.Label(win, text="Encounters", font=("Helvetica", 18)).pack(pady=5)
-        tk.Label(win, text="\n".join(text), justify="left", font=("Helvetica", 12)).pack(padx=10, pady=5)
+        tk.Label(
+            win, text="\n".join(text), justify="left", font=("Helvetica", 12)
+        ).pack(padx=10, pady=5)
         tk.Button(win, text="Close", command=win.destroy).pack(pady=5)
 
     def show_game_help() -> None:
@@ -521,18 +600,26 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             "Lay Eggs requires being fully grown with 80+ health and energy.",
             "There is a short waiting period before eggs can be laid again after doing so.",
             "Health, Energy, Hydration, Weight, Attack and Speed describe your dinosaur.",
-            "Grow by hunting prey and once grown up lay eggs and hatch enough of them to win."
+            "Grow by hunting prey and once grown up lay eggs and hatch enough of them to win.",
         ]
         win = tk.Toplevel(root)
         win.title("Game Help")
         tk.Label(win, text="Game Help", font=("Helvetica", 18)).pack(pady=5)
-        tk.Label(win, text="\n".join(text), justify="left", font=("Helvetica", 12)).pack(padx=10, pady=5)
+        tk.Label(
+            win, text="\n".join(text), justify="left", font=("Helvetica", 12)
+        ).pack(padx=10, pady=5)
         tk.Button(win, text="Close", command=win.destroy).pack(pady=5)
 
     button_row = tk.Frame(dino_frame)
-    tk.Button(button_row, text="Info", command=show_dino_facts).pack(side="left", padx=2)
-    tk.Button(button_row, text="Dinosaur Stats", command=show_legacy_stats).pack(side="left", padx=2)
-    tk.Button(button_row, text="Player Stats", command=show_player_stats).pack(side="left", padx=2)
+    tk.Button(button_row, text="Info", command=show_dino_facts).pack(
+        side="left", padx=2
+    )
+    tk.Button(button_row, text="Dinosaur Stats", command=show_legacy_stats).pack(
+        side="left", padx=2
+    )
+    tk.Button(button_row, text="Player Stats", command=show_player_stats).pack(
+        side="left", padx=2
+    )
     tk.Button(button_row, text="Help", command=show_game_help).pack(side="left", padx=2)
     button_row.pack(pady=5)
 
@@ -626,10 +713,18 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         command=lambda: do_lay_eggs(),
     )
     move_buttons["north"] = tk.Button(
-        btn_container, text="North", width=12, height=2, command=lambda: perform("north")
+        btn_container,
+        text="North",
+        width=12,
+        height=2,
+        command=lambda: perform("north"),
     )
     move_buttons["south"] = tk.Button(
-        btn_container, text="South", width=12, height=2, command=lambda: perform("south")
+        btn_container,
+        text="South",
+        width=12,
+        height=2,
+        command=lambda: perform("south"),
     )
     move_buttons["east"] = tk.Button(
         btn_container, text="East", width=12, height=2, command=lambda: perform("east")
@@ -641,7 +736,11 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         btn_container, text="Stay", width=12, height=2, command=lambda: perform("stay")
     )
     move_buttons["drink"] = tk.Button(
-        btn_container, text="Drink", width=12, height=2, command=lambda: perform("drink")
+        btn_container,
+        text="Drink",
+        width=12,
+        height=2,
+        command=lambda: perform("drink"),
     )
     move_buttons["threaten"] = tk.Button(
         btn_container,
@@ -707,7 +806,9 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     weather_var = tk.StringVar()
     tk.Label(weather_frame, textvariable=weather_var, font=("Helvetica", 12)).pack()
     weather_effect_var = tk.StringVar()
-    tk.Label(weather_frame, textvariable=weather_effect_var, font=("Helvetica", 10)).pack()
+    tk.Label(
+        weather_frame, textvariable=weather_effect_var, font=("Helvetica", 10)
+    ).pack()
     weather_images: dict[str, tk.PhotoImage] = {}
 
     # Population tracker on the right below weather
@@ -872,7 +973,9 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             row = tk.Frame(encounter_list)
             img = tk.Label(row)
             info_frame = tk.Frame(row)
-            name_lbl = tk.Label(info_frame, font=("Helvetica", 12), anchor="w", width=30)
+            name_lbl = tk.Label(
+                info_frame, font=("Helvetica", 12), anchor="w", width=30
+            )
             stats1 = tk.Frame(info_frame)
             stats2 = tk.Frame(info_frame)
             name_lbl.pack(anchor="w", fill="x")
@@ -885,13 +988,23 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             info_btn.grid(row=0, column=2, rowspan=3, sticky="e")
             btn.grid(row=0, column=3, rowspan=3, sticky="e")
             row.grid_columnconfigure(1, weight=1)
-            slot = {"frame": row, "img": img, "name": name_lbl, "s1": stats1, "s2": stats2, "btn": btn, "info": info_btn}
+            slot = {
+                "frame": row,
+                "img": img,
+                "name": name_lbl,
+                "s1": stats1,
+                "s2": stats2,
+                "btn": btn,
+                "info": info_btn,
+            }
             encounter_rows.append(slot)
             if entry.burrow:
                 b = entry.burrow
                 key = "burrow"
                 if key not in encounter_images:
-                    path = os.path.join(os.path.dirname(__file__), "assets/other/burrow.png")
+                    path = os.path.join(
+                        os.path.dirname(__file__), "assets/other/burrow.png"
+                    )
                     encounter_images[key] = load_scaled_image(path, 100, 70)
                 bimg = encounter_images.get(key)
                 if bimg:
@@ -905,7 +1018,9 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
                     w.destroy()
                 for w in slot["s2"].winfo_children():
                     w.destroy()
-                tk.Label(slot["s1"], text=f"Dig:{b.progress:.0f}%", font=("Helvetica", 10)).pack(side="left")
+                tk.Label(
+                    slot["s1"], text=f"Dig:{b.progress:.0f}%", font=("Helvetica", 10)
+                ).pack(side="left")
                 slot["btn"].configure(command=do_dig_burrow, text="Dig")
                 slot["info"].grid_remove()
                 slot["frame"].pack(fill="x", pady=2, expand=True)
@@ -914,12 +1029,18 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
                 cluster = entry.eggs
                 slot["img"].configure(image="")
                 slot["img"].image = None
-                slot["name"].configure(text=f"{cluster.species} Eggs ({cluster.number})")
+                slot["name"].configure(
+                    text=f"{cluster.species} Eggs ({cluster.number})"
+                )
                 for w in slot["s1"].winfo_children():
                     w.destroy()
                 for w in slot["s2"].winfo_children():
                     w.destroy()
-                tk.Label(slot["s1"], text=f"W:{cluster.weight:.1f}kg Hatch:{cluster.turns_until_hatch}", font=("Helvetica", 10)).pack(side="left")
+                tk.Label(
+                    slot["s1"],
+                    text=f"W:{cluster.weight:.1f}kg Hatch:{cluster.turns_until_hatch}",
+                    font=("Helvetica", 10),
+                ).pack(side="left")
                 slot["btn"].configure(command=do_collect_eggs, text="Eat")
                 slot["info"].grid_remove()
                 slot["frame"].pack(fill="x", pady=2, expand=True)
@@ -945,7 +1066,9 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
                 abs_path = os.path.join(os.path.dirname(__file__), img_path)
                 key = npc.name if npc.alive else f"{npc.name}_dead"
                 if key not in encounter_images:
-                    encounter_images[key] = load_scaled_image(abs_path, 100, 70, grayscale=not npc.alive)
+                    encounter_images[key] = load_scaled_image(
+                        abs_path, 100, 70, grayscale=not npc.alive
+                    )
                 img = encounter_images.get(key)
             if img:
                 slot["img"].configure(image=img)
@@ -960,6 +1083,12 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
                     image=icons["bleed"],
                     compound="right",
                 )
+            elif getattr(npc, "broken_bone", 0) > 0 and icons.get("broken_bone"):
+                slot["name"].configure(
+                    text=f"{disp_name} {npc.broken_bone}",
+                    image=icons["broken_bone"],
+                    compound="right",
+                )
             else:
                 slot["name"].configure(text=disp_name, image="")
             hp_max = game._scale_by_weight(npc.weight, stats, "hp")
@@ -970,21 +1099,57 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             for w in slot["s2"].winfo_children():
                 w.destroy()
             if icons.get("attack"):
-                tk.Label(slot["s1"], image=icons["attack"], compound="left", text=f"{target_a:.1f}", font=("Helvetica", 10)).pack(side="left")
+                tk.Label(
+                    slot["s1"],
+                    image=icons["attack"],
+                    compound="left",
+                    text=f"{target_a:.1f}",
+                    font=("Helvetica", 10),
+                ).pack(side="left")
             else:
-                tk.Label(slot["s1"], text=f"A:{target_a:.1f}", font=("Helvetica", 10)).pack(side="left")
+                tk.Label(
+                    slot["s1"], text=f"A:{target_a:.1f}", font=("Helvetica", 10)
+                ).pack(side="left")
             if icons.get("health"):
-                tk.Label(slot["s1"], image=icons["health"], compound="left", text=f"{hp_val:.1f} ({pct:.0f}%)", font=("Helvetica", 10)).pack(side="left", padx=(5,0))
+                tk.Label(
+                    slot["s1"],
+                    image=icons["health"],
+                    compound="left",
+                    text=f"{hp_val:.1f} ({pct:.0f}%)",
+                    font=("Helvetica", 10),
+                ).pack(side="left", padx=(5, 0))
             else:
-                tk.Label(slot["s1"], text=f"HP:{hp_val:.1f} ({pct:.0f}%)", font=("Helvetica", 10)).pack(side="left", padx=(5,0))
+                tk.Label(
+                    slot["s1"],
+                    text=f"HP:{hp_val:.1f} ({pct:.0f}%)",
+                    font=("Helvetica", 10),
+                ).pack(side="left", padx=(5, 0))
             if icons.get("speed"):
-                tk.Label(slot["s2"], image=icons["speed"], compound="left", text=f"{rel_s:.2f} ({int(round(catch*100))}%)", font=("Helvetica", 10)).pack(side="left")
+                tk.Label(
+                    slot["s2"],
+                    image=icons["speed"],
+                    compound="left",
+                    text=f"{rel_s:.2f} ({int(round(catch*100))}%)",
+                    font=("Helvetica", 10),
+                ).pack(side="left")
             else:
-                tk.Label(slot["s2"], text=f"S:{rel_s:.2f} ({int(round(catch*100))}%)", font=("Helvetica", 10)).pack(side="left")
+                tk.Label(
+                    slot["s2"],
+                    text=f"S:{rel_s:.2f} ({int(round(catch*100))}%)",
+                    font=("Helvetica", 10),
+                ).pack(side="left")
             if icons.get("weight"):
-                tk.Label(slot["s2"], image=icons["weight"], compound="left", text=f"{npc.weight:.1f}kg", font=("Helvetica", 10)).pack(side="left", padx=(5,0))
+                tk.Label(
+                    slot["s2"],
+                    image=icons["weight"],
+                    compound="left",
+                    text=f"{npc.weight:.1f}kg",
+                    font=("Helvetica", 10),
+                ).pack(side="left", padx=(5, 0))
             else:
-                tk.Label(slot["s2"], text=f"W:{npc.weight:.1f}kg", font=("Helvetica", 10)).pack(side="left", padx=(5,0))
+                tk.Label(
+                    slot["s2"], text=f"W:{npc.weight:.1f}kg", font=("Helvetica", 10)
+                ).pack(side="left", padx=(5, 0))
             label = "Attack" if npc.alive else "Eat"
             slot["btn"].configure(command=lambda i=npc.id: do_hunt(i), text=label)
             slot["info"].configure(command=lambda n=npc: show_npc_stats(n))
@@ -1119,9 +1284,13 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
                         fill="red",
                         outline="red",
                     )
-                if (
-                    abs(game.x - x) + abs(game.y - y) == 1
-                    and any(n.alive and getattr(n, "bleeding", 0) > 0 for n in game.map.animals[y][x])
+                if abs(game.x - x) + abs(game.y - y) == 1 and any(
+                    n.alive
+                    and (
+                        getattr(n, "bleeding", 0) > 0
+                        or getattr(n, "broken_bone", 0) > 0
+                    )
+                    for n in game.map.animals[y][x]
                 ):
                     canvas.create_oval(
                         tile_size / 2 - 2,
@@ -1162,9 +1331,17 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
                 compound="right",
                 text=f"{base_name} {game.player.bleeding}",
             )
+        elif game.player.broken_bone > 0 and icons.get("broken_bone"):
+            name_label.configure(
+                image=icons["broken_bone"],
+                compound="right",
+                text=f"{base_name} {game.player.broken_bone}",
+            )
         else:
             name_label.configure(image="", text=base_name)
-        img_key = stage.lower() if stage.lower() in ("hatchling", "juvenile") else "adult"
+        img_key = (
+            stage.lower() if stage.lower() in ("hatchling", "juvenile") else "adult"
+        )
         img = player_images.get(img_key)
         if img:
             dino_image_label.configure(image=img)
@@ -1180,13 +1357,14 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         hp_pct = 0 if hp_max <= 0 else game.player.hp / hp_max * 100
         update_bar(health_canvas, health_rect, health_text, hp_pct)
         update_bar(energy_canvas, energy_rect, energy_text, game.player.energy)
-        update_bar(hydration_canvas, hydration_rect, hydration_text, game.player.hydration)
+        update_bar(
+            hydration_canvas, hydration_rect, hydration_text, game.player.hydration
+        )
         pct = 0.0
         growth_range = game.player.adult_weight - game.player.hatchling_weight
         if growth_range > 0:
             pct = (
-                (game.player.weight - game.player.hatchling_weight)
-                / growth_range
+                (game.player.weight - game.player.hatchling_weight) / growth_range
             ) * 100
         weight_label.config(
             text=(
@@ -1204,9 +1382,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         if "ambush" in game.player.abilities and game.player.ambush_streak > 0:
             speed_text += " (Ambush)"
         speed_label.config(text=speed_text)
-        desc_label.config(
-            text=f"{game.descendant_count()}/{DESCENDANTS_TO_WIN}"
-        )
+        desc_label.config(text=f"{game.descendant_count()}/{DESCENDANTS_TO_WIN}")
         turn_label.config(text=f"{game.turn_count}")
         update_lay_button()
         update_weather()
@@ -1234,9 +1410,15 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
                 img_lbl.configure(image=img)
                 img_lbl.image = img
             img_lbl.grid(row=0, column=0, sticky="w")
-            tk.Label(row, text=f"{name}", font=("Helvetica", 10)).grid(row=0, column=1, sticky="w", padx=5)
-            tk.Label(row, text=f"{count} ({pct:.1f}%)", font=("Helvetica", 10)).grid(row=0, column=2, sticky="w")
-            tk.Button(row, text="Info", width=4, command=lambda n=name: show_dino_facts(n)).grid(row=0, column=3, sticky="e")
+            tk.Label(row, text=f"{name}", font=("Helvetica", 10)).grid(
+                row=0, column=1, sticky="w", padx=5
+            )
+            tk.Label(row, text=f"{count} ({pct:.1f}%)", font=("Helvetica", 10)).grid(
+                row=0, column=2, sticky="w"
+            )
+            tk.Button(
+                row, text="Info", width=4, command=lambda n=name: show_dino_facts(n)
+            ).grid(row=0, column=3, sticky="e")
             row.grid_columnconfigure(1, weight=1)
             row.pack(fill="x", pady=2)
 
@@ -1362,7 +1544,13 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         if shown_stats:
             return
         shown_stats = True
-        append_game_log(game.setting.formation, dinosaur_name, game.turn_count, game.player.weight, game.won)
+        append_game_log(
+            game.setting.formation,
+            dinosaur_name,
+            game.turn_count,
+            game.player.weight,
+            game.won,
+        )
         update_hunter_log(game.setting.formation, dinosaur_name, game.hunt_stats)
         lines = [
             header,
@@ -1405,7 +1593,9 @@ def launch_menu():
         frame.pack(expand=True)
 
         tk.Label(frame, text="Dinosaur Survival", font=("Helvetica", 24)).pack(pady=20)
-        tk.Label(frame, text="Select a setting to play in", font=("Helvetica", 16)).pack(pady=(0, 20))
+        tk.Label(
+            frame, text="Select a setting to play in", font=("Helvetica", 16)
+        ).pack(pady=(0, 20))
 
         tk.Button(
             frame,
@@ -1421,7 +1611,9 @@ def launch_menu():
             height=2,
             command=lambda: show_dino_menu(HELL_CREEK, frame),
         ).pack(pady=10)
-        tk.Button(frame, text="Quit", width=40, height=2, command=root.destroy).pack(pady=10)
+        tk.Button(frame, text="Quit", width=40, height=2, command=root.destroy).pack(
+            pady=10
+        )
 
     def show_dino_menu(setting, prev_frame):
         prev_frame.destroy()

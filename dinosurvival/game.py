@@ -18,8 +18,10 @@ def calculate_catch_chance(rel_speed: float) -> float:
     if rel_speed < 0.5:
         return 1.0
     if rel_speed <= 1.0:
-        return 1.0 - (rel_speed - 0.5)
+        return 1.0 - (rel_speed - 0.5) * 0.5
     return 0.0
+
+
 from .dinosaur import DinosaurStats, Diet, NPCAnimal
 from .plant import PlantStats, Plant
 from .map import Map, EggCluster, Burrow
@@ -42,9 +44,8 @@ HATCHLING_SPEED_MULTIPLIER = _config.getint(
 HATCHLING_ENERGY_DRAIN_DIVISOR = _config.getint(
     "DEFAULT", "hatchling_energy_drain_divisor", fallback=2
 )
-MIN_HATCHING_WEIGHT = _config.getfloat(
-    "DEFAULT", "min_hatching_weight", fallback=2.0
-)
+MIN_HATCHING_WEIGHT = _config.getfloat("DEFAULT", "min_hatching_weight", fallback=2.0)
+
 
 # Armor mechanics
 def effective_armor(target_stats: dict, attacker_stats: dict) -> float:
@@ -60,6 +61,7 @@ def damage_after_armor(
     """Apply armor reduction to ``damage`` and return reduced value."""
     eff = effective_armor(target_stats, attacker_stats)
     return damage * max(0.0, 1.0 - eff / 100.0)
+
 
 # Number of living descendants required to win the game
 DESCENDANTS_TO_WIN = 2
@@ -127,7 +129,6 @@ def set_stats_for_formation(formation: str) -> None:
         return
     DINO_STATS, PLANT_STATS, CRITTER_STATS = _load_stats(formation)
     _CURRENT_FORMATION = formation
-
 
 
 @dataclass
@@ -214,7 +215,9 @@ set_stats_for_formation("Morrison")
 
 
 class Game:
-    def __init__(self, setting: Setting, dinosaur_name: str, width: int = 18, height: int = 10):
+    def __init__(
+        self, setting: Setting, dinosaur_name: str, width: int = 18, height: int = 10
+    ):
         set_stats_for_formation(setting.formation)
         self.setting = setting
         dstats = setting.playable_dinos[dinosaur_name]
@@ -289,9 +292,7 @@ class Game:
         # Tracking and win state
         self.turn_count = 0
         # Track how many turns the player spends in each biome
-        self.biome_turns: dict[str, int] = {
-            name: 0 for name in setting.terrains.keys()
-        }
+        self.biome_turns: dict[str, int] = {name: 0 for name in setting.terrains.keys()}
         self.hunt_stats: dict[str, list[int]] = {}
         self.won = False
         self.turn_messages: list[str] = []
@@ -328,8 +329,7 @@ class Game:
         species = list(DINO_STATS.items())
 
         multipliers: dict[str, float] = {
-            name: stats.get("initial_spawn_multiplier", 0)
-            for name, stats in species
+            name: stats.get("initial_spawn_multiplier", 0) for name, stats in species
         }
 
         total_multiplier = sum(multipliers.values())
@@ -493,12 +493,9 @@ class Game:
         )
 
     def player_pack_hunter_active(self) -> bool:
-        return (
-            "pack_hunter" in self.player.abilities
-            and any(
-                npc.alive and npc.name == self.player.name
-                for npc in self.map.animals[self.y][self.x]
-            )
+        return "pack_hunter" in self.player.abilities and any(
+            npc.alive and npc.name == self.player.name
+            for npc in self.map.animals[self.y][self.x]
         )
 
     def player_effective_attack(self) -> float:
@@ -521,6 +518,8 @@ class Game:
         speed *= 1 + boost / 100.0
         if "ambush" in self.player.abilities:
             speed *= 1 + min(self.player.ambush_streak, 3) * 0.05
+        if getattr(self.player, "broken_bone", 0) > 0:
+            speed *= 0.5
         return max(speed, 0.1)
 
     def npc_effective_speed(self, npc: NPCAnimal, stats: dict) -> float:
@@ -529,6 +528,8 @@ class Game:
         )
         if "ambush" in npc.abilities:
             speed *= 1 + min(npc.ambush_streak, 3) * 0.05
+        if getattr(npc, "broken_bone", 0) > 0:
+            speed *= 0.5
         return max(speed, 0.1)
 
     def _npc_has_packmate(self, npc: NPCAnimal, x: int, y: int) -> bool:
@@ -541,7 +542,9 @@ class Game:
             return True
         return False
 
-    def npc_effective_attack(self, npc: NPCAnimal, stats: dict, x: int, y: int) -> float:
+    def npc_effective_attack(
+        self, npc: NPCAnimal, stats: dict, x: int, y: int
+    ) -> float:
         atk = self._scale_by_weight(npc.weight, stats, "attack")
         if "pack_hunter" in npc.abilities and self._npc_has_packmate(npc, x, y):
             atk *= 3
@@ -566,11 +569,11 @@ class Game:
         self._record_population()
         terrain = self.map.terrain_at(self.x, self.y).name
         self.biome_turns[terrain] = self.biome_turns.get(terrain, 0) + 1
+        self.turn_messages.extend(self.map.update_volcanic_activity((self.x, self.y)))
         self.turn_messages.extend(
-            self.map.update_volcanic_activity((self.x, self.y))
-        )
-        self.turn_messages.extend(
-            self.map.update_flood(self.player, (self.x, self.y), self.weather.flood_chance)
+            self.map.update_flood(
+                self.player, (self.x, self.y), self.weather.flood_chance
+            )
         )
         self.turn_messages.extend(
             self.map.update_forest_fire(self.weather, (self.x, self.y))
@@ -596,6 +599,8 @@ class Game:
         drain = self._base_energy_drain()
         if moved:
             drain *= WALKING_ENERGY_DRAIN_MULTIPLIER
+            if getattr(self.player, "broken_bone", 0) > 0:
+                drain *= 2
         drain *= multiplier
         drain *= self.weather.player_energy_mult
         prev_e = self.player.energy
@@ -639,7 +644,12 @@ class Game:
     def _apply_terrain_effects(self) -> None:
         """Apply end-of-turn biome effects to the player and NPCs."""
         terrain = self.map.terrain_at(self.x, self.y).name
-        if terrain in ("lava", "volcano_erupting", "forest_fire", "highland_forest_fire"):
+        if terrain in (
+            "lava",
+            "volcano_erupting",
+            "forest_fire",
+            "highland_forest_fire",
+        ):
             self.player.hp = 0.0
             self.turn_messages.append("Game Over.")
         if terrain == "toxic_badlands":
@@ -652,7 +662,12 @@ class Game:
         for y in range(self.map.height):
             for x in range(self.map.width):
                 tname = self.map.terrain_at(x, y).name
-                if tname in ("lava", "volcano_erupting", "forest_fire", "highland_forest_fire"):
+                if tname in (
+                    "lava",
+                    "volcano_erupting",
+                    "forest_fire",
+                    "highland_forest_fire",
+                ):
                     for npc in self.map.animals[y][x]:
                         npc.alive = False
                         npc.age = -1
@@ -731,20 +746,25 @@ class Game:
         max_gain = self._max_growth_gain()
         weight_gain = min(available_meat, max_gain)
         old_weight = self.player.weight
-        self.player.weight = min(self.player.weight + weight_gain, self.player.adult_weight)
+        self.player.weight = min(
+            self.player.weight + weight_gain, self.player.adult_weight
+        )
 
         if self.player.adult_weight > 0:
             pct = self.player.weight / self.player.adult_weight
             pct = max(0.0, min(pct, 1.0))
             self.player.attack = self.player.adult_attack * pct
-            old_max = self._scale_by_weight(old_weight, DINO_STATS[self.player.name], "hp")
-            new_max = self._scale_by_weight(self.player.weight, DINO_STATS[self.player.name], "hp")
+            old_max = self._scale_by_weight(
+                old_weight, DINO_STATS[self.player.name], "hp"
+            )
+            new_max = self._scale_by_weight(
+                self.player.weight, DINO_STATS[self.player.name], "hp"
+            )
             ratio = 1.0 if old_max <= 0 else self.player.hp / old_max
             self.player.max_hp = new_max
             self.player.hp = new_max * ratio
-            self.player.speed = (
-                self.player.hatchling_speed
-                + pct * (self.player.adult_speed - self.player.hatchling_speed)
+            self.player.speed = self.player.hatchling_speed + pct * (
+                self.player.adult_speed - self.player.hatchling_speed
             )
 
         return weight_gain, max_gain
@@ -819,6 +839,8 @@ class Game:
                 return True
         elif regen and allow_regen and entity.hp < entity.max_hp:
             entity.hp = min(entity.max_hp, entity.hp + entity.max_hp * regen / 100.0)
+        if getattr(entity, "broken_bone", 0) > 0:
+            entity.broken_bone -= 1
         return False
 
     def _npc_apply_growth(
@@ -856,7 +878,9 @@ class Game:
         plant.weight -= eat_amount
         return eat_amount
 
-    def _npc_consume_meat(self, npc: NPCAnimal, carcass: NPCAnimal, stats: dict) -> float:
+    def _npc_consume_meat(
+        self, npc: NPCAnimal, carcass: NPCAnimal, stats: dict
+    ) -> float:
         energy_needed = 100.0 - npc.energy
         weight_for_energy = energy_needed * npc.weight / 1000
         growth_target = self._npc_max_growth_gain(npc.weight, stats)
@@ -944,7 +968,10 @@ class Game:
         num_eggs = stats.get("num_eggs", 0)
         hatch_w = stats.get(
             "hatchling_weight",
-            max(MIN_HATCHING_WEIGHT, stats.get("adult_weight", 0.0) / HATCHLING_WEIGHT_DIVISOR),
+            max(
+                MIN_HATCHING_WEIGHT,
+                stats.get("adult_weight", 0.0) / HATCHLING_WEIGHT_DIVISOR,
+            ),
         )
         hatch_w = max(hatch_w, MIN_HATCHING_WEIGHT)
         eggs = EggCluster(
@@ -1114,7 +1141,8 @@ class Game:
                             "hatchling_weight",
                             max(
                                 MIN_HATCHING_WEIGHT,
-                                stats.get("adult_weight", 0.0) / HATCHLING_WEIGHT_DIVISOR,
+                                stats.get("adult_weight", 0.0)
+                                / HATCHLING_WEIGHT_DIVISOR,
                             ),
                         )
                         hatch_w = max(hatch_w, MIN_HATCHING_WEIGHT)
@@ -1128,7 +1156,9 @@ class Game:
                                     weight=hatch_w,
                                     max_hp=max_hp,
                                     hp=max_hp,
-                                    abilities=DINO_STATS.get(egg.species, {}).get("abilities", []),
+                                    abilities=DINO_STATS.get(egg.species, {}).get(
+                                        "abilities", []
+                                    ),
                                     is_descendant=egg.is_descendant,
                                 )
                             )
@@ -1155,7 +1185,7 @@ class Game:
         return self._weather_rng.choices(weathers, weights=weights, k=1)[0]
 
     def _move_npcs(self) -> None:
-        moves: list[tuple[int,int,int,int,NPCAnimal]] = []
+        moves: list[tuple[int, int, int, int, NPCAnimal]] = []
         directions = {
             "Up": (0, -1),
             "Right": (1, 0),
@@ -1287,6 +1317,8 @@ class Game:
                                 extra = base_drain * (
                                     WALKING_ENERGY_DRAIN_MULTIPLIER - 1.0
                                 )
+                                if getattr(npc, "broken_bone", 0) > 0:
+                                    extra *= 2
                                 if extra > 0:
                                     npc.energy = max(0.0, npc.energy - extra)
                                     if npc.energy <= 0:
@@ -1368,13 +1400,19 @@ class Game:
                             npc.last_action = "act"
                             continue
 
-                    if plants and any(d in diet for d in (Diet.FERNS, Diet.CYCADS, Diet.CONIFERS, Diet.FRUITS)):
+                    if plants and any(
+                        d in diet
+                        for d in (Diet.FERNS, Diet.CYCADS, Diet.CONIFERS, Diet.FRUITS)
+                    ):
                         allowed_plants = {
                             d.value
                             for d in diet
-                            if d in (Diet.FERNS, Diet.CYCADS, Diet.CONIFERS, Diet.FRUITS)
+                            if d
+                            in (Diet.FERNS, Diet.CYCADS, Diet.CONIFERS, Diet.FRUITS)
                         }
-                        options = [p for p in plants if p.name.lower() in allowed_plants]
+                        options = [
+                            p for p in plants if p.name.lower() in allowed_plants
+                        ]
                         if options:
                             chosen = max(options, key=lambda p: p.weight)
                             eaten = self._npc_consume_plant(npc, chosen, stats)
@@ -1401,29 +1439,46 @@ class Game:
                         for other in animals:
                             if other is npc or not other.alive:
                                 continue
-                            o_stats = DINO_STATS.get(other.name) or CRITTER_STATS.get(other.name, {})
+                            o_stats = DINO_STATS.get(other.name) or CRITTER_STATS.get(
+                                other.name, {}
+                            )
                             o_atk = self.npc_effective_attack(other, o_stats, x, y)
                             o_hp = self._scale_by_weight(other.weight, o_stats, "hp")
                             npc_dmg = damage_after_armor(npc_atk, stats, o_stats)
                             other_dmg = damage_after_armor(o_atk, o_stats, stats)
                             if other_dmg / max(npc_hp, 0.1) >= npc_dmg / max(o_hp, 0.1):
                                 continue
-                            o_speed = self._stat_from_weight(other.weight, o_stats, "hatchling_speed", "adult_speed")
+                            o_speed = self._stat_from_weight(
+                                other.weight, o_stats, "hatchling_speed", "adult_speed"
+                            )
                             if o_speed >= npc_speed:
                                 continue
                             if other.weight < npc.weight * 0.01:
                                 continue
                             potential.append((other, o_speed, o_atk, o_hp, o_stats))
                         if potential:
-                            target, t_speed, t_atk, t_hp, t_stats = random.choice(potential)
+                            target, t_speed, t_atk, t_hp, t_stats = random.choice(
+                                potential
+                            )
                             rel_speed = t_speed / max(npc_speed, 0.1)
                             if random.random() <= calculate_catch_chance(rel_speed):
                                 before = npc.hp
                                 dmg_val = damage_after_armor(t_atk, t_stats, stats)
                                 self._apply_damage(dmg_val, npc, stats)
                                 dmg = before - npc.hp
-                                if dmg > 0 and "bleed" in target.abilities and npc.alive:
+                                if (
+                                    dmg > 0
+                                    and "bleed" in target.abilities
+                                    and npc.alive
+                                ):
                                     npc.bleeding = 5
+                                if (
+                                    dmg > 0
+                                    and "bone_break" in target.abilities
+                                    and target.weight >= npc.weight / 3
+                                    and npc.alive
+                                ):
+                                    npc.broken_bone = 10
                                 if x == self.x and y == self.y and dmg > 0:
                                     messages.append(
                                         f"The {self._npc_label(target)} deals {dmg:.0f} damage to {self._npc_label(npc)}."
@@ -1433,14 +1488,27 @@ class Game:
                                 dmg_val2 = damage_after_armor(npc_atk, stats, t_stats)
                                 killed = self._apply_damage(dmg_val2, target, t_stats)
                                 dmg2 = before_t - target.hp
-                                if dmg2 > 0 and "bleed" in npc.abilities and target.alive:
+                                if (
+                                    dmg2 > 0
+                                    and "bleed" in npc.abilities
+                                    and target.alive
+                                ):
                                     target.bleeding = 5
+                                if (
+                                    dmg2 > 0
+                                    and "bone_break" in npc.abilities
+                                    and npc.weight >= target.weight / 3
+                                    and target.alive
+                                ):
+                                    target.broken_bone = 10
                                 if x == self.x and y == self.y and dmg2 > 0:
                                     messages.append(
                                         f"The {self._npc_label(npc)} deals {dmg2:.0f} damage to {self._npc_label(target)}."
                                     )
                                 if killed:
-                                    npc.hunts[target.name] = npc.hunts.get(target.name, 0) + 1
+                                    npc.hunts[target.name] = (
+                                        npc.hunts.get(target.name, 0) + 1
+                                    )
                                     eaten = self._npc_consume_meat(npc, target, stats)
                                     if x == self.x and y == self.y:
                                         messages.append(
@@ -1462,9 +1530,9 @@ class Game:
 
                     self._npc_choose_move(x, y, npc, stats)
                     if npc.next_move != "None":
-                        extra = base_drain * (
-                            WALKING_ENERGY_DRAIN_MULTIPLIER - 1.0
-                        )
+                        extra = base_drain * (WALKING_ENERGY_DRAIN_MULTIPLIER - 1.0)
+                        if getattr(npc, "broken_bone", 0) > 0:
+                            extra *= 2
                         if extra > 0:
                             npc.energy = max(0.0, npc.energy - extra)
                             if npc.energy <= 0:
@@ -1474,7 +1542,6 @@ class Game:
                                 continue
                         npc.last_action = "move"
         return messages
-
 
     def hunt_npc(self, npc_id: int) -> str:
         """Hunt a specific NPC animal by its ID."""
@@ -1514,8 +1581,12 @@ class Game:
         if target.alive:
             rel_speed = target_speed / max(player_speed, 0.1)
             catch_chance = calculate_catch_chance(rel_speed)
+            if rel_speed <= 0.7:
+                catch_chance = 1.0
             if random.random() > catch_chance:
-                msg = f"The {self._npc_label(target)} escaped before you could catch it."
+                msg = (
+                    f"The {self._npc_label(target)} escaped before you could catch it."
+                )
                 end_msg = self._apply_turn_costs(False, 5.0)
                 msg += end_msg
                 win = self._check_victory()
@@ -1552,8 +1623,19 @@ class Game:
             died_player = self._apply_damage(
                 dmg_from_target, self.player, DINO_STATS.get(self.player.name, {})
             )
-            if dmg_from_target > 0 and "bleed" in target.abilities and self.player.hp > 0:
+            if (
+                dmg_from_target > 0
+                and "bleed" in target.abilities
+                and self.player.hp > 0
+            ):
                 self.player.bleeding = 5
+            if (
+                dmg_from_target > 0
+                and "bone_break" in target.abilities
+                and target.weight >= self.player.weight / 3
+                and self.player.hp > 0
+            ):
+                self.player.broken_bone = 10
             player_damage = before - self.player.hp
             if player_damage > 0:
                 self.turn_messages.append(
@@ -1568,6 +1650,13 @@ class Game:
             target_died = self._apply_damage(dmg_to_target, target, stats)
             if dmg_to_target > 0 and "bleed" in self.player.abilities and target.hp > 0:
                 target.bleeding = 5
+            if (
+                dmg_to_target > 0
+                and "bone_break" in self.player.abilities
+                and self.player.weight >= target.weight / 3
+                and target.hp > 0
+            ):
+                target.broken_bone = 10
             dealt = before_t - target.hp
             if dealt > 0:
                 self.turn_messages.append(
@@ -1584,6 +1673,13 @@ class Game:
             target_died = self._apply_damage(dmg_to_target, target, stats)
             if dmg_to_target > 0 and "bleed" in self.player.abilities and target.hp > 0:
                 target.bleeding = 5
+            if (
+                dmg_to_target > 0
+                and "bone_break" in self.player.abilities
+                and self.player.weight >= target.weight / 3
+                and target.hp > 0
+            ):
+                target.broken_bone = 10
             dealt = before_t - target.hp
             if dealt > 0:
                 self.turn_messages.append(
@@ -1591,14 +1687,14 @@ class Game:
                 )
 
         if died_player:
-                self.turn_messages.extend(self._update_npcs())
-                self._move_npcs()
-                self.turn_messages.extend(self._spoil_carcasses())
-                self._generate_encounters()
-                self._reveal_adjacent_mountains()
-                return self._finish_turn(
-                    f"You fought the {self._npc_label(target)} but received fatal injuries. Game Over."
-                )
+            self.turn_messages.extend(self._update_npcs())
+            self._move_npcs()
+            self.turn_messages.extend(self._spoil_carcasses())
+            self._generate_encounters()
+            self._reveal_adjacent_mountains()
+            return self._finish_turn(
+                f"You fought the {self._npc_label(target)} but received fatal injuries. Game Over."
+            )
 
         if not target_died:
             end_msg = self._apply_turn_costs(False)

@@ -45,6 +45,9 @@
     "diet": [
       "ferns"
     ],
+    "abilities": [
+      "bone_break"
+    ],
     "egg_laying_interval": 18,
     "forms_packs": false,
     "growth_rate": 0.35,
