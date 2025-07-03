@@ -18,7 +18,7 @@ def calculate_catch_chance(rel_speed: float) -> float:
     if rel_speed < 0.5:
         return 1.0
     if rel_speed <= 1.0:
-        return 1.0 - (rel_speed - 0.5) * 0.5
+        return 1.0 - (rel_speed - 0.5)
     return 0.0
 
 
