@@ -1435,6 +1435,32 @@ class Game:
                         npc.last_action = "act"
                         continue
 
+                    if (
+                        "bleed" in npc.abilities
+                        and npc.bleed_wait_turns > 0
+                    ):
+                        target = next(
+                            (
+                                a
+                                for a in animals
+                                if a.id == npc.bleed_wait_target
+                            ),
+                            None,
+                        )
+                        if (
+                            target
+                            and target.alive
+                            and getattr(target, "bleeding", 0) > 0
+                            and npc.energy >= 70
+                        ):
+                            npc.bleed_wait_turns -= 1
+                            npc.next_move = "None"
+                            npc.last_action = "stay"
+                            continue
+                        else:
+                            npc.bleed_wait_turns = 0
+                            npc.bleed_wait_target = -1
+
                     if npc.energy > 90:
                         continue
 
@@ -1592,6 +1618,9 @@ class Game:
                                         or "heavy_armor" in target.abilities
                                     ) else 5
                                     target.bleeding = bleed_turns
+                                    if npc.energy >= 70 and not killed:
+                                        npc.bleed_wait_turns = 2
+                                        npc.bleed_wait_target = target.id
                                 if (
                                     dmg2 > 0
                                     and "bone_break" in npc.abilities
