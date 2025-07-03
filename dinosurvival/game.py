@@ -625,7 +625,9 @@ class Game:
         if self.player.is_exhausted():
             message = "\nYou have collapsed from exhaustion! Game Over."
         regen = getattr(self.player, "health_regen", 0.0)
-        self._apply_bleed_and_regen(self.player, regen, allow_regen=not message)
+        self._apply_bleed_and_regen(
+            self.player, regen, allow_regen=not message, moved=moved
+        )
         return message
 
     def _reveal_cardinals(self, x: int, y: int) -> None:
@@ -837,14 +839,15 @@ class Game:
         return died
 
     def _apply_bleed_and_regen(
-        self, entity, regen: float, allow_regen: bool = True
+        self, entity, regen: float, allow_regen: bool = True, moved: bool = False
     ) -> bool:
         """Apply bleed damage and health regeneration.
 
         Returns True if ``entity`` died from bleeding."""
 
         if getattr(entity, "bleeding", 0) > 0:
-            entity.hp = max(0.0, entity.hp - entity.max_hp * 0.05)
+            mult = 2 if moved else 1
+            entity.hp = max(0.0, entity.hp - entity.max_hp * 0.05 * mult)
             entity.bleeding -= 1
             if entity.hp <= 0:
                 if isinstance(entity, NPCAnimal):
@@ -1212,6 +1215,9 @@ class Game:
                 for npc in list(self.map.animals[y][x]):
                     d = npc.next_move
                     if not d or d == "None":
+                        continue
+                    if getattr(npc, "bleeding", 0) > 0:
+                        npc.next_move = "None"
                         continue
                     if not npc.alive:
                         npc.next_move = "None"
