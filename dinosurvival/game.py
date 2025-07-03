@@ -956,6 +956,70 @@ class Game:
                 self.next_npc_id += 1
         return True
 
+    def _npc_damage_advantage(
+        self,
+        hunter_atk: float,
+        hunter_hp: float,
+        hunter_stats: dict,
+        target_atk: float,
+        target_hp: float,
+        target_stats: dict,
+    ) -> bool:
+        """Return True if the hunter loses a smaller percent of HP than the target.
+
+        The calculation simulates a single exchange of blows. If either party has
+        the ``bleed`` ability and deals damage, bleed damage over five turns is
+        included. Bleeding creatures do not regenerate health while bleeding, but
+        non-bleeding ones do.
+        """
+
+        dmg_to_target = damage_after_armor(hunter_atk, hunter_stats, target_stats)
+        dmg_to_hunter = damage_after_armor(target_atk, target_stats, hunter_stats)
+
+        target_bleed_turns = 0
+        hunter_bleed_turns = 0
+
+        if dmg_to_target > 0 and "bleed" in hunter_stats.get("abilities", []):
+            if (
+                "light_armor" in target_stats.get("abilities", [])
+                or "heavy_armor" in target_stats.get("abilities", [])
+            ):
+                target_bleed_turns = 2
+            else:
+                target_bleed_turns = 5
+
+        if dmg_to_hunter > 0 and "bleed" in target_stats.get("abilities", []):
+            if (
+                "light_armor" in hunter_stats.get("abilities", [])
+                or "heavy_armor" in hunter_stats.get("abilities", [])
+            ):
+                hunter_bleed_turns = 2
+            else:
+                hunter_bleed_turns = 5
+
+        bleed = target_bleed_turns > 0 or hunter_bleed_turns > 0
+
+        bleed_dmg_target = target_bleed_turns * 0.05 * target_hp if bleed else 0.0
+        bleed_dmg_hunter = hunter_bleed_turns * 0.05 * hunter_hp if bleed else 0.0
+
+        regen_dmg_target = 0.0
+        regen_dmg_hunter = 0.0
+        if bleed:
+            regen_target = target_stats.get("health_regen", 0.0)
+            regen_hunter = hunter_stats.get("health_regen", 0.0)
+            regen_turns_target = max(0, 5 - target_bleed_turns)
+            regen_turns_hunter = max(0, 5 - hunter_bleed_turns)
+            regen_dmg_target = -regen_target / 100.0 * target_hp * regen_turns_target
+            regen_dmg_hunter = -regen_hunter / 100.0 * hunter_hp * regen_turns_hunter
+
+        total_target = max(0.0, dmg_to_target + bleed_dmg_target + regen_dmg_target)
+        total_hunter = max(0.0, dmg_to_hunter + bleed_dmg_hunter + regen_dmg_hunter)
+
+        pct_target = total_target / max(target_hp, 0.1)
+        pct_hunter = total_hunter / max(hunter_hp, 0.1)
+
+        return pct_hunter < pct_target
+
     def _can_player_lay_eggs(self) -> bool:
         stats = DINO_STATS.get(self.player.name, {})
         animals = self.map.animals[self.y][self.x]
@@ -1465,9 +1529,14 @@ class Game:
                             )
                             o_atk = self.npc_effective_attack(other, o_stats, x, y)
                             o_hp = self._scale_by_weight(other.weight, o_stats, "hp")
-                            npc_dmg = damage_after_armor(npc_atk, stats, o_stats)
-                            other_dmg = damage_after_armor(o_atk, o_stats, stats)
-                            if other_dmg / max(npc_hp, 0.1) >= npc_dmg / max(o_hp, 0.1):
+                            if not self._npc_damage_advantage(
+                                npc_atk,
+                                npc_hp,
+                                stats,
+                                o_atk,
+                                o_hp,
+                                o_stats,
+                            ):
                                 continue
                             o_speed = self._stat_from_weight(
                                 other.weight, o_stats, "hatchling_speed", "adult_speed"
