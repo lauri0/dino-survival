@@ -216,7 +216,7 @@
   "Gargoyleosaurus": {
     "adult_energy_drain": 5.0,
     "adult_speed": 20,
-    "adult_weight": 1000.0,
+    "adult_weight": 750.0,
     "aggressive": false,
     "aquatic_boost": 0.0,
     "can_be_juvenile": true,
@@ -312,6 +312,9 @@
     "diet": [
       "ferns",
       "cycads"
+    ],
+    "abilities": [
+      "bleed"
     ],
     "egg_laying_interval": 10,
     "forms_packs": false,
