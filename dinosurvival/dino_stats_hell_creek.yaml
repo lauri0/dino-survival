@@ -1,23 +1,25 @@
 {
   "Acheroraptor": {
+    "abilities": [
+      "bleed"
+    ],
     "adult_energy_drain": 5.0,
     "adult_speed": 100,
     "adult_weight": 30.0,
     "aggressive": true,
     "aquatic_boost": 0.0,
+    "attack": 8.04,
     "can_be_juvenile": true,
     "can_walk": true,
     "class": "reptile",
     "diet": [
       "meat"
     ],
-    "abilities": [
-      "bleed"
-    ],
     "egg_laying_interval": 10,
     "forms_packs": false,
     "growth_rate": 0.35,
     "health_regen": 2.5,
+    "hp": 16.08,
     "hydration_drain": 2.2,
     "image": "assets/dinosaurs/acheroraptor.png",
     "initial_spawn_multiplier": 5,
@@ -27,31 +29,30 @@
       "forest",
       "swamp",
       "plains"
-    ],
-    "attack": 8.04,
-    "hp": 16.08,
-    "armor": 0,
-    "armor_penetration": 0
+    ]
   },
   "Ankylosaurus": {
+    "abilities": [
+      "bone_break",
+      "heavy_armor"
+    ],
     "adult_energy_drain": 1.5,
     "adult_speed": 15,
     "adult_weight": 6800.0,
     "aggressive": false,
     "aquatic_boost": 0.0,
+    "attack": 1285.71,
     "can_be_juvenile": true,
     "can_walk": true,
     "class": "reptile",
     "diet": [
       "ferns"
     ],
-    "abilities": [
-      "bone_break"
-    ],
     "egg_laying_interval": 18,
     "forms_packs": false,
     "growth_rate": 0.35,
     "health_regen": 2.5,
+    "hp": 2571.42,
     "hydration_drain": 2.5,
     "image": "assets/dinosaurs/ankylosaurus.png",
     "initial_spawn_multiplier": 4,
@@ -60,11 +61,7 @@
     "preferred_biomes": [
       "forest",
       "desert"
-    ],
-    "attack": 1285.71,
-    "hp": 2571.42,
-    "armor": 40,
-    "armor_penetration": 0
+    ]
   },
   "Edmontosaurus": {
     "adult_energy_drain": 2.0,
@@ -72,6 +69,7 @@
     "adult_weight": 6000.0,
     "aggressive": false,
     "aquatic_boost": 0.0,
+    "attack": 535.71,
     "can_be_juvenile": true,
     "can_walk": true,
     "class": "reptile",
@@ -83,6 +81,7 @@
     "forms_packs": false,
     "growth_rate": 0.4,
     "health_regen": 2.5,
+    "hp": 1071.42,
     "hydration_drain": 2.5,
     "image": "assets/dinosaurs/edmontosaurus.png",
     "initial_spawn_multiplier": 6,
@@ -91,11 +90,7 @@
     "preferred_biomes": [
       "swamp",
       "plains"
-    ],
-    "attack": 535.71,
-    "hp": 1071.42,
-    "armor": 0,
-    "armor_penetration": 0
+    ]
   },
   "Leptoceratops": {
     "adult_energy_drain": 3.5,
@@ -103,6 +98,7 @@
     "adult_weight": 80.0,
     "aggressive": false,
     "aquatic_boost": 0.0,
+    "attack": 8.04,
     "can_be_juvenile": true,
     "can_walk": true,
     "class": "reptile",
@@ -113,6 +109,7 @@
     "forms_packs": false,
     "growth_rate": 0.35,
     "health_regen": 2.5,
+    "hp": 16.08,
     "hydration_drain": 2.5,
     "image": "assets/dinosaurs/leptoceratops.png",
     "initial_spawn_multiplier": 15,
@@ -121,11 +118,7 @@
     "preferred_biomes": [
       "forest",
       "swamp"
-    ],
-    "attack": 8.04,
-    "hp": 16.08,
-    "armor": 0,
-    "armor_penetration": 0
+    ]
   },
   "Pachycephalosaurus": {
     "adult_energy_drain": 5.0,
@@ -133,6 +126,7 @@
     "adult_weight": 450.0,
     "aggressive": false,
     "aquatic_boost": 0.0,
+    "attack": 44.64,
     "can_be_juvenile": true,
     "can_walk": true,
     "class": "reptile",
@@ -144,6 +138,7 @@
     "forms_packs": false,
     "growth_rate": 0.35,
     "health_regen": 2.5,
+    "hp": 89.28,
     "hydration_drain": 2.5,
     "image": "assets/dinosaurs/pachycephalosaurus.png",
     "initial_spawn_multiplier": 12,
@@ -152,31 +147,29 @@
     "preferred_biomes": [
       "woodlands",
       "forest"
-    ],
-    "attack": 44.64,
-    "hp": 89.28,
-    "armor": 0,
-    "armor_penetration": 0
+    ]
   },
   "Pectinodon": {
+    "abilities": [
+      "digger"
+    ],
     "adult_energy_drain": 5.0,
     "adult_speed": 160,
     "adult_weight": 25.0,
     "aggressive": true,
     "aquatic_boost": 0.0,
+    "attack": 3.21,
     "can_be_juvenile": true,
     "can_walk": true,
     "class": "reptile",
     "diet": [
       "meat"
     ],
-    "abilities": [
-      "digger"
-    ],
     "egg_laying_interval": 12,
     "forms_packs": false,
     "growth_rate": 0.35,
     "health_regen": 2.5,
+    "hp": 6.42,
     "hydration_drain": 2.2,
     "image": "assets/dinosaurs/pectinodon.png",
     "initial_spawn_multiplier": 5,
@@ -186,11 +179,7 @@
       "woodlands",
       "swamp",
       "plains"
-    ],
-    "attack": 3.21,
-    "hp": 6.42,
-    "armor": 0,
-    "armor_penetration": 0
+    ]
   },
   "Thescelosaurus": {
     "adult_energy_drain": 4.0,
@@ -198,6 +187,7 @@
     "adult_weight": 300.0,
     "aggressive": false,
     "aquatic_boost": 0.0,
+    "attack": 26.79,
     "can_be_juvenile": true,
     "can_walk": true,
     "class": "reptile",
@@ -208,6 +198,7 @@
     "forms_packs": false,
     "growth_rate": 0.35,
     "health_regen": 2.5,
+    "hp": 53.58,
     "hydration_drain": 2.5,
     "image": "assets/dinosaurs/thescelosaurus.png",
     "initial_spawn_multiplier": 12,
@@ -216,11 +207,7 @@
     "preferred_biomes": [
       "woodlands",
       "plains"
-    ],
-    "attack": 26.79,
-    "hp": 53.58,
-    "armor": 0,
-    "armor_penetration": 0
+    ]
   },
   "Triceratops": {
     "adult_energy_drain": 2.0,
@@ -228,6 +215,7 @@
     "adult_weight": 8000.0,
     "aggressive": false,
     "aquatic_boost": 0.0,
+    "attack": 1071.43,
     "can_be_juvenile": true,
     "can_walk": true,
     "class": "reptile",
@@ -238,6 +226,7 @@
     "forms_packs": false,
     "growth_rate": 0.35,
     "health_regen": 2.5,
+    "hp": 2142.86,
     "hydration_drain": 2.5,
     "image": "assets/dinosaurs/triceratops.png",
     "initial_spawn_multiplier": 5,
@@ -246,21 +235,19 @@
     "preferred_biomes": [
       "woodlands",
       "plains"
-    ],
-    "attack": 1071.43,
-    "hp": 2142.86,
-    "armor": 0,
-    "armor_penetration": 0
+    ]
   },
   "Tyrannosaurus": {
     "abilities": [
-      "ambush"
+      "ambush",
+      "bone_break"
     ],
     "adult_energy_drain": 4.0,
     "adult_speed": 38,
     "adult_weight": 8000.0,
     "aggressive": true,
     "aquatic_boost": 0.0,
+    "attack": 1428.57,
     "can_be_juvenile": true,
     "can_walk": true,
     "class": "reptile",
@@ -271,6 +258,7 @@
     "forms_packs": false,
     "growth_rate": 0.35,
     "health_regen": 2.5,
+    "hp": 2857.14,
     "hydration_drain": 2.2,
     "image": "assets/dinosaurs/tyrannosaurus.png",
     "initial_spawn_multiplier": 2,
@@ -281,10 +269,6 @@
       "forest",
       "swamp",
       "plains"
-    ],
-    "attack": 1428.57,
-    "hp": 2857.14,
-    "armor": 0,
-    "armor_penetration": 20
+    ]
   }
 }

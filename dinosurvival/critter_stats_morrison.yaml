@@ -4,125 +4,113 @@
     "adult_weight": 1.0,
     "aggressive": false,
     "aquatic_boost": 0.0,
+    "attack": 0.0,
     "avg_spawned_per_turn": 1.0,
     "can_be_juvenile": false,
     "can_walk": true,
     "class": "arthropod",
     "health_regen": 2.5,
+    "hp": 1.0,
     "image": "assets/dinosaurs/centipede.png",
     "maximum_individuals": 20,
     "name": "Centipede",
     "preferred_biomes": [
       "forest"
-    ],
-    "attack": 0.0,
-    "hp": 1.0,
-    "armor": 0,
-    "armor_penetration": 0
+    ]
   },
   "Ceratodus": {
     "adult_speed": 55,
     "adult_weight": 12.0,
     "aggressive": false,
     "aquatic_boost": 0.0,
+    "attack": 0.89,
     "avg_spawned_per_turn": 1.0,
     "can_be_juvenile": false,
     "can_walk": false,
     "class": "fish",
     "health_regen": 2.5,
+    "hp": 1.78,
     "image": "assets/dinosaurs/ceratodus.png",
     "maximum_individuals": 20,
     "name": "Ceratodus",
     "preferred_biomes": [
       "lake"
-    ],
-    "attack": 0.89,
-    "hp": 1.78,
-    "armor": 0,
-    "armor_penetration": 0
+    ]
   },
   "Frog": {
     "adult_speed": 45,
     "adult_weight": 2.5,
     "aggressive": false,
     "aquatic_boost": 0.0,
+    "attack": 0.0,
     "avg_spawned_per_turn": 1.0,
     "can_be_juvenile": false,
     "can_walk": true,
     "class": "amphibian",
     "health_regen": 2.5,
+    "hp": 1.0,
     "image": "assets/dinosaurs/frog.png",
     "maximum_individuals": 20,
     "name": "Frog",
     "preferred_biomes": [
       "swamp"
-    ],
-    "attack": 0.0,
-    "hp": 1.0,
-    "armor": 0,
-    "armor_penetration": 0
+    ]
   },
   "Glyptops": {
     "adult_speed": 45,
     "adult_weight": 5.0,
     "aggressive": false,
     "aquatic_boost": 0.0,
+    "attack": 0.54,
     "avg_spawned_per_turn": 1.0,
     "can_be_juvenile": false,
     "can_walk": true,
     "class": "reptile",
     "health_regen": 2.0,
+    "hp": 1.08,
     "image": "assets/dinosaurs/glyptops.png",
     "maximum_individuals": 20,
     "name": "Glyptops",
     "preferred_biomes": [
       "swamp"
-    ],
-    "attack": 0.54,
-    "hp": 1.08,
-    "armor": 0,
-    "armor_penetration": 0
+    ]
   },
   "Lizard": {
     "adult_speed": 55,
     "adult_weight": 4.0,
     "aggressive": false,
     "aquatic_boost": 0.0,
+    "attack": 0.89,
     "avg_spawned_per_turn": 1.0,
     "can_be_juvenile": false,
     "can_walk": true,
     "class": "reptile",
     "health_regen": 2.5,
+    "hp": 1.78,
     "image": "assets/dinosaurs/lizard.png",
     "maximum_individuals": 20,
     "name": "Lizard",
     "preferred_biomes": [
       "swamp"
-    ],
-    "attack": 0.89,
-    "hp": 1.78,
-    "armor": 0,
-    "armor_penetration": 0
+    ]
   },
   "Scorpion": {
     "adult_speed": 65,
     "adult_weight": 2.0,
     "aggressive": true,
     "aquatic_boost": 0.0,
+    "attack": 0.98,
     "avg_spawned_per_turn": 1.0,
     "can_be_juvenile": false,
     "can_walk": true,
     "class": "arthropod",
     "health_regen": 2.5,
+    "hp": 1.96,
     "image": "assets/dinosaurs/scorpion.png",
     "maximum_individuals": 20,
     "name": "Scorpion",
     "preferred_biomes": [
       "desert"
-    ],
-    "attack": 0.98,
-    "hp": 1.96,
-    "armor": 0,
-    "armor_penetration": 0
+    ]
   }
 }
