@@ -453,6 +453,14 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         tk.Label(win, text=f"Diet: {diet}", font=("Helvetica", 12), anchor="w").pack(
             anchor="w"
         )
+        abilities = ", ".join(info.get("abilities", []))
+        if abilities:
+            tk.Label(
+                win,
+                text=f"Abilities: {abilities}",
+                font=("Helvetica", 12),
+                anchor="w",
+            ).pack(anchor="w")
         interval = info.get("egg_laying_interval")
         if interval is not None:
             tk.Label(
