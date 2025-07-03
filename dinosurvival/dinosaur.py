@@ -10,6 +10,7 @@ class Diet(Enum):
     CONIFERS = "conifers"
     FRUITS = "fruits"
 
+
 @dataclass
 class DinosaurStats:
     name: str
@@ -43,6 +44,7 @@ class DinosaurStats:
     abilities: list[str] = field(default_factory=list)
     ambush_streak: int = 0
     bleeding: int = 0
+    broken_bone: int = 0
 
     def is_exhausted(self) -> bool:
         return self.energy <= 0
@@ -75,5 +77,4 @@ class NPCAnimal:
     ambush_streak: int = 0
     last_action: str = "None"
     bleeding: int = 0
-
-
+    broken_bone: int = 0
