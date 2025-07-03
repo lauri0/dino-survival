@@ -29,12 +29,22 @@ def load_scaled_image(path: str, width: int, height: int, master=None, grayscale
         img = Image.open(path)
         if grayscale:
             img = ImageOps.grayscale(img)
-        scale = width / img.width
         resample = getattr(getattr(Image, "Resampling", Image), "LANCZOS")
-        resized = img.resize((width, int(img.height * scale)), resample)
-        if resized.height > height:
+
+        # Scale so that the image fully covers the target box and then crop
+        # to the exact requested dimensions. This ensures consistent output
+        # size regardless of the original aspect ratio.
+        scale_w = width / img.width
+        scale_h = height / img.height
+        scale = max(scale_w, scale_h)
+        new_size = (int(img.width * scale), int(img.height * scale))
+        resized = img.resize(new_size, resample)
+
+        if resized.width > width or resized.height > height:
+            left = int((resized.width - width) / 2)
             top = int((resized.height - height) / 2)
-            resized = resized.crop((0, top, width, top + height))
+            resized = resized.crop((left, top, left + width, top + height))
+
         return ImageTk.PhotoImage(resized, master=master)
     return tk.PhotoImage(master=master, file=path)
 
