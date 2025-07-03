@@ -5,7 +5,7 @@
     "aggressive": false,
     "aquatic_boost": 0.0,
     "attack": 0.0,
-    "avg_spawned_per_turn": 1.0,
+    "avg_spawned_per_turn": 0.8,
     "can_be_juvenile": false,
     "can_walk": true,
     "class": "arthropod",
@@ -24,18 +24,19 @@
     "adult_weight": 5.0,
     "aggressive": false,
     "aquatic_boost": 0.0,
-    "attack": 0.36,
-    "avg_spawned_per_turn": 0.0,
+    "attack": 1.0,
+    "avg_spawned_per_turn": 0.2,
     "can_be_juvenile": false,
     "can_walk": true,
     "class": "mammal",
     "health_regen": 2.5,
-    "hp": 0.72,
+    "hp": 2.0,
     "image": "assets/dinosaurs/didelphodon.png",
     "maximum_individuals": 0,
     "name": "Didelphodon",
     "preferred_biomes": [
-      "forest"
+      "forest",
+      "highland_forest"
     ]
   }
 }
