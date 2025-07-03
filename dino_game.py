@@ -862,7 +862,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             row = tk.Frame(encounter_list)
             img = tk.Label(row)
             info_frame = tk.Frame(row)
-            name_lbl = tk.Label(info_frame, font=("Helvetica", 12), anchor="w")
+            name_lbl = tk.Label(info_frame, font=("Helvetica", 12), anchor="w", width=30)
             stats1 = tk.Frame(info_frame)
             stats2 = tk.Frame(info_frame)
             name_lbl.pack(anchor="w", fill="x")
