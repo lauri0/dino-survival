@@ -1,35 +1,4 @@
 {
-  "Alcovasaurus": {
-    "adult_energy_drain": 5.0,
-    "adult_speed": 20,
-    "adult_weight": 3500.0,
-    "aggressive": false,
-    "aquatic_boost": 0.0,
-    "can_be_juvenile": true,
-    "can_walk": true,
-    "class": "reptile",
-    "diet": [
-      "ferns",
-      "cycads"
-    ],
-    "egg_laying_interval": 10,
-    "forms_packs": false,
-    "growth_rate": 0.35,
-    "health_regen": 2.0,
-    "hydration_drain": 2.5,
-    "image": "assets/dinosaurs/alcovasaurus.png",
-    "initial_spawn_multiplier": 5,
-    "name": "Alcovasaurus",
-    "num_eggs": 2,
-    "preferred_biomes": [
-      "woodlands",
-      "desert"
-    ],
-    "attack": 500.0,
-    "hp": 1000.0,
-    "armor": 0,
-    "armor_penetration": 0
-  },
   "Allosaurus": {
     "adult_energy_drain": 5.0,
     "adult_speed": 30,
@@ -60,35 +29,6 @@
     ],
     "attack": 500.0,
     "hp": 1000.0,
-    "armor": 0,
-    "armor_penetration": 0
-  },
-  "Amphicotylus": {
-    "adult_energy_drain": 1.5,
-    "adult_speed": 50,
-    "adult_weight": 250.0,
-    "aggressive": true,
-    "aquatic_boost": 0.0,
-    "can_be_juvenile": true,
-    "can_walk": true,
-    "class": "reptile",
-    "diet": [
-      "meat"
-    ],
-    "egg_laying_interval": 10,
-    "forms_packs": false,
-    "growth_rate": 0.35,
-    "health_regen": 2.0,
-    "hydration_drain": 2.5,
-    "image": "assets/dinosaurs/amphicotylus.png",
-    "initial_spawn_multiplier": 5,
-    "name": "Amphicotylus",
-    "num_eggs": 2,
-    "preferred_biomes": [
-      "lake"
-    ],
-    "attack": 50.0,
-    "hp": 100.0,
     "armor": 0,
     "armor_penetration": 0
   },
@@ -273,36 +213,6 @@
     "armor": 0,
     "armor_penetration": 0
   },
-  "Fruitadens": {
-    "adult_energy_drain": 8.0,
-    "adult_speed": 60,
-    "adult_weight": 5.0,
-    "aggressive": false,
-    "aquatic_boost": 0.0,
-    "can_be_juvenile": true,
-    "can_walk": true,
-    "class": "reptile",
-    "diet": [
-      "fruits",
-      "insects"
-    ],
-    "egg_laying_interval": 10,
-    "forms_packs": false,
-    "growth_rate": 0.35,
-    "health_regen": 2.5,
-    "hydration_drain": 2.5,
-    "image": "assets/dinosaurs/fruitadens.png",
-    "initial_spawn_multiplier": 12,
-    "name": "Fruitadens",
-    "num_eggs": 2,
-    "preferred_biomes": [
-      "swamp"
-    ],
-    "attack": 0.45,
-    "hp": 0.9,
-    "armor": 0,
-    "armor_penetration": 0
-  },
   "Gargoyleosaurus": {
     "adult_energy_drain": 5.0,
     "adult_speed": 20,
@@ -329,36 +239,6 @@
     ],
     "attack": 178.57,
     "hp": 357.14,
-    "armor": 40,
-    "armor_penetration": 0
-  },
-  "Mymoorapelta": {
-    "adult_energy_drain": 5.0,
-    "adult_speed": 22,
-    "adult_weight": 500.0,
-    "aggressive": false,
-    "aquatic_boost": 0.0,
-    "can_be_juvenile": true,
-    "can_walk": true,
-    "class": "reptile",
-    "diet": [
-      "ferns"
-    ],
-    "egg_laying_interval": 10,
-    "forms_packs": false,
-    "growth_rate": 0.35,
-    "health_regen": 2.5,
-    "hydration_drain": 2.5,
-    "image": "assets/dinosaurs/mymoorapelta.png",
-    "initial_spawn_multiplier": 6,
-    "name": "Mymoorapelta",
-    "num_eggs": 2,
-    "preferred_biomes": [
-      "plains",
-      "woodlands"
-    ],
-    "attack": 98.21,
-    "hp": 196.42,
     "armor": 40,
     "armor_penetration": 0
   },
