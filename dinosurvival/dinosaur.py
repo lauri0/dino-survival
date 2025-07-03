@@ -78,3 +78,5 @@ class NPCAnimal:
     last_action: str = "None"
     bleeding: int = 0
     broken_bone: int = 0
+    bleed_wait_target: int = -1
+    bleed_wait_turns: int = 0
