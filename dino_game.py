@@ -892,7 +892,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
                 key = "burrow"
                 if key not in encounter_images:
                     path = os.path.join(os.path.dirname(__file__), "assets/other/burrow.png")
-                    encounter_images[key] = load_scaled_image(path, 100, 75)
+                    encounter_images[key] = load_scaled_image(path, 100, 70)
                 bimg = encounter_images.get(key)
                 if bimg:
                     slot["img"].configure(image=bimg)
@@ -945,7 +945,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
                 abs_path = os.path.join(os.path.dirname(__file__), img_path)
                 key = npc.name if npc.alive else f"{npc.name}_dead"
                 if key not in encounter_images:
-                    encounter_images[key] = load_scaled_image(abs_path, 100, 75, grayscale=not npc.alive)
+                    encounter_images[key] = load_scaled_image(abs_path, 100, 70, grayscale=not npc.alive)
                 img = encounter_images.get(key)
             if img:
                 slot["img"].configure(image=img)
