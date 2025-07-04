@@ -73,7 +73,7 @@ MORRISON = Setting(
         "solidified_lava_field": "solidified_lava_field.png",
     },
     height_levels={"low": 0.3, "normal": 0.4, "hilly": 0.2, "mountain": 0.1},
-    humidity_levels={"arid": 0.3, "normal": 0.4, "humid": 0.3},
+    humidity_levels={"arid": 0.35, "normal": 0.4, "humid": 0.25},
     num_burrows=0,
 )
 
