@@ -292,6 +292,8 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         path = os.path.join(icon_dir, f"{name}.png")
         icons[name] = load_scaled_image(path, 20, 20)
 
+    encounter_sort_ascending = True
+
     main = tk.Frame(root)
     main.pack(fill="both", expand=True)
 
@@ -778,9 +780,16 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     encounter_frame.grid(row=1, column=2, rowspan=4, sticky="nsew", padx=10, pady=10)
     encounter_frame.grid_propagate(False)
 
+    def toggle_sort() -> None:
+        nonlocal encounter_sort_ascending
+        encounter_sort_ascending = not encounter_sort_ascending
+        update_encounters()
+
     header = tk.Frame(encounter_frame)
     tk.Label(header, text="Encounters", font=("Helvetica", 14)).pack(side="left")
-    tk.Button(header, text="Help", command=show_encounter_help).pack(side="right")
+    help_btn = tk.Button(header, text="Help", command=show_encounter_help)
+    help_btn.pack(side="right")
+    tk.Button(header, text="Sort", command=toggle_sort).pack(side="right")
     header.pack(fill="x")
 
     encounter_canvas = tk.Canvas(encounter_frame)
@@ -982,7 +991,19 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             child.destroy()
         encounter_rows.clear()
         player_s = game.player_effective_speed() or 1
-        entries = game.current_encounters
+
+        def _entry_weight(e) -> float:
+            if e.npc is not None:
+                return e.npc.weight
+            if e.eggs is not None:
+                return e.eggs.weight
+            return 0.0
+
+        entries = sorted(
+            game.current_encounters,
+            key=_entry_weight,
+            reverse=not encounter_sort_ascending,
+        )
         for entry in entries:
             row = tk.Frame(encounter_list)
             img = tk.Label(row)
