@@ -1,24 +1,4 @@
 {
-  "Centipede": {
-    "adult_speed": 55,
-    "adult_weight": 1.0,
-    "aggressive": false,
-    "aquatic_boost": 0.0,
-    "attack": 0.0,
-    "avg_spawned_per_turn": 1.0,
-    "can_be_juvenile": false,
-    "can_walk": true,
-    "class": "arthropod",
-    "health_regen": 2.5,
-    "hp": 1.0,
-    "image": "assets/dinosaurs/centipede.png",
-    "maximum_individuals": 20,
-    "name": "Centipede",
-    "preferred_biomes": [
-      "forest",
-      "highland_forest"
-    ]
-  },
   "Ceratodus": {
     "adult_speed": 55,
     "adult_weight": 12.0,
@@ -32,7 +12,7 @@
     "health_regen": 2.5,
     "hp": 10.00,
     "image": "assets/dinosaurs/ceratodus.png",
-    "maximum_individuals": 20,
+    "maximum_individuals": 5,
     "name": "Ceratodus",
     "preferred_biomes": [
       "lake"
@@ -51,7 +31,7 @@
     "health_regen": 2.5,
     "hp": 2.5,
     "image": "assets/dinosaurs/frog.png",
-    "maximum_individuals": 20,
+    "maximum_individuals": 10,
     "name": "Frog",
     "preferred_biomes": [
       "swamp"
@@ -70,7 +50,7 @@
     "health_regen": 2.0,
     "hp": 8.00,
     "image": "assets/dinosaurs/glyptops.png",
-    "maximum_individuals": 20,
+    "maximum_individuals": 4,
     "name": "Glyptops",
     "preferred_biomes": [
       "swamp"
@@ -89,7 +69,7 @@
     "health_regen": 2.5,
     "hp": 4.0,
     "image": "assets/dinosaurs/lizard.png",
-    "maximum_individuals": 20,
+    "maximum_individuals": 10,
     "name": "Lizard",
     "preferred_biomes": [
       "swamp"
@@ -108,7 +88,7 @@
     "health_regen": 2.5,
     "hp": 2.0,
     "image": "assets/dinosaurs/scorpion.png",
-    "maximum_individuals": 20,
+    "maximum_individuals": 6,
     "name": "Scorpion",
     "preferred_biomes": [
       "desert"
