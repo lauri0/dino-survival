@@ -881,41 +881,6 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
                 b.config(state="disabled")
             show_final_stats("Victory", "Congratulations! Your lineage lives on!")
 
-    def do_pack_up(juvenile: bool) -> None:
-        result = game.pack_up(juvenile)
-        append_output(result)
-        update_biome()
-        update_stats()
-        update_drink_button()
-        update_lay_button()
-        update_encounters()
-        update_plants()
-        if "Game Over" in result:
-            for b in move_buttons.values():
-                b.config(state="disabled")
-            show_final_stats("Game Over", "You have perished!")
-        if game.won:
-            for b in move_buttons.values():
-                b.config(state="disabled")
-            show_final_stats("Victory", "Congratulations! Your lineage lives on!")
-
-    def do_leave_pack() -> None:
-        result = game.leave_pack()
-        append_output(result)
-        update_biome()
-        update_stats()
-        update_drink_button()
-        update_lay_button()
-        update_encounters()
-        update_plants()
-        if "Game Over" in result:
-            for b in move_buttons.values():
-                b.config(state="disabled")
-            show_final_stats("Game Over", "You have perished!")
-        if game.won:
-            for b in move_buttons.values():
-                b.config(state="disabled")
-            show_final_stats("Victory", "Congratulations! Your lineage lives on!")
 
     def do_collect_eggs() -> None:
         result = game.collect_eggs()

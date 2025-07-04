@@ -149,7 +149,6 @@ def set_stats_for_formation(formation: str) -> None:
 @dataclass
 class EncounterEntry:
     npc: NPCAnimal | None = None
-    in_pack: bool = False
     eggs: EggCluster | None = None
     burrow: Burrow | None = None
 
@@ -302,7 +301,6 @@ class Game:
         self._energy_multiplier = 1.0
         self.current_encounters: list[EncounterEntry] = []
         self.current_plants: list[Plant] = []
-        self.pack: list[bool] = []  # store juvenile status of packmates
         self.last_action: Optional[str] = None
         # Tracking and win state
         self.turn_count = 0
@@ -481,7 +479,7 @@ class Game:
     def _aggressive_attack_check(self) -> Optional[str]:
         player_a = max(self.player_effective_attack(), 0.1)
         for entry in self.current_encounters:
-            if entry.eggs or entry.in_pack or entry.npc is None:
+            if entry.eggs or entry.npc is None:
                 continue
             npc = entry.npc
             if not npc.alive:
@@ -1860,7 +1858,6 @@ class Game:
             return self._finish_turn(msg)
 
         prey_meat = target.weight
-        prey_meat /= max(1, len(self.pack) + 1)
         energy_gain = 1000 * prey_meat / max(self.player.weight, 0.1)
         needed = 100.0 - self.player.energy
         actual_energy_gain = min(energy_gain, needed)
@@ -1916,69 +1913,6 @@ class Game:
         self._reveal_adjacent_mountains()
         return self._finish_turn(msg)
 
-    def pack_up(self, juvenile: bool) -> str:
-        pre = self._start_turn()
-        if pre:
-            return self._finish_turn(pre)
-        self.pack.append(juvenile)
-        # Remove the recruited dinosaur from the cell and capture its ID
-        cell = self.map.animals[self.y][self.x]
-        partner = next((n for n in cell if n.name == self.player.name), None)
-        partner_id = partner.id if partner else 0
-        if partner:
-            self.map.remove_animal(self.x, self.y, npc_id=partner.id)
-        msg = f"A {self.player.name} ({partner_id}) joins your pack."
-        end_msg = self._apply_turn_costs(False)
-        msg += end_msg
-        win = self._check_victory()
-        if win:
-            msg += win
-        self.last_action = "pack"
-        if "Game Over" in end_msg:
-            self.turn_messages.extend(self._update_npcs())
-            self._move_npcs()
-            self.turn_messages.extend(self._spoil_carcasses())
-            self._generate_encounters()
-            self._reveal_adjacent_mountains()
-            return self._finish_turn(msg)
-        self.turn_messages.extend(self._update_npcs())
-        self._move_npcs()
-        attack = self._aggressive_attack_check()
-        if attack:
-            msg += "\n" + attack
-        self.turn_messages.extend(self._spoil_carcasses())
-        self._generate_encounters()
-        self._reveal_adjacent_mountains()
-        return self._finish_turn(msg)
-
-    def leave_pack(self) -> str:
-        pre = self._start_turn()
-        if pre:
-            return self._finish_turn(pre)
-        self.pack.clear()
-        msg = "You leave your pack behind."
-        end_msg = self._apply_turn_costs(False)
-        msg += end_msg
-        win = self._check_victory()
-        if win:
-            msg += win
-        self.last_action = "pack"
-        if "Game Over" in end_msg:
-            self.turn_messages.extend(self._update_npcs())
-            self._move_npcs()
-            self.turn_messages.extend(self._spoil_carcasses())
-            self._generate_encounters()
-            self._reveal_adjacent_mountains()
-            return self._finish_turn(msg)
-        self.turn_messages.extend(self._update_npcs())
-        self._move_npcs()
-        attack = self._aggressive_attack_check()
-        if attack:
-            msg += "\n" + attack
-        self.turn_messages.extend(self._spoil_carcasses())
-        self._generate_encounters()
-        self._reveal_adjacent_mountains()
-        return self._finish_turn(msg)
 
     def mate(self, partner_id: int) -> str:
         pre = self._start_turn()
@@ -2141,9 +2075,9 @@ class Game:
                 for npc in cell:
                     counts[npc.name] = counts.get(npc.name, 0) + 1
                     total += 1
-        # Include the player and pack members
-        counts[self.player.name] = counts.get(self.player.name, 0) + 1 + len(self.pack)
-        total += 1 + len(self.pack)
+        # Include the player
+        counts[self.player.name] = counts.get(self.player.name, 0) + 1
+        total += 1
         return counts, total
 
     def descendant_count(self) -> int:

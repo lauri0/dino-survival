@@ -16,7 +16,6 @@
       "meat"
     ],
     "egg_laying_interval": 10,
-    "forms_packs": true,
     "growth_rate": 0.35,
     "health_regen": 2.5,
     "hp": 3000.0,
@@ -47,7 +46,6 @@
       "conifers"
     ],
     "egg_laying_interval": 10,
-    "forms_packs": false,
     "growth_rate": 0.35,
     "health_regen": 2.5,
     "hp": 12000.0,
@@ -76,7 +74,6 @@
       "cycads"
     ],
     "egg_laying_interval": 10,
-    "forms_packs": false,
     "growth_rate": 0.35,
     "health_regen": 2.5,
     "hp": 6000.0,
@@ -106,7 +103,6 @@
       "ferns"
     ],
     "egg_laying_interval": 10,
-    "forms_packs": false,
     "growth_rate": 0.35,
     "health_regen": 2.5,
     "hp": 350.0,
@@ -135,7 +131,6 @@
       "meat"
     ],
     "egg_laying_interval": 10,
-    "forms_packs": false,
     "growth_rate": 0.35,
     "health_regen": 4.0,
     "hp": 900.0,
@@ -164,7 +159,6 @@
       "cycads"
     ],
     "egg_laying_interval": 10,
-    "forms_packs": false,
     "growth_rate": 0.35,
     "health_regen": 2.5,
     "hp": 8000.0,
@@ -192,7 +186,6 @@
       "fruits"
     ],
     "egg_laying_interval": 8,
-    "forms_packs": false,
     "growth_rate": 0.35,
     "health_regen": 2.5,
     "hp": 40.0,
@@ -225,7 +218,6 @@
       "ferns"
     ],
     "egg_laying_interval": 10,
-    "forms_packs": false,
     "growth_rate": 0.35,
     "health_regen": 2.5,
     "hp": 600.0,
@@ -253,7 +245,6 @@
       "fruits"
     ],
     "egg_laying_interval": 10,
-    "forms_packs": false,
     "growth_rate": 0.35,
     "health_regen": 2.5,
     "hp": 5.0,
@@ -281,7 +272,6 @@
       "meat"
     ],
     "egg_laying_interval": 10,
-    "forms_packs": false,
     "growth_rate": 0.35,
     "health_regen": 2.5,
     "hp": 20.0,
@@ -314,7 +304,6 @@
       "cycads"
     ],
     "egg_laying_interval": 10,
-    "forms_packs": false,
     "growth_rate": 0.35,
     "health_regen": 2.5,
     "hp": 3000.0,
@@ -346,7 +335,6 @@
       "meat"
     ],
     "egg_laying_interval": 10,
-    "forms_packs": false,
     "growth_rate": 0.35,
     "health_regen": 2.5,
     "hp": 2800.0,

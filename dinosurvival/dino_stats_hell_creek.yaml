@@ -16,7 +16,6 @@
       "meat"
     ],
     "egg_laying_interval": 10,
-    "forms_packs": false,
     "growth_rate": 0.35,
     "health_regen": 2.5,
     "hp": 30.0,
@@ -49,7 +48,6 @@
       "ferns"
     ],
     "egg_laying_interval": 18,
-    "forms_packs": false,
     "growth_rate": 0.35,
     "health_regen": 2.5,
     "hp": 6500.0,
@@ -78,7 +76,6 @@
       "cycads"
     ],
     "egg_laying_interval": 16,
-    "forms_packs": false,
     "growth_rate": 0.4,
     "health_regen": 2.5,
     "hp": 3000.0,
@@ -107,7 +104,6 @@
       "fruits"
     ],
     "egg_laying_interval": 9,
-    "forms_packs": false,
     "growth_rate": 0.35,
     "health_regen": 2.5,
     "hp": 40.0,
@@ -136,7 +132,6 @@
       "ferns"
     ],
     "egg_laying_interval": 14,
-    "forms_packs": false,
     "growth_rate": 0.35,
     "health_regen": 2.5,
     "hp": 240.0,
@@ -167,7 +162,6 @@
       "meat"
     ],
     "egg_laying_interval": 12,
-    "forms_packs": false,
     "growth_rate": 0.35,
     "health_regen": 2.5,
     "hp": 25.0,
@@ -196,7 +190,6 @@
       "ferns"
     ],
     "egg_laying_interval": 6,
-    "forms_packs": false,
     "growth_rate": 0.35,
     "health_regen": 2.5,
     "hp": 150.0,
@@ -228,7 +221,6 @@
       "cycads"
     ],
     "egg_laying_interval": 14,
-    "forms_packs": false,
     "growth_rate": 0.35,
     "health_regen": 2.5,
     "hp": 5500.0,
@@ -261,7 +253,6 @@
       "meat"
     ],
     "egg_laying_interval": 20,
-    "forms_packs": false,
     "growth_rate": 0.35,
     "health_regen": 2.5,
     "hp": 8000.0,
