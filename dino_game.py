@@ -269,10 +269,10 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         abs_path = os.path.join(os.path.dirname(__file__), dino_image_path)
         base, ext = os.path.splitext(abs_path)
         player_images["adult"] = load_scaled_image(abs_path, 400, 250)
-        player_images["hatchling"] = load_scaled_image(
-            f"{base}_hatchling{ext}", 400, 250
-        )
-        player_images["juvenile"] = load_scaled_image(f"{base}_juvenile{ext}", 400, 250)
+        hatch_img = load_scaled_image(f"{base}_hatchling{ext}", 400, 250)
+        player_images["hatchling"] = hatch_img
+        # Juvenile stage shares the hatchling image
+        player_images["juvenile"] = hatch_img
 
     # Load icon images used throughout the UI
     icon_dir = os.path.join(os.path.dirname(__file__), "assets", "icons")
@@ -328,7 +328,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
 
     dino_image_label = tk.Label(dino_frame)
     initial_stage = game.player_growth_stage().lower()
-    key = initial_stage if initial_stage in ("hatchling", "juvenile") else "adult"
+    key = "hatchling" if initial_stage in ("hatchling", "juvenile") else "adult"
     img = player_images.get(key)
     if img:
         dino_image_label.configure(image=img)
@@ -1064,12 +1064,29 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             img = None
             if img_path:
                 abs_path = os.path.join(os.path.dirname(__file__), img_path)
-                key = npc.name if npc.alive else f"{npc.name}_dead"
-                if key not in encounter_images:
-                    encounter_images[key] = load_scaled_image(
-                        abs_path, 100, 70, grayscale=not npc.alive
-                    )
-                img = encounter_images.get(key)
+                adult_weight = stats.get("adult_weight", 0.0)
+                show_hatchling = adult_weight > 0 and npc.weight <= adult_weight / 3
+                if show_hatchling:
+                    base, ext = os.path.splitext(abs_path)
+                    hatch_path = f"{base}_hatchling{ext}"
+                    if os.path.exists(hatch_path):
+                        key = (
+                            f"{npc.name}_hatchling"
+                            if npc.alive
+                            else f"{npc.name}_hatchling_dead"
+                        )
+                        if key not in encounter_images:
+                            encounter_images[key] = load_scaled_image(
+                                hatch_path, 100, 70, grayscale=not npc.alive
+                            )
+                        img = encounter_images.get(key)
+                if img is None:
+                    key = npc.name if npc.alive else f"{npc.name}_dead"
+                    if key not in encounter_images:
+                        encounter_images[key] = load_scaled_image(
+                            abs_path, 100, 70, grayscale=not npc.alive
+                        )
+                    img = encounter_images.get(key)
             if img:
                 slot["img"].configure(image=img)
                 slot["img"].image = img
@@ -1339,9 +1356,7 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
             )
         else:
             name_label.configure(image="", text=base_name)
-        img_key = (
-            stage.lower() if stage.lower() in ("hatchling", "juvenile") else "adult"
-        )
+        img_key = "hatchling" if stage.lower() in ("hatchling", "juvenile") else "adult"
         img = player_images.get(img_key)
         if img:
             dino_image_label.configure(image=img)
