@@ -37,7 +37,6 @@ class DinosaurStats:
     hydration: float = 100.0
     hydration_drain: float = 0.0
     aquatic_boost: float = 0.0
-    forms_packs: bool = False
     mated: bool = False
     turns_until_lay_eggs: int = 0
     diet: list[Diet] = field(default_factory=list)
