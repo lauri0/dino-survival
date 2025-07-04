@@ -5,10 +5,11 @@
     "image": "assets/plants/ferns.png",
     "weight": 100.0,
     "growth_chance": {
-      "plains": 0.02,
-      "forest": 0.03,
-      "swamp": 0.02,
-      "woodlands": 0.02,
+      "plains": 0.01,
+      "forest": 0.02,
+      "highland_forest": 0.01,
+      "swamp": 0.01,
+      "woodlands": 0.01,
       "desert": 0.005,
       "lake": 0.00,
       "mountain": 0.00
@@ -21,7 +22,8 @@
     "weight": 10.0,
     "growth_chance": {
       "plains": 0.005,
-      "forest": 0.04,
+      "forest": 0.02,
+      "highland_forest": 0.01,
       "swamp": 0.01,
       "woodlands": 0.01,
       "desert": 0.002,
@@ -37,6 +39,7 @@
     "growth_chance": {
       "plains": 0.02,
       "forest": 0.01,
+      "highland_forest": 0.02,
       "swamp": 0.01,
       "woodlands": 0.02,
       "desert": 0.005,
@@ -52,6 +55,7 @@
     "growth_chance": {
       "plains": 0.005,
       "forest": 0.01,
+      "highland_forest": 0.01,
       "swamp": 0.01,
       "woodlands": 0.02,
       "desert": 0.001,
