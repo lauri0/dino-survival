@@ -7,6 +7,7 @@
     "growth_chance": {
       "plains": 0.02,
       "forest": 0.03,
+      "highland_forest": 0.02,
       "swamp": 0.02,
       "woodlands": 0.02,
       "desert": 0.005,
@@ -21,7 +22,8 @@
     "weight": 5.0,
     "growth_chance": {
       "plains": 0.005,
-      "forest": 0.04,
+      "forest": 0.03,
+      "highland_forest": 0.02,
       "swamp": 0.01,
       "woodlands": 0.01,
       "desert": 0.002,
@@ -37,6 +39,7 @@
     "growth_chance": {
       "plains": 0.02,
       "forest": 0.01,
+      "highland_forest": 0.015,
       "swamp": 0.01,
       "woodlands": 0.02,
       "desert": 0.005,
