@@ -8,7 +8,7 @@
     "adult_weight": 3000.0,
     "aggressive": true,
     "aquatic_boost": 0.0,
-    "attack": 500.0,
+    "attack": 1000.0,
     "can_be_juvenile": true,
     "can_walk": true,
     "class": "reptile",
@@ -19,7 +19,7 @@
     "forms_packs": true,
     "growth_rate": 0.35,
     "health_regen": 2.5,
-    "hp": 1000.0,
+    "hp": 3000.0,
     "hydration_drain": 2.5,
     "image": "assets/dinosaurs/allosaurus.png",
     "initial_spawn_multiplier": 2,
@@ -27,7 +27,10 @@
     "num_eggs": 2,
     "preferred_biomes": [
       "plains",
-      "woodlands"
+      "woodlands",
+      "highland_forest",
+      "swamp",
+      "desert"
     ]
   },
   "Brachiosaurus": {
@@ -36,7 +39,7 @@
     "adult_weight": 45000.0,
     "aggressive": false,
     "aquatic_boost": 0.0,
-    "attack": 2142.86,
+    "attack": 2000.0,
     "can_be_juvenile": true,
     "can_walk": true,
     "class": "reptile",
@@ -47,7 +50,7 @@
     "forms_packs": false,
     "growth_rate": 0.35,
     "health_regen": 2.5,
-    "hp": 4285.72,
+    "hp": 12000.0,
     "hydration_drain": 2.5,
     "image": "assets/dinosaurs/brachiosaurus.png",
     "initial_spawn_multiplier": 3,
@@ -64,7 +67,7 @@
     "adult_weight": 15000.0,
     "aggressive": false,
     "aquatic_boost": 0.0,
-    "attack": 964.29,
+    "attack": 1000.0,
     "can_be_juvenile": true,
     "can_walk": true,
     "class": "reptile",
@@ -76,7 +79,7 @@
     "forms_packs": false,
     "growth_rate": 0.35,
     "health_regen": 2.5,
-    "hp": 1928.58,
+    "hp": 6000.0,
     "hydration_drain": 2.5,
     "image": "assets/dinosaurs/camarasaurus.png",
     "initial_spawn_multiplier": 3,
@@ -84,7 +87,9 @@
     "num_eggs": 2,
     "preferred_biomes": [
       "desert",
-      "woodlands"
+      "plains",
+      "woodlands",
+      "highland_woodlands"
     ]
   },
   "Camptosaurus": {
@@ -93,7 +98,7 @@
     "adult_weight": 700.0,
     "aggressive": false,
     "aquatic_boost": 0.0,
-    "attack": 62.5,
+    "attack": 175.0,
     "can_be_juvenile": true,
     "can_walk": true,
     "class": "reptile",
@@ -104,14 +109,16 @@
     "forms_packs": false,
     "growth_rate": 0.35,
     "health_regen": 2.5,
-    "hp": 125.0,
+    "hp": 350.0,
     "hydration_drain": 2.5,
     "image": "assets/dinosaurs/camptosaurus.png",
     "initial_spawn_multiplier": 6,
     "name": "Camptosaurus",
     "num_eggs": 2,
     "preferred_biomes": [
-      "woodlands"
+      "woodlands",
+      "highland_forest",
+      "swamp"
     ]
   },
   "Ceratosaurus": {
@@ -120,7 +127,7 @@
     "adult_weight": 900.0,
     "aggressive": true,
     "aquatic_boost": 40.0,
-    "attack": 178.57,
+    "attack": 600.0,
     "can_be_juvenile": true,
     "can_walk": true,
     "class": "reptile",
@@ -130,8 +137,8 @@
     "egg_laying_interval": 10,
     "forms_packs": false,
     "growth_rate": 0.35,
-    "health_regen": 2.5,
-    "hp": 357.14,
+    "health_regen": 4.0,
+    "hp": 900.0,
     "hydration_drain": 2.5,
     "image": "assets/dinosaurs/ceratosaurus.png",
     "initial_spawn_multiplier": 3,
@@ -148,7 +155,7 @@
     "adult_weight": 25000.0,
     "aggressive": false,
     "aquatic_boost": 0.0,
-    "attack": 1428.57,
+    "attack": 1400.0,
     "can_be_juvenile": true,
     "can_walk": true,
     "class": "reptile",
@@ -160,7 +167,7 @@
     "forms_packs": false,
     "growth_rate": 0.35,
     "health_regen": 2.5,
-    "hp": 2857.14,
+    "hp": 8000.0,
     "hydration_drain": 2.5,
     "image": "assets/dinosaurs/diplodocus.png",
     "initial_spawn_multiplier": 3,
@@ -176,7 +183,7 @@
     "adult_weight": 80.0,
     "aggressive": false,
     "aquatic_boost": 0.0,
-    "attack": 8.93,
+    "attack": 20.0,
     "can_be_juvenile": true,
     "can_walk": true,
     "class": "reptile",
@@ -188,7 +195,7 @@
     "forms_packs": false,
     "growth_rate": 0.35,
     "health_regen": 2.5,
-    "hp": 17.86,
+    "hp": 40.0,
     "hydration_drain": 2.5,
     "image": "assets/dinosaurs/dryosaurus.png",
     "initial_spawn_multiplier": 10,
@@ -196,7 +203,9 @@
     "num_eggs": 1,
     "preferred_biomes": [
       "forest",
-      "woodlands"
+      "woodlands",
+      "highland_forest",
+      "swamp"
     ]
   },
   "Gargoyleosaurus": {
@@ -208,7 +217,7 @@
     "adult_weight": 750.0,
     "aggressive": false,
     "aquatic_boost": 0.0,
-    "attack": 178.57,
+    "attack": 300.0,
     "can_be_juvenile": true,
     "can_walk": true,
     "class": "reptile",
@@ -219,14 +228,15 @@
     "forms_packs": false,
     "growth_rate": 0.35,
     "health_regen": 2.5,
-    "hp": 357.14,
+    "hp": 600.0,
     "hydration_drain": 2.5,
     "image": "assets/dinosaurs/gargoyleosaurus.png",
     "initial_spawn_multiplier": 5,
     "name": "Gargoyleosaurus",
     "num_eggs": 2,
     "preferred_biomes": [
-      "forest"
+      "highland_forest",
+      "desert"
     ]
   },
   "Nanosaurus": {
@@ -235,7 +245,7 @@
     "adult_weight": 10.0,
     "aggressive": false,
     "aquatic_boost": 0.0,
-    "attack": 1.07,
+    "attack": 2.5,
     "can_be_juvenile": true,
     "can_walk": true,
     "class": "reptile",
@@ -246,14 +256,15 @@
     "forms_packs": false,
     "growth_rate": 0.35,
     "health_regen": 2.5,
-    "hp": 2.14,
+    "hp": 5.0,
     "hydration_drain": 2.5,
     "image": "assets/dinosaurs/nanosaurus.png",
     "initial_spawn_multiplier": 10,
     "name": "Nanosaurus",
     "num_eggs": 2,
     "preferred_biomes": [
-      "forest"
+      "forest",
+      "highland_forest"
     ]
   },
   "Ornitholestes": {
@@ -262,7 +273,7 @@
     "adult_weight": 20.0,
     "aggressive": true,
     "aquatic_boost": 0.0,
-    "attack": 4.46,
+    "attack": 10.0,
     "can_be_juvenile": true,
     "can_walk": true,
     "class": "reptile",
@@ -273,14 +284,15 @@
     "forms_packs": false,
     "growth_rate": 0.35,
     "health_regen": 2.5,
-    "hp": 8.92,
+    "hp": 20.0,
     "hydration_drain": 2.5,
     "image": "assets/dinosaurs/ornitholestes.png",
     "initial_spawn_multiplier": 7,
     "name": "Ornitholestes",
     "num_eggs": 2,
     "preferred_biomes": [
-      "forest"
+      "forest",
+      "highland_forest"
     ]
   },
   "Stegosaurus": {
@@ -293,7 +305,7 @@
     "adult_weight": 4000.0,
     "aggressive": false,
     "aquatic_boost": 0.0,
-    "attack": 464.29,
+    "attack": 850.0,
     "can_be_juvenile": true,
     "can_walk": true,
     "class": "reptile",
@@ -305,7 +317,7 @@
     "forms_packs": false,
     "growth_rate": 0.35,
     "health_regen": 2.5,
-    "hp": 928.58,
+    "hp": 3000.0,
     "hydration_drain": 2.5,
     "image": "assets/dinosaurs/stegosaurus.png",
     "initial_spawn_multiplier": 5,
@@ -323,10 +335,10 @@
     ],
     "adult_energy_drain": 4.0,
     "adult_speed": 35,
-    "adult_weight": 2400.0,
+    "adult_weight": 2800.0,
     "aggressive": true,
     "aquatic_boost": 0.0,
-    "attack": 464.29,
+    "attack": 1400.0,
     "can_be_juvenile": true,
     "can_walk": true,
     "class": "reptile",
@@ -337,7 +349,7 @@
     "forms_packs": false,
     "growth_rate": 0.35,
     "health_regen": 2.5,
-    "hp": 928.58,
+    "hp": 2800.0,
     "hydration_drain": 2.2,
     "image": "assets/dinosaurs/torvosaurus.png",
     "initial_spawn_multiplier": 2,
@@ -345,7 +357,7 @@
     "num_eggs": 2,
     "preferred_biomes": [
       "woodlands",
-      "forest"
+      "highland_forest"
     ]
   }
 }
