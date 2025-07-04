@@ -1779,7 +1779,12 @@ class Game:
                 stats,
             )
             target_died = self._apply_damage(dmg_to_target, target, stats)
-            if dmg_to_target > 0 and "bleed" in self.player.abilities and target.hp > 0:
+            if (
+                dmg_to_target > 0
+                and "bleed" in self.player.abilities
+                and target.hp > 0
+                and target.alive
+            ):
                 bleed_turns = 2 if (
                     "light_armor" in target.abilities
                     or "heavy_armor" in target.abilities
@@ -1806,7 +1811,12 @@ class Game:
                 stats,
             )
             target_died = self._apply_damage(dmg_to_target, target, stats)
-            if dmg_to_target > 0 and "bleed" in self.player.abilities and target.hp > 0:
+            if (
+                dmg_to_target > 0
+                and "bleed" in self.player.abilities
+                and target.hp > 0
+                and target.alive
+            ):
                 bleed_turns = 2 if (
                     "light_armor" in target.abilities
                     or "heavy_armor" in target.abilities
