@@ -8,7 +8,7 @@ A simple text-based dinosaur survival game inspired by the BBC "Big Al" game. Th
 - NPC animals are persistently simulated and move around the map in search of food. Carnivores hunt other animals while herbivores eat the various plants which grow in the game world.
 - Noise based random terrain generation including forests, plains, swamps, woodlands, deserts and lakes that affect the type of prey encountered.
 - Occasional natural disasters like volcanic eruptions and floods. Stay away from the lava while it is hot!
-![dino_survival](https://github.com/user-attachments/assets/e18ef895-6505-4440-9653-15dc9b8826be)
+![dino_survival2](https://github.com/user-attachments/assets/2422b694-39cd-4f3d-a854-7f3e4c95fca5)
 
 ## Requirements
 
