@@ -45,6 +45,9 @@ HATCHLING_ENERGY_DRAIN_DIVISOR = _config.getint(
     "DEFAULT", "hatchling_energy_drain_divisor", fallback=2
 )
 MIN_HATCHING_WEIGHT = _config.getfloat("DEFAULT", "min_hatching_weight", fallback=2.0)
+DESCENDANTS_TO_WIN = _config.getint(
+    "DEFAULT", "descendants_to_win", fallback=2
+)
 
 
 # Armor mechanics
@@ -76,10 +79,6 @@ def damage_after_armor(
     """Apply armor reduction to ``damage`` and return reduced value."""
     eff = effective_armor(target_stats, attacker_stats)
     return damage * max(0.0, 1.0 - eff / 100.0)
-
-
-# Number of living descendants required to win the game
-DESCENDANTS_TO_WIN = 2
 
 
 def _load_stats(formation: str) -> tuple[dict, dict[str, PlantStats], dict]:
