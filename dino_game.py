@@ -1233,28 +1233,28 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
 
     def update_map() -> None:
         color_map = {
-            "forest": "green",
+            "forest": "darkgreen",
             "forest_flooded": "cadetblue",
-            "plains": "yellowgreen",
+            "plains": "greenyellow",
             "plains_flooded": "cadetblue",
             "swamp": "olivedrab",
             "swamp_flooded": "cadetblue",
-            "woodlands": "palegreen",
+            "woodlands": "limegreen",
             "woodlands_flooded": "cadetblue",
             "desert": "yellow",
             "desert_flooded": "cadetblue",
-            "toxic_badlands": "magenta",
-            "highland_forest": "darkgreen",
+            "toxic_badlands": "olive",
+            "highland_forest": "seagreen",
             "lake": "blue",
-            "mountain": "darkgray",
+            "mountain": "tan",
             "volcano": "black",
             "volcano_erupting": "black",
             "lava": "red",
             "solidified_lava_field": "dimgray",
             "forest_fire": "orange",
             "highland_forest_fire": "orange",
-            "forest_burnt": "darkseagreen",
-            "highland_forest_burnt": "darkseagreen",
+            "forest_burnt": "darkolivegreen",
+            "highland_forest_burnt": "darkolivegreen",
         }
         for y, r in enumerate(map_tiles):
             for x, canvas in enumerate(r):
