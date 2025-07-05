@@ -46,7 +46,7 @@ HATCHLING_ENERGY_DRAIN_DIVISOR = _config.getint(
 )
 MIN_HATCHING_WEIGHT = _config.getfloat("DEFAULT", "min_hatching_weight", fallback=2.0)
 DESCENDANTS_TO_WIN = _config.getint(
-    "DEFAULT", "descendants_to_win", fallback=2
+    "DEFAULT", "descendants_to_win", fallback=5
 )
 
 
