@@ -1,9 +1,9 @@
 import random
 import json
 import os
-import configparser
 from typing import Optional
 from dataclasses import dataclass
+from .constants import Constants, DEFAULT_CONSTANTS
 
 
 def calculate_catch_chance(rel_speed: float) -> float:
@@ -28,26 +28,14 @@ from .map import Map, EggCluster, Burrow
 from .settings import Setting
 from .logging_utils import append_event_log
 
-_config = configparser.ConfigParser()
-_config.read(os.path.join(os.path.dirname(__file__), "constants.ini"))
-
 # Constants used throughout the game
-WALKING_ENERGY_DRAIN_MULTIPLIER = _config.getfloat(
-    "DEFAULT", "walking_energy_drain_multiplier", fallback=1.0
-)
-HATCHLING_WEIGHT_DIVISOR = _config.getint(
-    "DEFAULT", "hatchling_weight_divisor", fallback=1000
-)
-HATCHLING_SPEED_MULTIPLIER = _config.getint(
-    "DEFAULT", "hatchling_speed_multiplier", fallback=3
-)
-HATCHLING_ENERGY_DRAIN_DIVISOR = _config.getint(
-    "DEFAULT", "hatchling_energy_drain_divisor", fallback=2
-)
-MIN_HATCHING_WEIGHT = _config.getfloat("DEFAULT", "min_hatching_weight", fallback=2.0)
-DESCENDANTS_TO_WIN = _config.getint(
-    "DEFAULT", "descendants_to_win", fallback=5
-)
+CONSTANTS = DEFAULT_CONSTANTS
+WALKING_ENERGY_DRAIN_MULTIPLIER = CONSTANTS.walking_energy_drain_multiplier
+HATCHLING_WEIGHT_DIVISOR = CONSTANTS.hatchling_weight_divisor
+HATCHLING_SPEED_MULTIPLIER = CONSTANTS.hatchling_speed_multiplier
+HATCHLING_ENERGY_DRAIN_DIVISOR = CONSTANTS.hatchling_energy_drain_divisor
+MIN_HATCHING_WEIGHT = CONSTANTS.min_hatching_weight
+DESCENDANTS_TO_WIN = CONSTANTS.descendants_to_win
 
 
 # Armor mechanics
@@ -229,8 +217,14 @@ set_stats_for_formation("Morrison")
 
 class Game:
     def __init__(
-        self, setting: Setting, dinosaur_name: str, width: int = 18, height: int = 10
+        self,
+        setting: Setting,
+        dinosaur_name: str,
+        width: int = 18,
+        height: int = 10,
+        constants: Constants = DEFAULT_CONSTANTS,
     ):
+        self.constants = constants
         set_stats_for_formation(setting.formation)
         self.setting = setting
         dstats = setting.playable_dinos[dinosaur_name]
@@ -267,6 +261,7 @@ class Game:
             setting.terrains,
             setting.height_levels,
             setting.humidity_levels,
+            constants=self.constants,
         )
         self.map.populate_burrows(setting.num_burrows)
         self.mammal_species: list[str] = [
