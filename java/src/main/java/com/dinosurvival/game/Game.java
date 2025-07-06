@@ -47,8 +47,16 @@ public class Game {
      * world without depending on the Python code.
      */
     public void start() {
+        start("Morrison", null);
+    }
+
+    /**
+     * Start a new game using the given formation and player dinosaur name.
+     * If {@code dinoName} is null the first available dinosaur is used.
+     */
+    public void start(String formation, String dinoName) {
         try {
-            StatsLoader.load(Path.of("dinosurvival"), "Morrison");
+            StatsLoader.load(Path.of("dinosurvival"), formation);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -56,20 +64,16 @@ public class Game {
         map = new Map(18, 10);
         map.populateBurrows(5);
 
-        // pick an arbitrary playable dinosaur
+        // choose player dinosaur
         if (!StatsLoader.getDinoStats().isEmpty()) {
-            player = cloneStats(StatsLoader.getDinoStats().values().iterator().next());
-            player.setWeight(player.getHatchlingWeight());
-            double pct = player.getAdultWeight() > 0
-                    ? player.getWeight() / player.getAdultWeight() : 1.0;
-            pct = Math.max(0.0, Math.min(1.0, pct));
-            player.setAttack(player.getAdultAttack() * pct);
-            player.setMaxHp(player.getAdultHp() * pct);
-            player.setHp(player.getMaxHp());
-            player.setSpeed(statFromWeight(player.getWeight(),
-                    player.getAdultWeight(),
-                    player.getHatchlingSpeed(),
-                    player.getAdultSpeed()));
+            DinosaurStats base = null;
+            if (dinoName != null) {
+                base = StatsLoader.getDinoStats().get(dinoName);
+            }
+            if (base == null) {
+                base = StatsLoader.getDinoStats().values().iterator().next();
+            }
+            initialisePlayer(base);
         } else {
             player = new DinosaurStats();
         }
@@ -109,6 +113,25 @@ public class Game {
         dst.setDiet(new ArrayList<>(src.getDiet()));
         dst.setAbilities(new ArrayList<>(src.getAbilities()));
         return dst;
+    }
+
+    /**
+     * Initialise the player state using the provided base statistics.
+     */
+    private void initialisePlayer(DinosaurStats base) {
+        player = cloneStats(base);
+        player.setWeight(player.getHatchlingWeight());
+        double pct = player.getAdultWeight() > 0
+                ? player.getWeight() / player.getAdultWeight() : 1.0;
+        pct = Math.max(0.0, Math.min(1.0, pct));
+        player.setAttack(player.getAdultAttack() * pct);
+        player.setMaxHp(player.getAdultHp() * pct);
+        player.setHp(player.getMaxHp());
+        player.setSpeed(statFromWeight(
+                player.getWeight(),
+                player.getAdultWeight(),
+                player.getHatchlingSpeed(),
+                player.getAdultSpeed()));
     }
 
     /** Linear interpolation between hatchling and adult values based on weight. */
