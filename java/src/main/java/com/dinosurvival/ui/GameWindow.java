@@ -2,6 +2,9 @@ package com.dinosurvival.ui;
 
 import com.dinosurvival.game.Game;
 import com.dinosurvival.game.Terrain;
+import com.dinosurvival.model.Plant;
+import com.dinosurvival.model.PlantStats;
+import com.dinosurvival.util.StatsLoader;
 import javax.swing.*;
 import java.awt.*;
 import java.util.HashMap;
@@ -16,6 +19,17 @@ public class GameWindow extends JFrame {
     private final Game game;
     private JLabel[][] mapCells;
     private final Map<String, ImageIcon> biomeImages = new HashMap<>();
+    private final Map<String, ImageIcon> plantImages = new HashMap<>();
+    private final JPanel plantList = new JPanel();
+
+    private final JButton northButton = new JButton("North");
+    private final JButton southButton = new JButton("South");
+    private final JButton eastButton = new JButton("East");
+    private final JButton westButton = new JButton("West");
+    private final JButton stayButton = new JButton("Stay");
+    private final JButton drinkButton = new JButton("Drink");
+    private final JButton threatenButton = new JButton("Threaten");
+    private final JButton layButton = new JButton("Lay Eggs");
 
     public GameWindow(Game game) {
         super("Dino Survival");
@@ -81,26 +95,19 @@ public class GameWindow extends JFrame {
         // Movement buttons and plant list (row 1, column 1)
         JPanel btnFrame = new JPanel(new BorderLayout());
         btnFrame.setPreferredSize(new Dimension(200, 200));
-        JPanel btns = new JPanel(new GridLayout(4, 2, 5, 5));
-        JButton north = new JButton("North");
-        JButton south = new JButton("South");
-        JButton east = new JButton("East");
-        JButton west = new JButton("West");
-        JButton stay = new JButton("Stay");
-        JButton drink = new JButton("Drink");
-        JButton threaten = new JButton("Threaten");
-        JButton lay = new JButton("Lay Eggs");
-        btns.add(north);
-        btns.add(south);
-        btns.add(east);
-        btns.add(west);
-        btns.add(stay);
-        btns.add(drink);
-        btns.add(threaten);
-        btns.add(lay);
+        JPanel btns = new JPanel(new GridLayout(3, 3, 5, 5));
+        btns.add(layButton);
+        btns.add(northButton);
+        btns.add(drinkButton);
+        btns.add(westButton);
+        btns.add(stayButton);
+        btns.add(eastButton);
+        btns.add(new JLabel());
+        btns.add(southButton);
+        btns.add(threatenButton);
         btnFrame.add(btns, BorderLayout.NORTH);
-        JPanel plantList = new JPanel();
-        btnFrame.add(plantList, BorderLayout.CENTER);
+        plantList.setLayout(new BoxLayout(plantList, BoxLayout.Y_AXIS));
+        btnFrame.add(new JScrollPane(plantList), BorderLayout.CENTER);
         c.gridx = 1;
         c.gridy = 1;
         c.weightx = 0;
@@ -163,14 +170,14 @@ public class GameWindow extends JFrame {
         c.gridwidth = 1;
 
         // Wire button actions
-        north.addActionListener(e -> doAction(() -> game.moveNorth(), "Moved north"));
-        south.addActionListener(e -> doAction(() -> game.moveSouth(), "Moved south"));
-        east.addActionListener(e -> doAction(() -> game.moveEast(), "Moved east"));
-        west.addActionListener(e -> doAction(() -> game.moveWest(), "Moved west"));
-        stay.addActionListener(e -> doAction(() -> game.rest(), "Stayed"));
-        drink.addActionListener(e -> doAction(() -> game.drink(), "Drink"));
-        threaten.addActionListener(e -> doAction(() -> game.threaten(), "Threaten"));
-        lay.addActionListener(e -> doAction(() -> game.layEggs(), "Lay eggs"));
+        northButton.addActionListener(e -> doAction(() -> game.moveNorth(), "Moved north"));
+        southButton.addActionListener(e -> doAction(() -> game.moveSouth(), "Moved south"));
+        eastButton.addActionListener(e -> doAction(() -> game.moveEast(), "Moved east"));
+        westButton.addActionListener(e -> doAction(() -> game.moveWest(), "Moved west"));
+        stayButton.addActionListener(e -> doAction(() -> game.rest(), "Stayed"));
+        drinkButton.addActionListener(e -> doAction(() -> game.drink(), "Drink"));
+        threatenButton.addActionListener(e -> doAction(() -> game.threaten(), "Threaten"));
+        layButton.addActionListener(e -> doAction(() -> game.layEggs(), "Lay eggs"));
 
         buildMap();
         refreshAll();
@@ -224,6 +231,8 @@ public class GameWindow extends JFrame {
         refreshMap();
         updateBiomeImage();
         updateDinoImage();
+        updateActionButtons();
+        updatePlantList();
     }
 
     private void refreshMap() {
@@ -263,5 +272,45 @@ public class GameWindow extends JFrame {
             dinoImageLabel.setIcon(new ImageIcon(url));
         }
         dinoImageLabel.setText(dName);
+    }
+
+    private void updateActionButtons() {
+        Terrain t = game.getMap().terrainAt(game.getPlayerX(), game.getPlayerY());
+        drinkButton.setEnabled(t == Terrain.LAKE);
+        layButton.setEnabled(game.playerCanLayEggs());
+    }
+
+    private void updatePlantList() {
+        plantList.removeAll();
+        for (Plant p : game.getCurrentPlants()) {
+            JPanel row = new JPanel();
+            row.setLayout(new FlowLayout(FlowLayout.LEFT));
+            JLabel img = new JLabel();
+            PlantStats stats = StatsLoader.getPlantStats().get(p.getName());
+            if (stats != null) {
+                ImageIcon icon = plantImages.get(p.getName());
+                if (icon == null) {
+                    String path = stats.getImage();
+                    if (path != null && !path.isEmpty()) {
+                        java.net.URL u = getClass().getResource("/" + path);
+                        if (u != null) {
+                            icon = new ImageIcon(u);
+                            plantImages.put(p.getName(), icon);
+                        }
+                    }
+                }
+                if (icon != null) {
+                    img.setIcon(icon);
+                }
+            }
+            JLabel name = new JLabel(p.getName());
+            JLabel weight = new JLabel(String.format("W:%.1fkg", p.getWeight()));
+            row.add(img);
+            row.add(name);
+            row.add(weight);
+            plantList.add(row);
+        }
+        plantList.revalidate();
+        plantList.repaint();
     }
 }
