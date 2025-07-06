@@ -34,6 +34,8 @@ public class Game {
     private List<EncounterEntry> currentEncounters = new ArrayList<>();
     private List<Plant> currentPlants = new ArrayList<>();
     private String lastAction = "";
+    private final java.util.Map<String, List<Integer>> populationHistory = new java.util.HashMap<>();
+    private final List<Integer> turnHistory = new ArrayList<>();
 
     /** Number of descendants required to win the game. */
     public static final int DESCENDANTS_TO_WIN = 5;
@@ -78,6 +80,14 @@ public class Game {
         weatherTurns = 0;
         _populateAnimals();
         _spawnCritters(true);
+        populationHistory.clear();
+        for (String name : StatsLoader.getDinoStats().keySet()) {
+            populationHistory.put(name, new ArrayList<>());
+        }
+        for (String name : StatsLoader.getCritterStats().keySet()) {
+            populationHistory.putIfAbsent(name, new ArrayList<>());
+        }
+        _recordPopulation();
     }
 
     private DinosaurStats cloneStats(DinosaurStats src) {
@@ -654,6 +664,7 @@ public class Game {
 
     private void _startTurn() {
         turn++;
+        _recordPopulation();
         if (weatherTurns >= 10) {
             weather = chooseWeather();
             weatherTurns = 0;
@@ -699,6 +710,7 @@ public class Game {
         _generateEncounters();
         _aggressiveAttackCheck();
         _applyTurnCosts(true, 1.0);
+        _checkVictory();
         lastAction = "move";
     }
 
@@ -708,6 +720,7 @@ public class Game {
         _generateEncounters();
         _aggressiveAttackCheck();
         _applyTurnCosts(false, 1.0);
+        _checkVictory();
         lastAction = "stay";
     }
 
@@ -720,6 +733,7 @@ public class Game {
         _generateEncounters();
         _aggressiveAttackCheck();
         _applyTurnCosts(false, 1.0);
+        _checkVictory();
         lastAction = "drink";
     }
 
@@ -798,6 +812,7 @@ public class Game {
         _generateEncounters();
         _aggressiveAttackCheck();
         _applyTurnCosts(false, 1.0);
+        _checkVictory();
         lastAction = "hunt";
     }
 
@@ -824,6 +839,7 @@ public class Game {
         _generateEncounters();
         _aggressiveAttackCheck();
         _applyTurnCosts(false, 1.0);
+        _checkVictory();
         lastAction = "eggs";
     }
 
@@ -842,6 +858,7 @@ public class Game {
         _generateEncounters();
         _aggressiveAttackCheck();
         _applyTurnCosts(false, 1.0);
+        _checkVictory();
         lastAction = "dig";
     }
 
@@ -863,6 +880,7 @@ public class Game {
         _generateEncounters();
         _aggressiveAttackCheck();
         _applyTurnCosts(false, 1.0);
+        _checkVictory();
         lastAction = "lay_eggs";
     }
 
@@ -881,6 +899,7 @@ public class Game {
         _generateEncounters();
         _aggressiveAttackCheck();
         _applyTurnCosts(false, 1.0);
+        _checkVictory();
         lastAction = "mate";
     }
 
@@ -924,6 +943,7 @@ public class Game {
         _generateEncounters();
         _aggressiveAttackCheck();
         _applyTurnCosts(false, 2.0);
+        _checkVictory();
         lastAction = "threaten";
     }
 
@@ -1285,6 +1305,50 @@ public class Game {
         double pctHunter = totalHunter / Math.max(hunterHp, 0.1);
 
         return pctHunter < pctTarget;
+    }
+
+    private void _checkVictory() {
+        if (!won && descendantCount() >= DESCENDANTS_TO_WIN) {
+            won = true;
+        }
+    }
+
+    public java.util.Map<String, Integer> populationStats() {
+        java.util.Map<String, Integer> counts = new java.util.HashMap<>();
+        for (int ty = 0; ty < map.getHeight(); ty++) {
+            for (int tx = 0; tx < map.getWidth(); tx++) {
+                for (NPCAnimal npc : map.getAnimals(tx, ty)) {
+                    counts.merge(npc.getName(), 1, Integer::sum);
+                }
+            }
+        }
+        if (player.getName() != null) {
+            counts.merge(player.getName(), 1, Integer::sum);
+        }
+        return counts;
+    }
+
+    public int descendantCount() {
+        int count = 0;
+        for (int ty = 0; ty < map.getHeight(); ty++) {
+            for (int tx = 0; tx < map.getWidth(); tx++) {
+                for (NPCAnimal npc : map.getAnimals(tx, ty)) {
+                    if (npc.isDescendant() && npc.isAlive()) {
+                        count++;
+                    }
+                }
+            }
+        }
+        return count;
+    }
+
+    private void _recordPopulation() {
+        java.util.Map<String, Integer> counts = populationStats();
+        for (String name : populationHistory.keySet()) {
+            List<Integer> list = populationHistory.get(name);
+            list.add(counts.getOrDefault(name, 0));
+        }
+        turnHistory.add(turn);
     }
 
 
