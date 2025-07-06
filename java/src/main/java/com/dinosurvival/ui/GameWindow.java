@@ -30,6 +30,8 @@ public class GameWindow extends JFrame {
     private final Map<String, ImageIcon> npcImages = new HashMap<>();
     private boolean encounterSortAsc = true;
 
+    private static final int TILE_SIZE = 22;
+
     private final JButton northButton = new JButton("North");
     private final JButton southButton = new JButton("South");
     private final JButton eastButton = new JButton("East");
@@ -83,7 +85,7 @@ public class GameWindow extends JFrame {
         // Dinosaur image (row 0, column 0)
         dinoImageLabel.setHorizontalAlignment(SwingConstants.CENTER);
         JPanel dinoPanel = new JPanel(new BorderLayout());
-        dinoPanel.setPreferredSize(new Dimension(200, 250));
+        dinoPanel.setPreferredSize(new Dimension(400, 250));
         dinoPanel.add(dinoImageLabel, BorderLayout.CENTER);
         String dName = game.getPlayer().getName();
         String imgPath = "/assets/dinosaurs/" + dName.toLowerCase().replace(" ", "_") + ".png";
@@ -118,7 +120,7 @@ public class GameWindow extends JFrame {
 
         // Biome display (row 0, column 1)
         JPanel biomePanel = new JPanel(new BorderLayout());
-        biomePanel.setPreferredSize(new Dimension(200, 250));
+        biomePanel.setPreferredSize(new Dimension(400, 250));
         biomeLabel.setHorizontalAlignment(SwingConstants.CENTER);
         biomePanel.add(biomeLabel, BorderLayout.CENTER);
         c.gridx = 1;
@@ -152,9 +154,11 @@ public class GameWindow extends JFrame {
         // Map (row 0, column 2)
         c.gridx = 2;
         c.gridy = 0;
-        c.weightx = 1;
+        c.weightx = 0;
         c.weighty = 0;
+        c.fill = GridBagConstraints.NONE;
         main.add(mapPanel, c);
+        c.fill = GridBagConstraints.BOTH;
 
         // Encounter list (row 1, column 2)
         JPanel encounterPanel = new JPanel(new BorderLayout());
@@ -251,11 +255,15 @@ public class GameWindow extends JFrame {
             for (int x = 0; x < gmap.getWidth(); x++) {
                 JLabel lbl = new JLabel(" ", SwingConstants.CENTER);
                 lbl.setOpaque(true);
-                lbl.setPreferredSize(new Dimension(22, 22));
+                lbl.setPreferredSize(new Dimension(TILE_SIZE, TILE_SIZE));
                 mapPanel.add(lbl);
                 mapCells[y][x] = lbl;
             }
         }
+        int prefW = gmap.getWidth() * TILE_SIZE;
+        int prefH = gmap.getHeight() * TILE_SIZE;
+        mapPanel.setPreferredSize(new Dimension(prefW, prefH));
+        mapPanel.setMinimumSize(new Dimension(prefW, prefH));
     }
 
     private Color colorForTerrain(Terrain t) {
