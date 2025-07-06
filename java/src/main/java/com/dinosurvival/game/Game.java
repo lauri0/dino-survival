@@ -2,6 +2,11 @@ package com.dinosurvival.game;
 
 import com.dinosurvival.model.DinosaurStats;
 import com.dinosurvival.model.NPCAnimal;
+import com.dinosurvival.model.Plant;
+import com.dinosurvival.game.EncounterEntry;
+import com.dinosurvival.game.EggCluster;
+import com.dinosurvival.game.Burrow;
+import java.util.Iterator;
 import com.dinosurvival.util.StatsLoader;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -26,6 +31,8 @@ public class Game {
     private int nextNpcId = 1;
     private boolean won;
     private int turn;
+    private List<EncounterEntry> currentEncounters = new ArrayList<>();
+    private List<Plant> currentPlants = new ArrayList<>();
 
     /** Number of descendants required to win the game. */
     public static final int DESCENDANTS_TO_WIN = 5;
@@ -297,6 +304,158 @@ public class Game {
         }
     }
 
+    /**
+     * Load encounter information for the player's current tile.
+     */
+    private void _generateEncounters() {
+        List<EncounterEntry> entries = new ArrayList<>();
+
+        // Clean up any invalid animals on this tile
+        List<NPCAnimal> cellAnimals = map.getAnimals(x, y);
+        for (Iterator<NPCAnimal> it = cellAnimals.iterator(); it.hasNext(); ) {
+            NPCAnimal npc = it.next();
+            if (npc.getWeight() <= 0) {
+                it.remove();
+            }
+        }
+
+        List<Plant> cellPlants = map.getPlants(x, y);
+        Burrow burrow = map.getBurrow(x, y);
+        if (burrow != null) {
+            EncounterEntry e = new EncounterEntry();
+            e.setBurrow(burrow);
+            entries.add(e);
+        }
+        for (EggCluster egg : map.getEggs(x, y)) {
+            EncounterEntry e = new EncounterEntry();
+            e.setEggs(egg);
+            entries.add(e);
+        }
+        for (NPCAnimal npc : cellAnimals) {
+            EncounterEntry e = new EncounterEntry();
+            e.setNpc(npc);
+            entries.add(e);
+        }
+
+        currentEncounters = entries;
+        currentPlants = new ArrayList<>(cellPlants);
+    }
+
+    private boolean npcHasPackmate(NPCAnimal npc, int tx, int ty) {
+        for (NPCAnimal other : map.getAnimals(tx, ty)) {
+            if (other == npc) continue;
+            if (other.isAlive() && other.getName().equals(npc.getName())) {
+                return true;
+            }
+        }
+        if (this.x == tx && this.y == ty && player.getName() != null && player.getName().equals(npc.getName())) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean playerPackHunterActive() {
+        if (!player.getAbilities().contains("pack_hunter")) {
+            return false;
+        }
+        for (NPCAnimal npc : map.getAnimals(x, y)) {
+            if (npc.isAlive() && player.getName().equals(npc.getName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private double playerEffectiveAttack() {
+        double atk = player.getAttack();
+        if (playerPackHunterActive()) {
+            atk *= 3;
+        }
+        double hpPct = 1.0;
+        if (player.getMaxHp() > 0) {
+            hpPct = Math.max(0.0, Math.min(player.getHp() / player.getMaxHp(), 1.0));
+        }
+        return atk * hpPct;
+    }
+
+    private double scaleByWeight(double weight, double adultWeight, double val) {
+        double pct = adultWeight > 0 ? weight / adultWeight : 1.0;
+        pct = Math.max(0.0, Math.min(pct, 1.0));
+        return val * pct;
+    }
+
+    private double npcEffectiveAttack(NPCAnimal npc, Object stats, int tx, int ty) {
+        double adultWeight = 0.0;
+        double baseAtk = 0.0;
+        List<String> abilities = null;
+        if (stats instanceof DinosaurStats ds) {
+            adultWeight = ds.getAdultWeight();
+            baseAtk = ds.getAdultAttack();
+            abilities = ds.getAbilities();
+        } else if (stats instanceof java.util.Map<?, ?> map) {
+            Object aw = ((java.util.Map<?, ?>) map).get("adult_weight");
+            if (aw instanceof Number n) adultWeight = n.doubleValue();
+            Object atk = ((java.util.Map<?, ?>) map).get("attack");
+            if (atk instanceof Number n) baseAtk = n.doubleValue();
+            Object abil = ((java.util.Map<?, ?>) map).get("abilities");
+            if (abil instanceof List<?> list) {
+                abilities = new ArrayList<>();
+                for (Object o : list) {
+                    abilities.add(o.toString());
+                }
+            }
+        }
+        double atk = scaleByWeight(npc.getWeight(), adultWeight, baseAtk);
+        if (abilities != null && abilities.contains("pack_hunter") && npcHasPackmate(npc, tx, ty)) {
+            atk *= 3;
+        }
+        double hpPct = 1.0;
+        if (npc.getMaxHp() > 0) {
+            hpPct = Math.max(0.0, Math.min(npc.getHp() / npc.getMaxHp(), 1.0));
+        }
+        return atk * hpPct;
+    }
+
+    /**
+     * Determine if an aggressive NPC immediately attacks the player.
+     */
+    private String _aggressiveAttackCheck() {
+        double playerA = Math.max(playerEffectiveAttack(), 0.1);
+        Random r = new Random();
+        for (EncounterEntry entry : currentEncounters) {
+            if (entry.getEggs() != null || entry.getNpc() == null) {
+                continue;
+            }
+            NPCAnimal npc = entry.getNpc();
+            if (!npc.isAlive()) {
+                continue;
+            }
+            Object stats = StatsLoader.getDinoStats().get(npc.getName());
+            if (stats == null) {
+                stats = StatsLoader.getCritterStats().get(npc.getName());
+            }
+            boolean aggressive = false;
+            if (stats instanceof java.util.Map<?, ?> map) {
+                Object ag = ((java.util.Map<?, ?>) map).get("aggressive");
+                if (ag instanceof Boolean b) {
+                    aggressive = b;
+                }
+            }
+            // DinosaurStats currently lacks an aggressive flag
+            if (!aggressive) {
+                continue;
+            }
+
+            double targetA = npcEffectiveAttack(npc, stats, x, y);
+            double rel = targetA / playerA;
+            if (rel > 2.0 && r.nextDouble() < 0.5) {
+                player.setHp(0);
+                return "A fierce " + npc.getName() + " (" + npc.getId() + ") attacks and kills you! Game Over.";
+            }
+        }
+        return null;
+    }
+
     private void startTurn() {
         turn++;
         if (weatherTurns >= 10) {
@@ -309,6 +468,8 @@ public class Game {
         player.setEnergy(Math.max(0.0,
                 player.getEnergy() - player.getHatchlingEnergyDrain() * weather.getPlayerEnergyMult()));
         updateNpcs();
+        _generateEncounters();
+        _aggressiveAttackCheck();
     }
 
     /** Move the player by the specified delta. */
@@ -317,11 +478,15 @@ public class Game {
         x = Math.max(0, Math.min(map.getWidth() - 1, x + dx));
         y = Math.max(0, Math.min(map.getHeight() - 1, y + dy));
         map.reveal(x, y);
+        _generateEncounters();
+        _aggressiveAttackCheck();
     }
 
     /** Skip a turn without moving. */
     public void rest() {
         startTurn();
+        _generateEncounters();
+        _aggressiveAttackCheck();
     }
 
     /** Drink if the player is on a lake tile. */
@@ -330,6 +495,8 @@ public class Game {
         if (map.terrainAt(x, y) == Terrain.LAKE) {
             player.setHydration(100.0);
         }
+        _generateEncounters();
+        _aggressiveAttackCheck();
     }
 
     public Map getMap() {

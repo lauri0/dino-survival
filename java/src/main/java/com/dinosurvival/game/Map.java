@@ -342,6 +342,20 @@ public class Map {
         animals[y][x].remove(npc);
     }
 
+    /**
+     * Get the list of egg clusters present at the given coordinates.
+     */
+    public List<EggCluster> getEggs(int x, int y) {
+        return eggs[y][x];
+    }
+
+    /**
+     * Get the list of plants present at the given coordinates.
+     */
+    public List<Plant> getPlants(int x, int y) {
+        return plants[y][x];
+    }
+
     // ---------------------------------------------------------------------
     // Minimal implementations of dynamic map effects. These are greatly
     // simplified compared to the Python version but allow tests to invoke
