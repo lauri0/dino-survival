@@ -28,6 +28,8 @@ public class GameWindow extends JFrame {
     private final JPanel plantList = new JPanel();
     private final JPanel encounterList = new JPanel();
     private final Map<String, ImageIcon> npcImages = new HashMap<>();
+    private final JPanel populationList = new JPanel();
+    private final Map<String, ImageIcon> populationImages = new HashMap<>();
     private boolean encounterSortAsc = true;
 
     private static final int TILE_SIZE = 22;
@@ -197,15 +199,18 @@ public class GameWindow extends JFrame {
         main.add(weatherPanel, c);
 
         // Population tracker (row 1, column 3)
-        JTextArea popArea = new JTextArea();
-        popArea.setEditable(false);
-        JScrollPane popScroll = new JScrollPane(popArea);
-        popScroll.setPreferredSize(new Dimension(200, 200));
+        JPanel popPanel = new JPanel(new BorderLayout());
+        popPanel.setPreferredSize(new Dimension(200, 200));
+        JLabel popLabel = new JLabel("Global Population");
+        popPanel.add(popLabel, BorderLayout.NORTH);
+        populationList.setLayout(new BoxLayout(populationList, BoxLayout.Y_AXIS));
+        JScrollPane popScroll = new JScrollPane(populationList);
+        popPanel.add(popScroll, BorderLayout.CENTER);
         c.gridx = 3;
         c.gridy = 1;
         c.weightx = 0;
         c.weighty = 1;
-        main.add(popScroll, c);
+        main.add(popPanel, c);
 
         // Log area at the bottom spanning two columns
         JScrollPane scroll = new JScrollPane(logArea);
@@ -290,6 +295,7 @@ public class GameWindow extends JFrame {
         updateActionButtons();
         updatePlantList();
         updateEncounterList();
+        updatePopulationList();
     }
 
     private void refreshMap() {
@@ -438,5 +444,72 @@ public class GameWindow extends JFrame {
         }
         encounterList.revalidate();
         encounterList.repaint();
+    }
+
+    private void updatePopulationList() {
+        populationList.removeAll();
+        java.util.Map<String, Integer> counts = game.populationStats();
+        int total = 0;
+        for (int c : counts.values()) {
+            total += c;
+        }
+        java.util.List<java.util.Map.Entry<String, Integer>> list =
+                new java.util.ArrayList<>(counts.entrySet());
+        list.sort((a, b) -> Integer.compare(b.getValue(), a.getValue()));
+        for (java.util.Map.Entry<String, Integer> e : list) {
+            String name = e.getKey();
+            int count = e.getValue();
+            double pct = total > 0 ? count * 100.0 / total : 0.0;
+            JPanel row = new JPanel(new BorderLayout());
+            JLabel img = new JLabel();
+            ImageIcon icon = populationImages.get(name);
+            if (icon == null) {
+                String path = "/assets/dinosaurs/" + name.toLowerCase().replace(" ", "_") + ".png";
+                icon = loadScaledIcon(path, 40, 25);
+                if (icon != null) {
+                    populationImages.put(name, icon);
+                }
+            }
+            if (icon != null) {
+                img.setIcon(icon);
+            }
+            row.add(img, BorderLayout.WEST);
+            row.add(new JLabel(name + " " + count + String.format(" (%.1f%%)", pct)), BorderLayout.CENTER);
+            JButton infoBtn = new JButton("Info");
+            infoBtn.addActionListener(ev -> new NpcStatsDialog(this, game, sampleNpc(name)).setVisible(true));
+            row.add(infoBtn, BorderLayout.EAST);
+            populationList.add(row);
+        }
+        populationList.revalidate();
+        populationList.repaint();
+    }
+
+    private NPCAnimal sampleNpc(String name) {
+        NPCAnimal npc = new NPCAnimal();
+        npc.setName(name);
+        var ds = StatsLoader.getDinoStats().get(name);
+        if (ds != null) {
+            npc.setWeight(ds.getAdultWeight());
+            npc.setMaxHp(ds.getAdultHp());
+            npc.setHp(npc.getMaxHp());
+            npc.setAttack(ds.getAdultAttack());
+            npc.setSpeed(ds.getAdultSpeed());
+        } else {
+            java.util.Map<String, Object> map = StatsLoader.getCritterStats().get(name);
+            if (map != null) {
+                Object w = map.get("adult_weight");
+                if (w instanceof Number n) npc.setWeight(n.doubleValue());
+                Object hp = map.get("hp");
+                if (hp instanceof Number n) {
+                    npc.setMaxHp(n.doubleValue());
+                    npc.setHp(n.doubleValue());
+                }
+                Object atk = map.get("attack");
+                if (atk instanceof Number n) npc.setAttack(n.doubleValue());
+                Object sp = map.get("adult_speed");
+                if (sp instanceof Number n) npc.setSpeed(n.doubleValue());
+            }
+        }
+        return npc;
     }
 }
