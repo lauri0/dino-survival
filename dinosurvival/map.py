@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import Dict, Tuple, List, Optional
 from .plant import PlantStats, Plant
 from .dinosaur import NPCAnimal, DinosaurStats
+from .constants import Constants, DEFAULT_CONSTANTS
 import random
 
 @dataclass
@@ -36,7 +37,9 @@ class Map:
         terrains: Dict[str, Terrain],
         height_levels: Dict[str, float],
         humidity_levels: Dict[str, float],
+        constants: Constants = DEFAULT_CONSTANTS,
     ):
+        self.constants = constants
         self.width = width
         self.height = height
         self.terrains = terrains
