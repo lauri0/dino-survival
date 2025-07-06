@@ -290,6 +290,31 @@ public class Map {
         return burrows[y][x];
     }
 
+    /**
+     * Randomly place {@code count} burrows on land tiles. Mirrors the Python
+     * {@code populate_burrows} helper so the Java {@link Game} class can
+     * initialise the world in a similar fashion.
+     */
+    public void populateBurrows(int count) {
+        List<int[]> land = new ArrayList<>();
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                if (terrainAt(x, y) != Terrain.LAKE) {
+                    land.add(new int[]{x, y});
+                }
+            }
+        }
+        Random r = new Random();
+        for (int i = 0; i < count; i++) {
+            if (land.isEmpty()) {
+                break;
+            }
+            int idx = r.nextInt(land.size());
+            int[] pos = land.remove(idx);
+            spawnBurrow(pos[0], pos[1], true);
+        }
+    }
+
     // ---------------------------------------------------------------------
     // Basic accessors for animals used by the Game logic. These mirror the
     // simple data structures in the Python implementation and allow the Java
