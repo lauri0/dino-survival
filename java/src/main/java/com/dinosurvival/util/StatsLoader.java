@@ -4,7 +4,9 @@ import com.dinosurvival.model.Diet;
 import com.dinosurvival.model.DinosaurStats;
 import com.dinosurvival.model.PlantStats;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,7 +23,9 @@ import java.util.Map;
  */
 public class StatsLoader {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper(new YAMLFactory());
+    private static final ObjectMapper MAPPER = new ObjectMapper(new YAMLFactory())
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
 
     private static final int HATCHLING_WEIGHT_DIVISOR = 1000;
     private static final int HATCHLING_SPEED_MULTIPLIER = 3;
