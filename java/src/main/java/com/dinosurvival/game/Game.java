@@ -1407,6 +1407,47 @@ public class Game {
     }
 
     /**
+     * Get the list of encounters on the player's current tile.
+     */
+    public java.util.List<EncounterEntry> getCurrentEncounters() {
+        return currentEncounters;
+    }
+
+    /**
+     * Effective attack value for the given NPC.
+     */
+    public double npcEffectiveAttack(NPCAnimal npc) {
+        Object stats = StatsLoader.getDinoStats().get(npc.getName());
+        if (stats == null) {
+            stats = StatsLoader.getCritterStats().get(npc.getName());
+        }
+        return npcEffectiveAttack(npc, stats, x, y);
+    }
+
+    /**
+     * Effective speed value for the given NPC.
+     */
+    public double npcEffectiveSpeed(NPCAnimal npc) {
+        Object stats = StatsLoader.getDinoStats().get(npc.getName());
+        if (stats == null) {
+            stats = StatsLoader.getCritterStats().get(npc.getName());
+        }
+        return npcEffectiveSpeed(npc, stats);
+    }
+
+    /**
+     * Maximum health for the given NPC based on its weight.
+     */
+    public double npcMaxHp(NPCAnimal npc) {
+        Object stats = StatsLoader.getDinoStats().get(npc.getName());
+        if (stats == null) {
+            stats = StatsLoader.getCritterStats().get(npc.getName());
+        }
+        return scaleByWeight(npc.getWeight(), getStat(stats, "adult_weight"),
+                getStat(stats, "hp"));
+    }
+
+    /**
      * Get the list of plants on the player's current tile.
      */
     public java.util.List<Plant> getCurrentPlants() {

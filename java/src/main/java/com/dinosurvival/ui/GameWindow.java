@@ -4,6 +4,8 @@ import com.dinosurvival.game.Game;
 import com.dinosurvival.game.Terrain;
 import com.dinosurvival.model.Plant;
 import com.dinosurvival.model.PlantStats;
+import com.dinosurvival.game.EncounterEntry;
+import com.dinosurvival.model.NPCAnimal;
 import com.dinosurvival.util.StatsLoader;
 import javax.swing.*;
 import java.awt.*;
@@ -21,6 +23,9 @@ public class GameWindow extends JFrame {
     private final Map<String, ImageIcon> biomeImages = new HashMap<>();
     private final Map<String, ImageIcon> plantImages = new HashMap<>();
     private final JPanel plantList = new JPanel();
+    private final JPanel encounterList = new JPanel();
+    private final Map<String, ImageIcon> npcImages = new HashMap<>();
+    private boolean encounterSortAsc = true;
 
     private final JButton northButton = new JButton("North");
     private final JButton southButton = new JButton("South");
@@ -122,14 +127,25 @@ public class GameWindow extends JFrame {
         main.add(mapPanel, c);
 
         // Encounter list (row 1, column 2)
-        JTextArea encounterArea = new JTextArea();
-        encounterArea.setEditable(false);
-        JScrollPane encounterScroll = new JScrollPane(encounterArea);
+        JPanel encounterPanel = new JPanel(new BorderLayout());
+        JLabel encLabel = new JLabel("Encounters");
+        JButton sortBtn = new JButton("Sort");
+        sortBtn.addActionListener(e -> {
+            encounterSortAsc = !encounterSortAsc;
+            updateEncounterList();
+        });
+        JPanel encHeader = new JPanel(new BorderLayout());
+        encHeader.add(encLabel, BorderLayout.WEST);
+        encHeader.add(sortBtn, BorderLayout.EAST);
+        encounterPanel.add(encHeader, BorderLayout.NORTH);
+        encounterList.setLayout(new BoxLayout(encounterList, BoxLayout.Y_AXIS));
+        JScrollPane encounterScroll = new JScrollPane(encounterList);
+        encounterPanel.add(encounterScroll, BorderLayout.CENTER);
         c.gridx = 2;
         c.gridy = 1;
         c.weightx = 1;
         c.weighty = 1;
-        main.add(encounterScroll, c);
+        main.add(encounterPanel, c);
 
         // Weather info (row 0, column 3)
         JPanel weatherPanel = new JPanel();
@@ -233,6 +249,7 @@ public class GameWindow extends JFrame {
         updateDinoImage();
         updateActionButtons();
         updatePlantList();
+        updateEncounterList();
     }
 
     private void refreshMap() {
@@ -312,5 +329,77 @@ public class GameWindow extends JFrame {
         }
         plantList.revalidate();
         plantList.repaint();
+    }
+
+    private double entryWeight(EncounterEntry e) {
+        if (e.getNpc() != null) {
+            return e.getNpc().getWeight();
+        } else if (e.getEggs() != null) {
+            return e.getEggs().getWeight();
+        }
+        return 0.0;
+    }
+
+    private void updateEncounterList() {
+        encounterList.removeAll();
+        java.util.List<EncounterEntry> entries = new java.util.ArrayList<>(game.getCurrentEncounters());
+        entries.sort(java.util.Comparator.comparingDouble(this::entryWeight));
+        if (!encounterSortAsc) {
+            java.util.Collections.reverse(entries);
+        }
+        for (EncounterEntry e : entries) {
+            JPanel row = new JPanel(new BorderLayout());
+            JLabel img = new JLabel();
+            JPanel info = new JPanel();
+            info.setLayout(new BoxLayout(info, BoxLayout.Y_AXIS));
+            row.add(img, BorderLayout.WEST);
+            row.add(info, BorderLayout.CENTER);
+            JButton actBtn = new JButton();
+            JButton statsBtn = new JButton("Stats");
+            JPanel btns = new JPanel();
+            btns.setLayout(new GridLayout(2,1));
+            btns.add(statsBtn);
+            btns.add(actBtn);
+            row.add(btns, BorderLayout.EAST);
+
+            if (e.getBurrow() != null) {
+                java.net.URL u = getClass().getResource("/assets/other/burrow.png");
+                if (u != null) img.setIcon(new ImageIcon(u));
+                info.add(new JLabel("Burrow" + (e.getBurrow().isFull() ? " (Full)" : " (Empty)")));
+                info.add(new JLabel(String.format("Dig: %.0f%%", e.getBurrow().getProgress())));
+                actBtn.setText("Dig");
+                actBtn.addActionListener(ev -> doAction(() -> game.digBurrow(), "Dig"));
+                statsBtn.setVisible(false);
+            } else if (e.getEggs() != null) {
+                info.add(new JLabel(e.getEggs().getSpecies() + " Eggs"));
+                info.add(new JLabel(String.format("W: %.1fkg", e.getEggs().getWeight())));
+                actBtn.setText("Eat");
+                actBtn.addActionListener(ev -> doAction(() -> game.collectEggs(), "Eat eggs"));
+                statsBtn.setVisible(false);
+            } else if (e.getNpc() != null) {
+                NPCAnimal npc = e.getNpc();
+                String name = npc.getName();
+                ImageIcon icon = npcImages.get(name);
+                if (icon == null) {
+                    String path = "/assets/dinosaurs/" + name.toLowerCase().replace(" ", "_") + ".png";
+                    java.net.URL u = getClass().getResource(path);
+                    if (u != null) {
+                        icon = new ImageIcon(u);
+                        npcImages.put(name, icon);
+                    }
+                }
+                if (icon != null) img.setIcon(icon);
+                info.add(new JLabel(name + " (" + npc.getId() + ")"));
+                info.add(new JLabel(String.format("A: %.1f  HP: %.1f/%.1f", game.npcEffectiveAttack(npc), npc.getHp(), game.npcMaxHp(npc))));
+                info.add(new JLabel(String.format("S: %.1f  W: %.1fkg", game.npcEffectiveSpeed(npc), npc.getWeight())));
+                actBtn.setText(npc.isAlive() ? "Attack" : "Eat");
+                actBtn.addActionListener(ev -> doAction(() -> game.huntNpc(npc.getId()), "Hunt"));
+                statsBtn.addActionListener(ev -> new NpcStatsDialog(this, game, npc).setVisible(true));
+            }
+
+            encounterList.add(row);
+        }
+        encounterList.revalidate();
+        encounterList.repaint();
     }
 }
