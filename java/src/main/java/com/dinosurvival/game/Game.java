@@ -907,7 +907,9 @@ public class Game {
                     "Down", new int[]{0,1}, "Left", new int[]{-1,0});
             for (NPCAnimal npc : weaker) {
                 List<String> opts = new ArrayList<>();
-                boolean canWalk = !getBool(StatsLoader.getDinoStats().getOrDefault(npc.getName(), StatsLoader.getCritterStats().get(npc.getName())), "can_walk", true) ? false : true;
+                Object stats = StatsLoader.getDinoStats().get(npc.getName());
+                if (stats == null) stats = StatsLoader.getCritterStats().get(npc.getName());
+                boolean canWalk = !getBool(stats, "can_walk", true) ? false : true;
                 for (var e : dirs.entrySet()) {
                     int nx = x + e.getValue()[0];
                     int ny = y + e.getValue()[1];
