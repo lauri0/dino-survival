@@ -351,6 +351,24 @@ public class Map {
     }
 
     /**
+     * Remove and return the first egg cluster from the cell, if any.
+     */
+    public EggCluster takeEggs(int x, int y) {
+        List<EggCluster> cell = eggs[y][x];
+        if (!cell.isEmpty()) {
+            return cell.remove(0);
+        }
+        return null;
+    }
+
+    /**
+     * Add an egg cluster to the specified cell.
+     */
+    public void addEggs(int x, int y, EggCluster cluster) {
+        eggs[y][x].add(cluster);
+    }
+
+    /**
      * Get the list of plants present at the given coordinates.
      */
     public List<Plant> getPlants(int x, int y) {
