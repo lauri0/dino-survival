@@ -45,6 +45,8 @@ mvn -f java/pom.xml package
 
 ### Running
 
+The build creates a versioned jar under `java/target`. Run it using
+
 ```bash
-java -cp java/target/dino-survival.jar com.dinosurvival.ui.Main
+java -jar java/target/dino-survival-0.1.0.jar
 ```
