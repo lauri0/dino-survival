@@ -33,6 +33,7 @@ public class Game {
     private int turn;
     private List<EncounterEntry> currentEncounters = new ArrayList<>();
     private List<Plant> currentPlants = new ArrayList<>();
+    private String lastAction = "";
 
     /** Number of descendants required to win the game. */
     public static final int DESCENDANTS_TO_WIN = 5;
@@ -456,17 +457,87 @@ public class Game {
         return null;
     }
 
-    private void startTurn() {
+    private void _updateEggs() {
+        for (int ty = 0; ty < map.getHeight(); ty++) {
+            for (int tx = 0; tx < map.getWidth(); tx++) {
+                List<EggCluster> cell = map.getEggs(tx, ty);
+                for (Iterator<EggCluster> it = cell.iterator(); it.hasNext(); ) {
+                    EggCluster egg = it.next();
+                    egg.setTurnsUntilHatch(egg.getTurnsUntilHatch() - 1);
+                    if (egg.getTurnsUntilHatch() <= 0 || egg.getWeight() <= 0) {
+                        it.remove();
+                    }
+                }
+            }
+        }
+    }
+
+    private void _applyBleedAndRegen(DinosaurStats dino, double regen,
+                                     boolean moved, boolean allowRegen) {
+        if (dino.getBleeding() > 0) {
+            int mult = moved ? 2 : 1;
+            dino.setHp(Math.max(0.0,
+                    dino.getHp() - dino.getMaxHp() * 0.05 * mult));
+            dino.setBleeding(dino.getBleeding() - 1);
+        } else if (regen > 0 && allowRegen && dino.getHp() < dino.getMaxHp()) {
+            dino.setHp(Math.min(dino.getMaxHp(),
+                    dino.getHp() + dino.getMaxHp() * regen / 100.0));
+        }
+        if (dino.getBrokenBone() > 0) {
+            dino.setBrokenBone(dino.getBrokenBone() - 1);
+        }
+    }
+
+    private void _applyTurnCosts(boolean moved, double multiplier) {
+        double drain = player.getHatchlingEnergyDrain();
+        if (moved) {
+            drain *= player.getWalkingEnergyDrainMultiplier();
+            if (player.getBrokenBone() > 0) {
+                drain *= 2;
+            }
+        }
+        drain *= multiplier;
+        drain *= weather.getPlayerEnergyMult();
+        player.setEnergy(Math.max(0.0, player.getEnergy() - drain));
+        if (player.isExhausted()) {
+            player.setHp(0.0);
+        }
+        _applyBleedAndRegen(player, player.getHealthRegen(), moved, !player.isExhausted());
+    }
+
+    private void _startTurn() {
         turn++;
         if (weatherTurns >= 10) {
             weather = chooseWeather();
             weatherTurns = 0;
         }
         weatherTurns++;
+
+        if (player.getAbilities().contains("ambush")) {
+            if ("stay".equals(lastAction)) {
+                player.setAmbushStreak(Math.min(player.getAmbushStreak() + 1, 3));
+            } else {
+                player.setAmbushStreak(0);
+            }
+        }
+
+        map.updateVolcanicActivity();
+        map.updateFlood(weather.getFloodChance());
+        map.updateForestFire();
+        _updateEggs();
+        map.growPlants(StatsLoader.getPlantStats());
+        _spawnCritters(false);
+        map.refreshBurrows();
+        if (player.getTurnsUntilLayEggs() > 0) {
+            player.setTurnsUntilLayEggs(player.getTurnsUntilLayEggs() - 1);
+        }
+
         player.setHydration(Math.max(0.0,
                 player.getHydration() - player.getHydrationDrain() * weather.getPlayerHydrationMult()));
-        player.setEnergy(Math.max(0.0,
-                player.getEnergy() - player.getHatchlingEnergyDrain() * weather.getPlayerEnergyMult()));
+        if (player.isDehydrated()) {
+            player.setHp(0.0);
+        }
+
         updateNpcs();
         _generateEncounters();
         _aggressiveAttackCheck();
@@ -474,29 +545,35 @@ public class Game {
 
     /** Move the player by the specified delta. */
     public void move(int dx, int dy) {
-        startTurn();
+        _startTurn();
         x = Math.max(0, Math.min(map.getWidth() - 1, x + dx));
         y = Math.max(0, Math.min(map.getHeight() - 1, y + dy));
         map.reveal(x, y);
         _generateEncounters();
         _aggressiveAttackCheck();
+        _applyTurnCosts(true, 1.0);
+        lastAction = "move";
     }
 
     /** Skip a turn without moving. */
     public void rest() {
-        startTurn();
+        _startTurn();
         _generateEncounters();
         _aggressiveAttackCheck();
+        _applyTurnCosts(false, 1.0);
+        lastAction = "stay";
     }
 
     /** Drink if the player is on a lake tile. */
     public void drink() {
-        startTurn();
+        _startTurn();
         if (map.terrainAt(x, y) == Terrain.LAKE) {
             player.setHydration(100.0);
         }
         _generateEncounters();
         _aggressiveAttackCheck();
+        _applyTurnCosts(false, 1.0);
+        lastAction = "drink";
     }
 
     public Map getMap() {

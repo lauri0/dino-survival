@@ -2,6 +2,7 @@ package com.dinosurvival.game;
 
 import com.dinosurvival.model.NPCAnimal;
 import com.dinosurvival.model.Plant;
+import com.dinosurvival.model.PlantStats;
 import com.dinosurvival.game.EggCluster;
 import com.dinosurvival.game.Burrow;
 import com.dinosurvival.game.LavaInfo;
@@ -429,6 +430,142 @@ public class Map {
                 }
             }
         }
+        return msgs;
+    }
+
+    public void refreshBurrows() {
+        Random r = new Random();
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                Burrow b = burrows[y][x];
+                if (b != null && !b.isFull()) {
+                    if (r.nextDouble() < 0.02) {
+                        b.setFull(true);
+                        b.setProgress(0.0);
+                    }
+                }
+            }
+        }
+    }
+
+    public void growPlants(java.util.Map<String, PlantStats> plantStats) {
+        Random r = new Random();
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                List<Plant> cell = plants[y][x];
+                String terrain = terrainAt(x, y).getName();
+                for (PlantStats ps : plantStats.values()) {
+                    Double chance = ps.getGrowthChance().get(terrain);
+                    if (chance == null) continue;
+                    if (r.nextDouble() < chance) {
+                        Plant existing = null;
+                        for (Plant p : cell) {
+                            if (ps.getName().equals(p.getName())) {
+                                existing = p;
+                                break;
+                            }
+                        }
+                        if (existing != null) {
+                            existing.setWeight(Math.min(existing.getWeight() + ps.getWeight(), ps.getWeight() * 10));
+                        } else {
+                            Plant p = new Plant();
+                            p.setName(ps.getName());
+                            p.setWeight(ps.getWeight());
+                            cell.add(p);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private Terrain floodedTerrain(Terrain t) {
+        return switch (t) {
+            case DESERT -> Terrain.DESERT_FLOODED;
+            case PLAINS -> Terrain.PLAINS_FLOODED;
+            case WOODLANDS -> Terrain.WOODLANDS_FLOODED;
+            case FOREST -> Terrain.FOREST_FLOODED;
+            case SWAMP -> Terrain.SWAMP_FLOODED;
+            default -> null;
+        };
+    }
+
+    private void floodTile(int x, int y) {
+        if (x < 0 || x >= width || y < 0 || y >= height) return;
+        if (floodInfo[y][x] != null) return;
+        Terrain orig = grid[y][x];
+        Terrain flooded = floodedTerrain(orig);
+        if (flooded == null) return;
+        floodInfo[y][x] = orig;
+        grid[y][x] = flooded;
+        plants[y][x].clear();
+        for (NPCAnimal npc : animals[y][x]) {
+            if (npc.isAlive()) {
+                double dmg = npc.getMaxHp() * 0.5;
+                npc.setHp(Math.max(0.0, npc.getHp() - dmg));
+                if (npc.getHp() <= 0) {
+                    npc.setAlive(false);
+                    npc.setAge(-1);
+                    npc.setSpeed(0.0);
+                }
+            }
+        }
+    }
+
+    private void clearFlood() {
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                Terrain orig = floodInfo[y][x];
+                if (orig != null) {
+                    grid[y][x] = orig;
+                    floodInfo[y][x] = null;
+                }
+            }
+        }
+    }
+
+    public List<String> updateFlood(double chance) {
+        List<String> msgs = new ArrayList<>();
+        if (!activeFlood) {
+            if (chance > 0 && floodRng.nextDouble() < chance) {
+                activeFlood = true;
+                floodTurn = 0;
+                for (int y = 0; y < height; y++) {
+                    for (int x = 0; x < width; x++) {
+                        if (grid[y][x] == Terrain.LAKE) {
+                            floodTile(x + 1, y);
+                            floodTile(x - 1, y);
+                            floodTile(x, y + 1);
+                            floodTile(x, y - 1);
+                        }
+                    }
+                }
+            }
+            return msgs;
+        }
+
+        floodTurn++;
+        if (floodTurn == 1) {
+            List<int[]> current = new ArrayList<>();
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    if (floodInfo[y][x] != null) {
+                        current.add(new int[]{x, y});
+                    }
+                }
+            }
+            for (int[] pos : current) {
+                floodTile(pos[0] + 1, pos[1]);
+                floodTile(pos[0] - 1, pos[1]);
+                floodTile(pos[0], pos[1] + 1);
+                floodTile(pos[0], pos[1] - 1);
+            }
+        } else if (floodTurn >= 3) {
+            clearFlood();
+            activeFlood = false;
+            floodTurn = 0;
+        }
+
         return msgs;
     }
 }
