@@ -4,3 +4,4 @@ __pycache__/
 
 # Java
 /java/target/
+game_log.txt

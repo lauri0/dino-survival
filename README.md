@@ -45,8 +45,9 @@ mvn -f java/pom.xml package
 
 ### Running
 
-The build creates a versioned jar under `java/target`. Run it using
+The jar produced by the build does not bundle its dependencies. Run the
+application with Maven so that they are included on the classpath:
 
 ```bash
-java -jar java/target/dino-survival-0.1.0.jar
+mvn -f java/pom.xml exec:java -Dexec.mainClass=com.dinosurvival.ui.Main
 ```
