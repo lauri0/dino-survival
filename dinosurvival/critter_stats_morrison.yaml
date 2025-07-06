@@ -18,13 +18,33 @@
       "lake"
     ]
   },
+  "Dragonfly": {
+    "adult_speed": 60,
+    "adult_weight": 0.4,
+    "aggressive": false,
+    "aquatic_boost": 0.0,
+    "attack": 0.0,
+    "avg_spawned_per_turn": 0.6,
+    "can_be_juvenile": false,
+    "can_walk": true,
+    "class": "insect",
+    "health_regen": 2.5,
+    "hp": 0.2,
+    "image": "assets/dinosaurs/dragonfly.png",
+    "maximum_individuals": 12,
+    "name": "Dragonfly",
+    "preferred_biomes": [
+      "swamp",
+      "forest"
+    ]
+  },  
   "Frog": {
     "adult_speed": 45,
     "adult_weight": 2.5,
     "aggressive": false,
     "aquatic_boost": 0.0,
     "attack": 0.0,
-    "avg_spawned_per_turn": 1.0,
+    "avg_spawned_per_turn": 0.6,
     "can_be_juvenile": false,
     "can_walk": true,
     "class": "amphibian",
@@ -43,7 +63,7 @@
     "aggressive": false,
     "aquatic_boost": 0.0,
     "attack": 1.0,
-    "avg_spawned_per_turn": 1.0,
+    "avg_spawned_per_turn": 0.2,
     "can_be_juvenile": false,
     "can_walk": true,
     "class": "reptile",
@@ -62,17 +82,18 @@
     "aggressive": false,
     "aquatic_boost": 0.0,
     "attack": 2.0,
-    "avg_spawned_per_turn": 1.0,
+    "avg_spawned_per_turn": 0.5,
     "can_be_juvenile": false,
     "can_walk": true,
     "class": "reptile",
     "health_regen": 2.5,
     "hp": 4.0,
     "image": "assets/dinosaurs/lizard.png",
-    "maximum_individuals": 10,
+    "maximum_individuals": 11,
     "name": "Lizard",
     "preferred_biomes": [
-      "swamp"
+      "woodlands",
+      "highland_forest"
     ]
   },
   "Scorpion": {
@@ -81,7 +102,7 @@
     "aggressive": true,
     "aquatic_boost": 0.0,
     "attack": 2.0,
-    "avg_spawned_per_turn": 1.0,
+    "avg_spawned_per_turn": 0.2,
     "can_be_juvenile": false,
     "can_walk": true,
     "class": "arthropod",
