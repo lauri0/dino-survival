@@ -1399,6 +1399,20 @@ public class Game {
         return turn;
     }
 
+    /**
+     * Return true if the player can currently lay eggs.
+     */
+    public boolean playerCanLayEggs() {
+        return canPlayerLayEggs();
+    }
+
+    /**
+     * Get the list of plants on the player's current tile.
+     */
+    public java.util.List<Plant> getCurrentPlants() {
+        return currentPlants;
+    }
+
     public boolean hasWon() {
         return won;
     }
