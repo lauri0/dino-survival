@@ -2,7 +2,7 @@
   "Avisaurus": {
     "abilities": [
       "flight"
-    ]
+    ],
     "adult_speed": 140,
     "adult_weight": 1.7,
     "aggressive": false,
