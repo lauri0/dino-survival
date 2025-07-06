@@ -1364,6 +1364,9 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
         elif player_images.get("adult"):
             dino_image_label.configure(image=player_images["adult"])
             dino_image_label.image = player_images["adult"]
+        atk = game.player_effective_attack()
+        text = f"{atk:.1f}"
+        attack_label.config(text=text)
         hp_max = game._scale_by_weight(
             game.player.weight,
             game_module.DINO_STATS[game.player.name],
@@ -1387,11 +1390,6 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
                 f"{game.player.adult_weight:.0f}kg ({pct:.1f}%)"
             )
         )
-        atk = game.player_effective_attack()
-        text = f"{atk:.1f}"
-        if game.player_pack_hunter_active():
-            text += " (Pack Hunter)"
-        attack_label.config(text=text)
         hp_label_value.config(text=f"{game.player.hp:.1f}/{hp_max:.1f}")
         speed_text = f"{game.player_effective_speed():.1f}"
         if "ambush" in game.player.abilities and game.player.ambush_streak > 0:
@@ -1443,6 +1441,17 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
 
     name_label = tk.Label(stats_frame, font=("Helvetica", 16))
     name_label.pack()
+    
+    attack_row = tk.Frame(stats_frame)
+    attack_icon = tk.Label(attack_row)
+    if icons.get("attack"):
+        attack_icon.configure(image=icons["attack"])
+        attack_icon.image = icons["attack"]
+    attack_icon.pack(side="left")
+    attack_label = tk.Label(attack_row, font=("Helvetica", 14), anchor="w")
+    attack_label.pack(side="left")
+    attack_row.pack(anchor="w")
+    
     health_row = tk.Frame(stats_frame)
     health_icon = tk.Label(health_row)
     if icons.get("health"):
@@ -1493,16 +1502,6 @@ def run_game_gui(setting, dinosaur_name: str) -> None:
     weight_label = tk.Label(weight_row, font=("Helvetica", 14), anchor="w")
     weight_label.pack(side="left")
     weight_row.pack(anchor="w")
-
-    attack_row = tk.Frame(stats_frame)
-    attack_icon = tk.Label(attack_row)
-    if icons.get("attack"):
-        attack_icon.configure(image=icons["attack"])
-        attack_icon.image = icons["attack"]
-    attack_icon.pack(side="left")
-    attack_label = tk.Label(attack_row, font=("Helvetica", 14), anchor="w")
-    attack_label.pack(side="left")
-    attack_row.pack(anchor="w")
 
     speed_row = tk.Frame(stats_frame)
     speed_icon = tk.Label(speed_row)
