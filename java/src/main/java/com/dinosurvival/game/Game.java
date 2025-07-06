@@ -78,8 +78,8 @@ public class Game {
         map.reveal(x, y);
         weather = chooseWeather();
         weatherTurns = 0;
-        _populateAnimals();
-        _spawnCritters(true);
+        populateAnimals();
+        spawnCritters(true);
         populationHistory.clear();
         for (String name : StatsLoader.getDinoStats().keySet()) {
             populationHistory.put(name, new ArrayList<>());
@@ -87,7 +87,7 @@ public class Game {
         for (String name : StatsLoader.getCritterStats().keySet()) {
             populationHistory.putIfAbsent(name, new ArrayList<>());
         }
-        _recordPopulation();
+        recordPopulation();
     }
 
     private DinosaurStats cloneStats(DinosaurStats src) {
@@ -182,7 +182,7 @@ public class Game {
     }
 
     /** Populate the map with initial dinosaur NPCs. */
-    private void _populateAnimals() {
+    private void populateAnimals() {
         List<int[]> land = new ArrayList<>();
         for (int ty = 0; ty < map.getHeight(); ty++) {
             for (int tx = 0; tx < map.getWidth(); tx++) {
@@ -211,7 +211,7 @@ public class Game {
     }
 
     /** Spawn critter NPCs either for the initial game setup or a normal turn. */
-    private void _spawnCritters(boolean initial) {
+    private void spawnCritters(boolean initial) {
         if (StatsLoader.getCritterStats().isEmpty()) {
             return;
         }
@@ -366,7 +366,7 @@ public class Game {
                     }
 
                     double regen = getStat(stats, "health_regen");
-                    if (_applyBleedAndRegen(npc, regen)) {
+                    if (applyBleedAndRegen(npc, regen)) {
                         continue;
                     }
 
@@ -376,7 +376,7 @@ public class Game {
                             && npc.getEnergy() >= 80 && npc.getHp() >= npc.getMaxHp() * 0.8
                             && npc.getTurnsUntilLayEggs() == 0) {
                         if (animals.size() >= 4) {
-                            _npcChooseMove(tx, ty, npc, stats);
+                            npcChooseMove(tx, ty, npc, stats);
                         } else {
                             npc.setEnergy(npc.getEnergy() * 0.7);
                             int numEggs = (int) getStat(stats, "num_eggs");
@@ -404,7 +404,7 @@ public class Game {
                                 }
                             }
                             if (carcass != null) {
-                                _npcConsumeMeat(npc, carcass, stats);
+                                npcConsumeMeat(npc, carcass, stats);
                                 if (carcass.getWeight() <= 0) {
                                     map.removeAnimal(tx, ty, carcass);
                                 }
@@ -420,7 +420,7 @@ public class Game {
                                 }
                             }
                             if (targetEgg != null) {
-                                _npcConsumeEggs(npc, targetEgg, stats);
+                                npcConsumeEggs(npc, targetEgg, stats);
                                 if (targetEgg.getWeight() <= 0) {
                                     eggs.remove(targetEgg);
                                 }
@@ -428,7 +428,7 @@ public class Game {
                                 continue;
                             }
 
-                            if (npc.getAbilities().contains("digger") && _npcDigBurrow(tx, ty)) {
+                            if (npc.getAbilities().contains("digger") && npcDigBurrow(tx, ty)) {
                                 npc.setLastAction("act");
                                 continue;
                             }
@@ -442,7 +442,7 @@ public class Game {
                                 }
                             }
                             if (chosen != null) {
-                                _npcConsumePlant(npc, chosen, stats);
+                                npcConsumePlant(npc, chosen, stats);
                                 if (chosen.getWeight() <= 0) {
                                     plants.remove(chosen);
                                 }
@@ -452,20 +452,20 @@ public class Game {
                         }
                     }
 
-                    _npcChooseMove(tx, ty, npc, stats);
+                    npcChooseMove(tx, ty, npc, stats);
                     if (!"None".equals(npc.getNextMove())) {
                         npc.setLastAction("move");
                     }
                 }
             }
         }
-        _moveNpcs();
+        moveNpcs();
     }
 
     /**
      * Load encounter information for the player's current tile.
      */
-    private void _generateEncounters() {
+    private void generateEncounters() {
         List<EncounterEntry> entries = new ArrayList<>();
 
         // Clean up any invalid animals on this tile
@@ -577,7 +577,7 @@ public class Game {
     /**
      * Determine if an aggressive NPC immediately attacks the player.
      */
-    private String _aggressiveAttackCheck() {
+    private String aggressiveAttackCheck() {
         double playerA = Math.max(playerEffectiveAttack(), 0.1);
         Random r = new Random();
         for (EncounterEntry entry : currentEncounters) {
@@ -614,7 +614,7 @@ public class Game {
         return null;
     }
 
-    private void _updateEggs() {
+    private void updateEggs() {
         for (int ty = 0; ty < map.getHeight(); ty++) {
             for (int tx = 0; tx < map.getWidth(); tx++) {
                 List<EggCluster> cell = map.getEggs(tx, ty);
@@ -629,7 +629,7 @@ public class Game {
         }
     }
 
-    private void _applyBleedAndRegen(DinosaurStats dino, double regen,
+    private void applyBleedAndRegen(DinosaurStats dino, double regen,
                                      boolean moved, boolean allowRegen) {
         if (dino.getBleeding() > 0) {
             int mult = moved ? 2 : 1;
@@ -645,7 +645,7 @@ public class Game {
         }
     }
 
-    private void _applyTurnCosts(boolean moved, double multiplier) {
+    private void applyTurnCosts(boolean moved, double multiplier) {
         double drain = player.getHatchlingEnergyDrain();
         if (moved) {
             drain *= player.getWalkingEnergyDrainMultiplier();
@@ -659,12 +659,12 @@ public class Game {
         if (player.isExhausted()) {
             player.setHp(0.0);
         }
-        _applyBleedAndRegen(player, player.getHealthRegen(), moved, !player.isExhausted());
+        applyBleedAndRegen(player, player.getHealthRegen(), moved, !player.isExhausted());
     }
 
-    private void _startTurn() {
+    private void startTurn() {
         turn++;
-        _recordPopulation();
+        recordPopulation();
         if (weatherTurns >= 10) {
             weather = chooseWeather();
             weatherTurns = 0;
@@ -682,9 +682,9 @@ public class Game {
         map.updateVolcanicActivity();
         map.updateFlood(weather.getFloodChance());
         map.updateForestFire();
-        _updateEggs();
+        updateEggs();
         map.growPlants(StatsLoader.getPlantStats());
-        _spawnCritters(false);
+        spawnCritters(false);
         map.refreshBurrows();
         if (player.getTurnsUntilLayEggs() > 0) {
             player.setTurnsUntilLayEggs(player.getTurnsUntilLayEggs() - 1);
@@ -697,43 +697,43 @@ public class Game {
         }
 
         updateNpcs();
-        _generateEncounters();
-        _aggressiveAttackCheck();
+        generateEncounters();
+        aggressiveAttackCheck();
     }
 
     /** Move the player by the specified delta. */
     public void move(int dx, int dy) {
-        _startTurn();
+        startTurn();
         x = Math.max(0, Math.min(map.getWidth() - 1, x + dx));
         y = Math.max(0, Math.min(map.getHeight() - 1, y + dy));
         map.reveal(x, y);
-        _generateEncounters();
-        _aggressiveAttackCheck();
-        _applyTurnCosts(true, 1.0);
-        _checkVictory();
+        generateEncounters();
+        aggressiveAttackCheck();
+        applyTurnCosts(true, 1.0);
+        checkVictory();
         lastAction = "move";
     }
 
     /** Skip a turn without moving. */
     public void rest() {
-        _startTurn();
-        _generateEncounters();
-        _aggressiveAttackCheck();
-        _applyTurnCosts(false, 1.0);
-        _checkVictory();
+        startTurn();
+        generateEncounters();
+        aggressiveAttackCheck();
+        applyTurnCosts(false, 1.0);
+        checkVictory();
         lastAction = "stay";
     }
 
     /** Drink if the player is on a lake tile. */
     public void drink() {
-        _startTurn();
+        startTurn();
         if (map.terrainAt(x, y) == Terrain.LAKE) {
             player.setHydration(100.0);
         }
-        _generateEncounters();
-        _aggressiveAttackCheck();
-        _applyTurnCosts(false, 1.0);
-        _checkVictory();
+        generateEncounters();
+        aggressiveAttackCheck();
+        applyTurnCosts(false, 1.0);
+        checkVictory();
         lastAction = "drink";
     }
 
@@ -745,15 +745,15 @@ public class Game {
 
     /** Hunt the NPC with the given identifier on the current tile. */
     public void huntNpc(int id) {
-        _startTurn();
+        startTurn();
         NPCAnimal target = null;
         for (NPCAnimal npc : map.getAnimals(x, y)) {
             if (npc.getId() == id) { target = npc; break; }
         }
         if (target == null) {
-            _generateEncounters();
-            _aggressiveAttackCheck();
-            _applyTurnCosts(false, 1.0);
+            generateEncounters();
+            aggressiveAttackCheck();
+            applyTurnCosts(false, 1.0);
             lastAction = "hunt";
             return;
         }
@@ -767,7 +767,7 @@ public class Game {
         if (target.isAlive()) {
             double dmg = damageAfterArmor(targetAtk, stats,
                     StatsLoader.getDinoStats().getOrDefault(player.getName(), new DinosaurStats()));
-            boolean died = _applyDamage(dmg, player, StatsLoader.getDinoStats().get(player.getName()));
+            boolean died = applyDamage(dmg, player, StatsLoader.getDinoStats().get(player.getName()));
             if (dmg > 0 && target.getAbilities().contains("bleed") && player.getHp() > 0) {
                 int bleed = (player.getAbilities().contains("light_armor") || player.getAbilities().contains("heavy_armor")) ? 2 : 5;
                 player.setBleeding(bleed);
@@ -776,8 +776,8 @@ public class Game {
                 player.setBrokenBone(10);
             }
             if (died) {
-                _generateEncounters();
-                _applyTurnCosts(false, 1.0);
+                generateEncounters();
+                applyTurnCosts(false, 1.0);
                 lastAction = "hunt";
                 return;
             }
@@ -785,7 +785,7 @@ public class Game {
 
         double dmgToTarget = damageAfterArmor(playerAtk,
                 StatsLoader.getDinoStats().get(player.getName()), stats);
-        boolean targetDied = _applyDamage(dmgToTarget, target, stats);
+        boolean targetDied = applyDamage(dmgToTarget, target, stats);
         if (dmgToTarget > 0 && player.getAbilities().contains("bleed") && target.getHp() > 0 && target.isAlive()) {
             int bleed = (target.getAbilities().contains("light_armor") || target.getAbilities().contains("heavy_armor")) ? 2 : 5;
             target.setBleeding(bleed);
@@ -802,28 +802,28 @@ public class Game {
             player.setEnergy(Math.min(100.0, player.getEnergy() + actual));
             double used = actual * player.getWeight() / 1000.0;
             double leftover = Math.max(0.0, meat - used);
-            double[] growth = _applyGrowth(leftover);
+            double[] growth = applyGrowth(leftover);
             target.setWeight(Math.max(0.0, target.getWeight() - (used + growth[0])));
             if (target.getWeight() <= 0) {
                 map.removeAnimal(x, y, target);
             }
         }
 
-        _generateEncounters();
-        _aggressiveAttackCheck();
-        _applyTurnCosts(false, 1.0);
-        _checkVictory();
+        generateEncounters();
+        aggressiveAttackCheck();
+        applyTurnCosts(false, 1.0);
+        checkVictory();
         lastAction = "hunt";
     }
 
     /** Eat eggs present on the current tile. */
     public void collectEggs() {
-        _startTurn();
+        startTurn();
         List<EggCluster> eggs = map.getEggs(x, y);
         if (eggs.isEmpty()) {
-            _generateEncounters();
-            _aggressiveAttackCheck();
-            _applyTurnCosts(false, 1.0);
+            generateEncounters();
+            aggressiveAttackCheck();
+            applyTurnCosts(false, 1.0);
             lastAction = "eggs";
             return;
         }
@@ -835,17 +835,17 @@ public class Game {
         player.setEnergy(Math.min(100.0, player.getEnergy() + actual));
         double used = actual * player.getWeight() / 1000.0;
         double leftover = Math.max(0.0, weight - used);
-        _applyGrowth(leftover);
-        _generateEncounters();
-        _aggressiveAttackCheck();
-        _applyTurnCosts(false, 1.0);
-        _checkVictory();
+        applyGrowth(leftover);
+        generateEncounters();
+        aggressiveAttackCheck();
+        applyTurnCosts(false, 1.0);
+        checkVictory();
         lastAction = "eggs";
     }
 
     /** Dig into a burrow on the current tile if present. */
     public void digBurrow() {
-        _startTurn();
+        startTurn();
         Burrow b = map.getBurrow(x, y);
         if (b != null && b.isFull()) {
             double gain = player.getAbilities().contains("digger") ? 100.0 : 25.0;
@@ -855,20 +855,20 @@ public class Game {
                 b.setProgress(0.0);
             }
         }
-        _generateEncounters();
-        _aggressiveAttackCheck();
-        _applyTurnCosts(false, 1.0);
-        _checkVictory();
+        generateEncounters();
+        aggressiveAttackCheck();
+        applyTurnCosts(false, 1.0);
+        checkVictory();
         lastAction = "dig";
     }
 
     /** Lay eggs if conditions allow. */
     public void layEggs() {
-        _startTurn();
-        if (!_canPlayerLayEggs()) {
-            _generateEncounters();
-            _aggressiveAttackCheck();
-            _applyTurnCosts(false, 1.0);
+        startTurn();
+        if (!canPlayerLayEggs()) {
+            generateEncounters();
+            aggressiveAttackCheck();
+            applyTurnCosts(false, 1.0);
             lastAction = "lay_eggs";
             return;
         }
@@ -877,16 +877,16 @@ public class Game {
         EggCluster ec = new EggCluster(player.getName(), 1, hatchW, 5, true);
         map.getEggs(x, y).add(ec);
         player.setTurnsUntilLayEggs(10);
-        _generateEncounters();
-        _aggressiveAttackCheck();
-        _applyTurnCosts(false, 1.0);
-        _checkVictory();
+        generateEncounters();
+        aggressiveAttackCheck();
+        applyTurnCosts(false, 1.0);
+        checkVictory();
         lastAction = "lay_eggs";
     }
 
     /** Mate with an NPC on the current tile. */
     public void mate(int partnerId) {
-        _startTurn();
+        startTurn();
         List<NPCAnimal> cell = map.getAnimals(x, y);
         NPCAnimal partner = null;
         for (NPCAnimal npc : cell) {
@@ -896,16 +896,16 @@ public class Game {
             cell.remove(partner);
             player.setMated(true);
         }
-        _generateEncounters();
-        _aggressiveAttackCheck();
-        _applyTurnCosts(false, 1.0);
-        _checkVictory();
+        generateEncounters();
+        aggressiveAttackCheck();
+        applyTurnCosts(false, 1.0);
+        checkVictory();
         lastAction = "mate";
     }
 
     /** Attempt to frighten nearby animals. */
     public void threaten() {
-        _startTurn();
+        startTurn();
         List<NPCAnimal> cell = map.getAnimals(x, y);
         double playerA = Math.max(playerEffectiveAttack(), 0.1);
         List<NPCAnimal> stronger = new ArrayList<>();
@@ -940,10 +940,10 @@ public class Game {
                 npc.setNextMove(opts.isEmpty()?"None":opts.get(r.nextInt(opts.size())));
             }
         }
-        _generateEncounters();
-        _aggressiveAttackCheck();
-        _applyTurnCosts(false, 2.0);
-        _checkVictory();
+        generateEncounters();
+        aggressiveAttackCheck();
+        applyTurnCosts(false, 2.0);
+        checkVictory();
         lastAction = "threaten";
     }
 
@@ -999,7 +999,7 @@ public class Game {
                 || statsDietHas(stats, "conifers") || statsDietHas(stats, "fruits");
     }
 
-    private boolean _applyBleedAndRegen(NPCAnimal npc, double regen) {
+    private boolean applyBleedAndRegen(NPCAnimal npc, double regen) {
         if (npc.getBleeding() > 0) {
             npc.setHp(Math.max(0.0, npc.getHp() - npc.getMaxHp() * 0.05));
             npc.setBleeding(npc.getBleeding() - 1);
@@ -1018,7 +1018,7 @@ public class Game {
         return false;
     }
 
-    private double _npcMaxGrowthGain(double weight, Object stats) {
+    private double npcMaxGrowthGain(double weight, Object stats) {
         double adult = getStat(stats, "adult_weight");
         if (adult <= 0 || weight >= adult) {
             return 0.0;
@@ -1030,8 +1030,8 @@ public class Game {
         return Math.min(gain, adult - weight);
     }
 
-    private void _npcApplyGrowth(NPCAnimal npc, double available, Object stats) {
-        double maxGain = _npcMaxGrowthGain(npc.getWeight(), stats);
+    private void npcApplyGrowth(NPCAnimal npc, double available, Object stats) {
+        double maxGain = npcMaxGrowthGain(npc.getWeight(), stats);
         double gain = Math.min(available, maxGain);
         double oldWeight = npc.getWeight();
         double adultW = getStat(stats, "adult_weight");
@@ -1047,48 +1047,48 @@ public class Game {
         npc.setHp(newMax * ratio);
     }
 
-    private void _npcConsumePlant(NPCAnimal npc, Plant plant, Object stats) {
+    private void npcConsumePlant(NPCAnimal npc, Plant plant, Object stats) {
         double energyNeeded = 100.0 - npc.getEnergy();
         double weightForEnergy = energyNeeded * npc.getWeight() / 1000.0;
-        double growthTarget = _npcMaxGrowthGain(npc.getWeight(), stats);
+        double growthTarget = npcMaxGrowthGain(npc.getWeight(), stats);
         double eatAmount = Math.min(plant.getWeight(), weightForEnergy + growthTarget);
         double energyGainPossible = 1000 * eatAmount / Math.max(npc.getWeight(), 0.1);
         double actualGain = Math.min(energyNeeded, energyGainPossible);
         npc.setEnergy(Math.min(100.0, npc.getEnergy() + actualGain));
         double used = actualGain * npc.getWeight() / 1000.0;
         double remaining = eatAmount - used;
-        _npcApplyGrowth(npc, remaining, stats);
+        npcApplyGrowth(npc, remaining, stats);
         plant.setWeight(plant.getWeight() - eatAmount);
     }
 
-    private void _npcConsumeMeat(NPCAnimal npc, NPCAnimal carcass, Object stats) {
+    private void npcConsumeMeat(NPCAnimal npc, NPCAnimal carcass, Object stats) {
         double energyNeeded = 100.0 - npc.getEnergy();
         double weightForEnergy = energyNeeded * npc.getWeight() / 1000.0;
-        double growthTarget = _npcMaxGrowthGain(npc.getWeight(), stats);
+        double growthTarget = npcMaxGrowthGain(npc.getWeight(), stats);
         double eatAmount = Math.min(carcass.getWeight(), weightForEnergy + growthTarget);
         double energyGainPossible = 1000 * eatAmount / Math.max(npc.getWeight(), 0.1);
         double actualGain = Math.min(energyNeeded, energyGainPossible);
         npc.setEnergy(Math.min(100.0, npc.getEnergy() + actualGain));
         double used = actualGain * npc.getWeight() / 1000.0;
         double remaining = eatAmount - used;
-        _npcApplyGrowth(npc, remaining, stats);
+        npcApplyGrowth(npc, remaining, stats);
         carcass.setWeight(carcass.getWeight() - eatAmount);
     }
 
-    private void _npcConsumeEggs(NPCAnimal npc, EggCluster egg, Object stats) {
+    private void npcConsumeEggs(NPCAnimal npc, EggCluster egg, Object stats) {
         double energyNeeded = 100.0 - npc.getEnergy();
-        double growthTarget = _npcMaxGrowthGain(npc.getWeight(), stats);
+        double growthTarget = npcMaxGrowthGain(npc.getWeight(), stats);
         double eatAmount = egg.getWeight();
         double energyGainPossible = 1000 * eatAmount / Math.max(npc.getWeight(), 0.1);
         double actualGain = Math.min(energyNeeded, energyGainPossible);
         npc.setEnergy(Math.min(100.0, npc.getEnergy() + actualGain));
         double used = actualGain * npc.getWeight() / 1000.0;
         double remaining = eatAmount - used;
-        _npcApplyGrowth(npc, remaining, stats);
+        npcApplyGrowth(npc, remaining, stats);
         egg.setWeight(egg.getWeight() - eatAmount);
     }
 
-    private boolean _npcDigBurrow(int x, int y) {
+    private boolean npcDigBurrow(int x, int y) {
         Burrow b = map.getBurrow(x, y);
         if (b == null || !b.isFull()) {
             return false;
@@ -1117,7 +1117,7 @@ public class Game {
         return Math.max(speed, 0.1);
     }
 
-    private void _npcChooseMove(int x, int y, NPCAnimal npc, Object stats) {
+    private void npcChooseMove(int x, int y, NPCAnimal npc, Object stats) {
         Random r = new Random();
         if (r.nextDouble() < 0.5) {
             npc.setNextMove("None");
@@ -1147,7 +1147,7 @@ public class Game {
         }
     }
 
-    private void _moveNpcs() {
+    private void moveNpcs() {
         class Move { int x; int y; int nx; int ny; NPCAnimal npc; Move(int x,int y,int nx,int ny,NPCAnimal n){this.x=x;this.y=y;this.nx=nx;this.ny=ny;this.npc=n;} }
         List<Move> moves = new ArrayList<>();
         java.util.Map<String,int[]> dirs = java.util.Map.of(
@@ -1181,7 +1181,7 @@ public class Game {
     // Player growth and combat helpers
     // ------------------------------------------------------------------
 
-    private double _maxGrowthGain() {
+    private double maxGrowthGain() {
         double weight = player.getWeight();
         double adult = player.getAdultWeight();
         if (weight >= adult) return 0.0;
@@ -1192,8 +1192,8 @@ public class Game {
         return Math.min(gain, adult - weight);
     }
 
-    private double[] _applyGrowth(double available) {
-        double maxGain = _maxGrowthGain();
+    private double[] applyGrowth(double available) {
+        double maxGain = maxGrowthGain();
         double weightGain = Math.min(available, maxGain);
         double oldWeight = player.getWeight();
         player.setWeight(Math.min(player.getWeight() + weightGain, player.getAdultWeight()));
@@ -1212,7 +1212,7 @@ public class Game {
         return new double[]{weightGain, maxGain};
     }
 
-    private boolean _canPlayerLayEggs() {
+    private boolean canPlayerLayEggs() {
         List<NPCAnimal> animals = map.getAnimals(x, y);
         return player.getWeight() >= player.getAdultWeight()
                 && player.getEnergy() >= 80
@@ -1249,7 +1249,7 @@ public class Game {
         return dmg * Math.max(0.0, 1.0 - eff / 100.0);
     }
 
-    private boolean _applyDamage(double damage, DinosaurStats dino, DinosaurStats stats) {
+    private boolean applyDamage(double damage, DinosaurStats dino, DinosaurStats stats) {
         double maxHp = statFromWeight(dino.getWeight(), stats.getAdultWeight(), stats.getHatchlingHp(), stats.getAdultHp());
         dino.setMaxHp(maxHp);
         if (dino.getHp() > maxHp) dino.setHp(maxHp);
@@ -1257,7 +1257,7 @@ public class Game {
         return dino.getHp() <= 0;
     }
 
-    private boolean _applyDamage(double damage, NPCAnimal npc, Object stats) {
+    private boolean applyDamage(double damage, NPCAnimal npc, Object stats) {
         double maxHp = scaleByWeight(npc.getWeight(), getStat(stats, "adult_weight"), getStat(stats, "hp"));
         npc.setMaxHp(maxHp);
         if (npc.getHp() > maxHp) npc.setHp(maxHp);
@@ -1267,7 +1267,7 @@ public class Game {
         return died;
     }
 
-    private boolean _npcDamageAdvantage(double hunterAtk, double hunterHp, Object hunterStats,
+    private boolean npcDamageAdvantage(double hunterAtk, double hunterHp, Object hunterStats,
                                          double targetAtk, double targetHp, Object targetStats) {
         double dmgToTarget = damageAfterArmor(hunterAtk, hunterStats, targetStats);
         double dmgToHunter = damageAfterArmor(targetAtk, targetStats, hunterStats);
@@ -1307,7 +1307,7 @@ public class Game {
         return pctHunter < pctTarget;
     }
 
-    private void _checkVictory() {
+    private void checkVictory() {
         if (!won && descendantCount() >= DESCENDANTS_TO_WIN) {
             won = true;
         }
@@ -1342,7 +1342,7 @@ public class Game {
         return count;
     }
 
-    private void _recordPopulation() {
+    private void recordPopulation() {
         java.util.Map<String, Integer> counts = populationStats();
         for (String name : populationHistory.keySet()) {
             List<Integer> list = populationHistory.get(name);
