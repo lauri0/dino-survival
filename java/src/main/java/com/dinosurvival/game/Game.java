@@ -723,6 +723,208 @@ public class Game {
         lastAction = "drink";
     }
 
+    /** Convenience movement helpers matching the Python API. */
+    public void moveNorth() { move(0, -1); }
+    public void moveSouth() { move(0, 1); }
+    public void moveEast()  { move(1, 0); }
+    public void moveWest()  { move(-1, 0); }
+
+    /** Hunt the NPC with the given identifier on the current tile. */
+    public void huntNpc(int id) {
+        _startTurn();
+        NPCAnimal target = null;
+        for (NPCAnimal npc : map.getAnimals(x, y)) {
+            if (npc.getId() == id) { target = npc; break; }
+        }
+        if (target == null) {
+            _generateEncounters();
+            _aggressiveAttackCheck();
+            _applyTurnCosts(false, 1.0);
+            lastAction = "hunt";
+            return;
+        }
+
+        Object stats = StatsLoader.getDinoStats().get(target.getName());
+        if (stats == null) stats = StatsLoader.getCritterStats().get(target.getName());
+
+        double playerAtk = playerEffectiveAttack();
+        double targetAtk = target.isAlive() ? npcEffectiveAttack(target, stats, x, y) : 0.0;
+
+        if (target.isAlive()) {
+            double dmg = damageAfterArmor(targetAtk, stats,
+                    StatsLoader.getDinoStats().getOrDefault(player.getName(), new DinosaurStats()));
+            boolean died = _applyDamage(dmg, player, StatsLoader.getDinoStats().get(player.getName()));
+            if (dmg > 0 && target.getAbilities().contains("bleed") && player.getHp() > 0) {
+                int bleed = (player.getAbilities().contains("light_armor") || player.getAbilities().contains("heavy_armor")) ? 2 : 5;
+                player.setBleeding(bleed);
+            }
+            if (dmg > 0 && target.getAbilities().contains("bone_break") && target.getWeight() >= player.getWeight()/3 && player.getHp() > 0) {
+                player.setBrokenBone(10);
+            }
+            if (died) {
+                _generateEncounters();
+                _applyTurnCosts(false, 1.0);
+                lastAction = "hunt";
+                return;
+            }
+        }
+
+        double dmgToTarget = damageAfterArmor(playerAtk,
+                StatsLoader.getDinoStats().get(player.getName()), stats);
+        boolean targetDied = _applyDamage(dmgToTarget, target, stats);
+        if (dmgToTarget > 0 && player.getAbilities().contains("bleed") && target.getHp() > 0 && target.isAlive()) {
+            int bleed = (target.getAbilities().contains("light_armor") || target.getAbilities().contains("heavy_armor")) ? 2 : 5;
+            target.setBleeding(bleed);
+        }
+        if (dmgToTarget > 0 && player.getAbilities().contains("bone_break") && player.getWeight() >= target.getWeight()/3 && target.getHp() > 0) {
+            target.setBrokenBone(10);
+        }
+
+        if (!target.isAlive()) {
+            double meat = target.getWeight();
+            double energyGain = 1000 * meat / Math.max(player.getWeight(), 0.1);
+            double need = 100.0 - player.getEnergy();
+            double actual = Math.min(energyGain, need);
+            player.setEnergy(Math.min(100.0, player.getEnergy() + actual));
+            double used = actual * player.getWeight() / 1000.0;
+            double leftover = Math.max(0.0, meat - used);
+            double[] growth = _applyGrowth(leftover);
+            target.setWeight(Math.max(0.0, target.getWeight() - (used + growth[0])));
+            if (target.getWeight() <= 0) {
+                map.removeAnimal(x, y, target);
+            }
+        }
+
+        _generateEncounters();
+        _aggressiveAttackCheck();
+        _applyTurnCosts(false, 1.0);
+        lastAction = "hunt";
+    }
+
+    /** Eat eggs present on the current tile. */
+    public void collectEggs() {
+        _startTurn();
+        List<EggCluster> eggs = map.getEggs(x, y);
+        if (eggs.isEmpty()) {
+            _generateEncounters();
+            _aggressiveAttackCheck();
+            _applyTurnCosts(false, 1.0);
+            lastAction = "eggs";
+            return;
+        }
+        EggCluster egg = eggs.remove(0);
+        double weight = egg.getWeight();
+        double energyGain = 1000 * weight / Math.max(player.getWeight(), 0.1);
+        double need = 100.0 - player.getEnergy();
+        double actual = Math.min(energyGain, need);
+        player.setEnergy(Math.min(100.0, player.getEnergy() + actual));
+        double used = actual * player.getWeight() / 1000.0;
+        double leftover = Math.max(0.0, weight - used);
+        _applyGrowth(leftover);
+        _generateEncounters();
+        _aggressiveAttackCheck();
+        _applyTurnCosts(false, 1.0);
+        lastAction = "eggs";
+    }
+
+    /** Dig into a burrow on the current tile if present. */
+    public void digBurrow() {
+        _startTurn();
+        Burrow b = map.getBurrow(x, y);
+        if (b != null && b.isFull()) {
+            double gain = player.getAbilities().contains("digger") ? 100.0 : 25.0;
+            b.setProgress(Math.min(100.0, b.getProgress() + gain));
+            if (b.getProgress() >= 100.0) {
+                b.setFull(false);
+                b.setProgress(0.0);
+            }
+        }
+        _generateEncounters();
+        _aggressiveAttackCheck();
+        _applyTurnCosts(false, 1.0);
+        lastAction = "dig";
+    }
+
+    /** Lay eggs if conditions allow. */
+    public void layEggs() {
+        _startTurn();
+        if (!_canPlayerLayEggs()) {
+            _generateEncounters();
+            _aggressiveAttackCheck();
+            _applyTurnCosts(false, 1.0);
+            lastAction = "lay_eggs";
+            return;
+        }
+        player.setEnergy(player.getEnergy() * 0.7);
+        double hatchW = player.getHatchlingWeight();
+        EggCluster ec = new EggCluster(player.getName(), 1, hatchW, 5, true);
+        map.getEggs(x, y).add(ec);
+        player.setTurnsUntilLayEggs(10);
+        _generateEncounters();
+        _aggressiveAttackCheck();
+        _applyTurnCosts(false, 1.0);
+        lastAction = "lay_eggs";
+    }
+
+    /** Mate with an NPC on the current tile. */
+    public void mate(int partnerId) {
+        _startTurn();
+        List<NPCAnimal> cell = map.getAnimals(x, y);
+        NPCAnimal partner = null;
+        for (NPCAnimal npc : cell) {
+            if (npc.getId() == partnerId) { partner = npc; break; }
+        }
+        if (partner != null) {
+            cell.remove(partner);
+            player.setMated(true);
+        }
+        _generateEncounters();
+        _aggressiveAttackCheck();
+        _applyTurnCosts(false, 1.0);
+        lastAction = "mate";
+    }
+
+    /** Attempt to frighten nearby animals. */
+    public void threaten() {
+        _startTurn();
+        List<NPCAnimal> cell = map.getAnimals(x, y);
+        double playerA = Math.max(playerEffectiveAttack(), 0.1);
+        List<NPCAnimal> stronger = new ArrayList<>();
+        List<NPCAnimal> weaker = new ArrayList<>();
+        for (NPCAnimal npc : cell) {
+            if (!npc.isAlive()) continue;
+            Object stats = StatsLoader.getDinoStats().get(npc.getName());
+            if (stats == null) stats = StatsLoader.getCritterStats().get(npc.getName());
+            double npcA = npcEffectiveAttack(npc, stats, x, y);
+            if (npcA > playerA) stronger.add(npc); else weaker.add(npc);
+        }
+        Random r = new Random();
+        if (!stronger.isEmpty()) {
+            player.setHp(0.0);
+        } else {
+            java.util.Map<String,int[]> dirs = java.util.Map.of(
+                    "Up", new int[]{0,-1}, "Right", new int[]{1,0},
+                    "Down", new int[]{0,1}, "Left", new int[]{-1,0});
+            for (NPCAnimal npc : weaker) {
+                List<String> opts = new ArrayList<>();
+                boolean canWalk = !getBool(StatsLoader.getDinoStats().getOrDefault(npc.getName(), StatsLoader.getCritterStats().get(npc.getName())), "can_walk", true) ? false : true;
+                for (var e : dirs.entrySet()) {
+                    int nx = x + e.getValue()[0];
+                    int ny = y + e.getValue()[1];
+                    if (nx<0||ny<0||nx>=map.getWidth()||ny>=map.getHeight()) continue;
+                    Terrain t = map.terrainAt(nx, ny);
+                    if (!canWalk && t != Terrain.LAKE) continue;
+                    opts.add(e.getKey());
+                }
+                npc.setNextMove(opts.isEmpty()?"None":opts.get(r.nextInt(opts.size())));
+            }
+        }
+        _generateEncounters();
+        _aggressiveAttackCheck();
+        _applyTurnCosts(false, 2.0);
+        lastAction = "threaten";
+    }
+
     // ------------------------------------------------------------------
     // Helper methods for NPC logic
     // ------------------------------------------------------------------
@@ -951,6 +1153,136 @@ public class Game {
             map.addAnimal(m.nx, m.ny, m.npc);
             m.npc.setNextMove("None");
         }
+    }
+
+    // ------------------------------------------------------------------
+    // Player growth and combat helpers
+    // ------------------------------------------------------------------
+
+    private double _maxGrowthGain() {
+        double weight = player.getWeight();
+        double adult = player.getAdultWeight();
+        if (weight >= adult) return 0.0;
+        double maxWeight = adult * 1.05;
+        double r = player.getGrowthRate();
+        if (r == 0.0) r = 0.35;
+        double gain = r * weight * (1 - weight / maxWeight);
+        return Math.min(gain, adult - weight);
+    }
+
+    private double[] _applyGrowth(double available) {
+        double maxGain = _maxGrowthGain();
+        double weightGain = Math.min(available, maxGain);
+        double oldWeight = player.getWeight();
+        player.setWeight(Math.min(player.getWeight() + weightGain, player.getAdultWeight()));
+        if (player.getAdultWeight() > 0) {
+            double pct = player.getWeight() / player.getAdultWeight();
+            pct = Math.max(0.0, Math.min(pct, 1.0));
+            player.setAttack(player.getAdultAttack() * pct);
+            double oldMax = statFromWeight(oldWeight, player.getAdultWeight(), player.getHatchlingHp(), player.getAdultHp());
+            double newMax = statFromWeight(player.getWeight(), player.getAdultWeight(), player.getHatchlingHp(), player.getAdultHp());
+            double ratio = oldMax <= 0 ? 1.0 : player.getHp() / oldMax;
+            player.setMaxHp(newMax);
+            player.setHp(newMax * ratio);
+            player.setSpeed(statFromWeight(player.getWeight(), player.getAdultWeight(),
+                    player.getHatchlingSpeed(), player.getAdultSpeed()));
+        }
+        return new double[]{weightGain, maxGain};
+    }
+
+    private boolean _canPlayerLayEggs() {
+        List<NPCAnimal> animals = map.getAnimals(x, y);
+        return player.getWeight() >= player.getAdultWeight()
+                && player.getEnergy() >= 80
+                && player.getHp() >= player.getMaxHp() * 0.8
+                && player.getTurnsUntilLayEggs() == 0
+                && animals.size() < 4;
+    }
+
+    private List<String> abilities(Object stats) {
+        if (stats instanceof DinosaurStats ds) {
+            return ds.getAbilities();
+        } else if (stats instanceof java.util.Map<?,?> map) {
+            Object val = map.get("abilities");
+            if (val instanceof List<?> list) {
+                List<String> out = new ArrayList<>();
+                for (Object o : list) out.add(o.toString());
+                return out;
+            }
+        }
+        return List.of();
+    }
+
+    private double effectiveArmor(Object targetStats, Object attackerStats) {
+        List<String> abil = abilities(targetStats);
+        double base = 0.0;
+        if (abil.contains("heavy_armor")) base = 40.0;
+        else if (abil.contains("light_armor")) base = 20.0;
+        if (abilities(attackerStats).contains("bone_break")) base *= 0.5;
+        return Math.max(0.0, base);
+    }
+
+    private double damageAfterArmor(double dmg, Object attackerStats, Object targetStats) {
+        double eff = effectiveArmor(targetStats, attackerStats);
+        return dmg * Math.max(0.0, 1.0 - eff / 100.0);
+    }
+
+    private boolean _applyDamage(double damage, DinosaurStats dino, DinosaurStats stats) {
+        double maxHp = statFromWeight(dino.getWeight(), stats.getAdultWeight(), stats.getHatchlingHp(), stats.getAdultHp());
+        dino.setMaxHp(maxHp);
+        if (dino.getHp() > maxHp) dino.setHp(maxHp);
+        dino.setHp(Math.max(0.0, dino.getHp() - damage));
+        return dino.getHp() <= 0;
+    }
+
+    private boolean _applyDamage(double damage, NPCAnimal npc, Object stats) {
+        double maxHp = scaleByWeight(npc.getWeight(), getStat(stats, "adult_weight"), getStat(stats, "hp"));
+        npc.setMaxHp(maxHp);
+        if (npc.getHp() > maxHp) npc.setHp(maxHp);
+        npc.setHp(Math.max(0.0, npc.getHp() - damage));
+        boolean died = npc.getHp() <= 0;
+        if (died) { npc.setAlive(false); npc.setAge(-1); npc.setSpeed(0.0); }
+        return died;
+    }
+
+    private boolean _npcDamageAdvantage(double hunterAtk, double hunterHp, Object hunterStats,
+                                         double targetAtk, double targetHp, Object targetStats) {
+        double dmgToTarget = damageAfterArmor(hunterAtk, hunterStats, targetStats);
+        double dmgToHunter = damageAfterArmor(targetAtk, targetStats, hunterStats);
+
+        int targetBleed = 0;
+        int hunterBleed = 0;
+        if (dmgToTarget > 0 && abilities(hunterStats).contains("bleed")) {
+            if (abilities(targetStats).contains("light_armor") || abilities(targetStats).contains("heavy_armor"))
+                targetBleed = 2; else targetBleed = 5;
+        }
+        if (dmgToHunter > 0 && abilities(targetStats).contains("bleed")) {
+            if (abilities(hunterStats).contains("light_armor") || abilities(hunterStats).contains("heavy_armor"))
+                hunterBleed = 2; else hunterBleed = 5;
+        }
+
+        boolean bleed = targetBleed > 0 || hunterBleed > 0;
+        double bleedDmgTarget = bleed ? targetBleed * 0.05 * targetHp : 0.0;
+        double bleedDmgHunter = bleed ? hunterBleed * 0.05 * hunterHp : 0.0;
+
+        double regenDmgTarget = 0.0;
+        double regenDmgHunter = 0.0;
+        if (bleed) {
+            double regenTarget = getStat(targetStats, "health_regen");
+            double regenHunter = getStat(hunterStats, "health_regen");
+            int regenTurnsTarget = Math.max(0, 5 - targetBleed);
+            int regenTurnsHunter = Math.max(0, 5 - hunterBleed);
+            regenDmgTarget = -regenTarget / 100.0 * targetHp * regenTurnsTarget;
+            regenDmgHunter = -regenHunter / 100.0 * hunterHp * regenTurnsHunter;
+        }
+
+        double totalTarget = Math.max(0.0, dmgToTarget + bleedDmgTarget + regenDmgTarget);
+        double totalHunter = Math.max(0.0, dmgToHunter + bleedDmgHunter + regenDmgHunter);
+
+        double pctTarget = totalTarget / Math.max(targetHp, 0.1);
+        double pctHunter = totalHunter / Math.max(hunterHp, 0.1);
+
+        return pctHunter < pctTarget;
     }
 
 
