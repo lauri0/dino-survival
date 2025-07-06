@@ -1,4 +1,27 @@
 {
+  "Avisaurus": {
+    "abilities": [
+      "flight"
+    ]
+    "adult_speed": 140,
+    "adult_weight": 1.7,
+    "aggressive": false,
+    "aquatic_boost": 0.0,
+    "attack": 0.6,
+    "avg_spawned_per_turn": 0.2,
+    "can_be_juvenile": false,
+    "can_walk": true,
+    "class": "bird",
+    "health_regen": 2.5,
+    "hp": 1.2,
+    "image": "assets/dinosaurs/avisaurus.png",
+    "maximum_individuals": 10,
+    "name": "Centipede",
+    "preferred_biomes": [
+      "swamp",
+      "forest"
+    ]
+  },
   "Centipede": {
     "adult_speed": 55,
     "adult_weight": 1.0,
