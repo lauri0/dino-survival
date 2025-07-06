@@ -296,13 +296,160 @@ public class Game {
     }
 
     private void updateNpcs() {
-        for (NPCAnimal npc : spawned) {
-            if (!npc.isAlive()) continue;
-            npc.setEnergy(Math.max(0.0, npc.getEnergy() - 1.0 * weather.getNpcEnergyMult()));
-            if (npc.getEnergy() <= 0) {
-                npc.setAlive(false);
+        Random r = new Random();
+        for (int ty = 0; ty < map.getHeight(); ty++) {
+            for (int tx = 0; tx < map.getWidth(); tx++) {
+                List<NPCAnimal> animals = new ArrayList<>(map.getAnimals(tx, ty));
+                List<Plant> plants = map.getPlants(tx, ty);
+                List<EggCluster> eggs = map.getEggs(tx, ty);
+                for (NPCAnimal npc : animals) {
+                    if (npc.getWeight() <= 0) {
+                        map.removeAnimal(tx, ty, npc);
+                        continue;
+                    }
+
+                    if (npc.getHp() <= 0 && npc.isAlive()) {
+                        npc.setAlive(false);
+                        npc.setAge(-1);
+                        npc.setSpeed(0.0);
+                        continue;
+                    }
+
+                    if (!npc.isAlive()) {
+                        continue;
+                    }
+
+                    npc.setAge(npc.getAge() + 1);
+                    String prev = npc.getLastAction();
+                    npc.setLastAction("stay");
+                    if ("spawned".equals(prev)) {
+                        continue;
+                    }
+                    if (npc.getAbilities().contains("ambush")) {
+                        if ("stay".equals(prev)) {
+                            npc.setAmbushStreak(Math.min(npc.getAmbushStreak() + 1, 3));
+                        } else {
+                            npc.setAmbushStreak(0);
+                        }
+                    }
+
+                    Object stats = StatsLoader.getDinoStats().get(npc.getName());
+                    if (stats == null) {
+                        stats = StatsLoader.getCritterStats().get(npc.getName());
+                    }
+                    if (stats == null) {
+                        continue;
+                    }
+
+                    npc.setNextMove("None");
+                    if (npc.getTurnsUntilLayEggs() > 0) {
+                        npc.setTurnsUntilLayEggs(npc.getTurnsUntilLayEggs() - 1);
+                    }
+
+                    double drain = getStat(stats, "adult_energy_drain") * 0.5 * weather.getNpcEnergyMult();
+                    npc.setEnergy(Math.max(0.0, npc.getEnergy() - drain));
+                    if (npc.getEnergy() <= 0) {
+                        npc.setAlive(false);
+                        npc.setAge(-1);
+                        npc.setSpeed(0.0);
+                        continue;
+                    }
+
+                    double regen = getStat(stats, "health_regen");
+                    if (_applyBleedAndRegen(npc, regen)) {
+                        continue;
+                    }
+
+                    double adultWeight = getStat(stats, "adult_weight");
+                    boolean canBeJuvenile = getBool(stats, "can_be_juvenile", true);
+                    if (npc.getWeight() >= adultWeight && canBeJuvenile
+                            && npc.getEnergy() >= 80 && npc.getHp() >= npc.getMaxHp() * 0.8
+                            && npc.getTurnsUntilLayEggs() == 0) {
+                        if (animals.size() >= 4) {
+                            _npcChooseMove(tx, ty, npc, stats);
+                        } else {
+                            npc.setEnergy(npc.getEnergy() * 0.7);
+                            int numEggs = (int) getStat(stats, "num_eggs");
+                            if (numEggs > 0) {
+                                double hatchW = getStat(stats, "hatchling_weight");
+                                if (hatchW <= 0) hatchW = Math.max(1.0, adultWeight * 0.001);
+                                EggCluster ec = new EggCluster(npc.getName(), numEggs,
+                                        hatchW * numEggs, 5, npc.isDescendant());
+                                eggs.add(ec);
+                            }
+                            npc.setTurnsUntilLayEggs((int) getStat(stats, "egg_laying_interval"));
+                            npc.setLastAction("act");
+                            continue;
+                        }
+                    }
+
+                    if (npc.getEnergy() <= 90) {
+                        if (statsDietHas(stats, "meat")) {
+                            NPCAnimal carcass = null;
+                            for (NPCAnimal other : animals) {
+                                if (other != npc && !other.isAlive() && other.getWeight() > 0) {
+                                    if (carcass == null || other.getWeight() > carcass.getWeight()) {
+                                        carcass = other;
+                                    }
+                                }
+                            }
+                            if (carcass != null) {
+                                _npcConsumeMeat(npc, carcass, stats);
+                                if (carcass.getWeight() <= 0) {
+                                    map.removeAnimal(tx, ty, carcass);
+                                }
+                                npc.setLastAction("act");
+                                continue;
+                            }
+
+                            EggCluster targetEgg = null;
+                            for (EggCluster e : eggs) {
+                                if (!npc.getName().equals(e.getSpecies())) {
+                                    targetEgg = e;
+                                    break;
+                                }
+                            }
+                            if (targetEgg != null) {
+                                _npcConsumeEggs(npc, targetEgg, stats);
+                                if (targetEgg.getWeight() <= 0) {
+                                    eggs.remove(targetEgg);
+                                }
+                                npc.setLastAction("act");
+                                continue;
+                            }
+
+                            if (npc.getAbilities().contains("digger") && _npcDigBurrow(tx, ty)) {
+                                npc.setLastAction("act");
+                                continue;
+                            }
+                        }
+
+                        if (statsDietHasPlant(stats) && !plants.isEmpty()) {
+                            Plant chosen = null;
+                            for (Plant p : plants) {
+                                if (chosen == null || p.getWeight() > chosen.getWeight()) {
+                                    chosen = p;
+                                }
+                            }
+                            if (chosen != null) {
+                                _npcConsumePlant(npc, chosen, stats);
+                                if (chosen.getWeight() <= 0) {
+                                    plants.remove(chosen);
+                                }
+                                npc.setLastAction("act");
+                                continue;
+                            }
+                        }
+                    }
+
+                    _npcChooseMove(tx, ty, npc, stats);
+                    if (!"None".equals(npc.getNextMove())) {
+                        npc.setLastAction("move");
+                    }
+                }
             }
         }
+        _moveNpcs();
     }
 
     /**
@@ -575,6 +722,237 @@ public class Game {
         _applyTurnCosts(false, 1.0);
         lastAction = "drink";
     }
+
+    // ------------------------------------------------------------------
+    // Helper methods for NPC logic
+    // ------------------------------------------------------------------
+
+    private double getStat(Object stats, String key) {
+        if (stats instanceof DinosaurStats ds) {
+            return switch (key) {
+                case "adult_weight" -> ds.getAdultWeight();
+                case "adult_energy_drain" -> ds.getAdultEnergyDrain();
+                case "health_regen" -> ds.getHealthRegen();
+                case "hatchling_speed" -> ds.getHatchlingSpeed();
+                case "adult_speed" -> ds.getAdultSpeed();
+                case "attack" -> ds.getAttack();
+                case "hatchling_weight" -> ds.getHatchlingWeight();
+                default -> 0.0;
+            };
+        } else if (stats instanceof java.util.Map<?,?> map) {
+            Object val = map.get(key);
+            if (val instanceof Number n) return n.doubleValue();
+        }
+        return 0.0;
+    }
+
+    private boolean getBool(Object stats, String key, boolean def) {
+        if (stats instanceof java.util.Map<?,?> map) {
+            Object val = map.get(key);
+            if (val instanceof Boolean b) return b;
+        }
+        return def;
+    }
+
+    private boolean statsDietHas(Object stats, String diet) {
+        if (stats instanceof DinosaurStats ds) {
+            for (var d : ds.getDiet()) {
+                if (d.name().equalsIgnoreCase(diet)) return true;
+            }
+        } else if (stats instanceof java.util.Map<?,?> map) {
+            Object val = map.get("diet");
+            if (val instanceof List<?> list) {
+                for (Object o : list) {
+                    if (o.toString().equalsIgnoreCase(diet)) return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean statsDietHasPlant(Object stats) {
+        return statsDietHas(stats, "ferns") || statsDietHas(stats, "cycads")
+                || statsDietHas(stats, "conifers") || statsDietHas(stats, "fruits");
+    }
+
+    private boolean _applyBleedAndRegen(NPCAnimal npc, double regen) {
+        if (npc.getBleeding() > 0) {
+            npc.setHp(Math.max(0.0, npc.getHp() - npc.getMaxHp() * 0.05));
+            npc.setBleeding(npc.getBleeding() - 1);
+            if (npc.getHp() <= 0) {
+                npc.setAlive(false);
+                npc.setAge(-1);
+                npc.setSpeed(0.0);
+                return true;
+            }
+        } else if (regen > 0 && npc.getHp() < npc.getMaxHp()) {
+            npc.setHp(Math.min(npc.getMaxHp(), npc.getHp() + npc.getMaxHp() * regen / 100.0));
+        }
+        if (npc.getBrokenBone() > 0) {
+            npc.setBrokenBone(npc.getBrokenBone() - 1);
+        }
+        return false;
+    }
+
+    private double _npcMaxGrowthGain(double weight, Object stats) {
+        double adult = getStat(stats, "adult_weight");
+        if (adult <= 0 || weight >= adult) {
+            return 0.0;
+        }
+        double maxWeight = adult * 1.05;
+        double r = getStat(stats, "growth_rate");
+        if (r == 0.0) r = 0.35;
+        double gain = r * weight * (1 - weight / maxWeight);
+        return Math.min(gain, adult - weight);
+    }
+
+    private void _npcApplyGrowth(NPCAnimal npc, double available, Object stats) {
+        double maxGain = _npcMaxGrowthGain(npc.getWeight(), stats);
+        double gain = Math.min(available, maxGain);
+        double oldWeight = npc.getWeight();
+        double adultW = getStat(stats, "adult_weight");
+        npc.setWeight(Math.min(npc.getWeight() + gain, adultW));
+        double pct = adultW > 0 ? npc.getWeight() / adultW : 1.0;
+        pct = Math.max(0.0, Math.min(pct, 1.0));
+        double baseAtk = getStat(stats, "attack");
+        npc.setAttack(baseAtk * pct);
+        double oldMax = scaleByWeight(oldWeight, adultW, getStat(stats, "hp"));
+        double newMax = scaleByWeight(npc.getWeight(), adultW, getStat(stats, "hp"));
+        double ratio = oldMax <= 0 ? 1.0 : npc.getHp() / oldMax;
+        npc.setMaxHp(newMax);
+        npc.setHp(newMax * ratio);
+    }
+
+    private void _npcConsumePlant(NPCAnimal npc, Plant plant, Object stats) {
+        double energyNeeded = 100.0 - npc.getEnergy();
+        double weightForEnergy = energyNeeded * npc.getWeight() / 1000.0;
+        double growthTarget = _npcMaxGrowthGain(npc.getWeight(), stats);
+        double eatAmount = Math.min(plant.getWeight(), weightForEnergy + growthTarget);
+        double energyGainPossible = 1000 * eatAmount / Math.max(npc.getWeight(), 0.1);
+        double actualGain = Math.min(energyNeeded, energyGainPossible);
+        npc.setEnergy(Math.min(100.0, npc.getEnergy() + actualGain));
+        double used = actualGain * npc.getWeight() / 1000.0;
+        double remaining = eatAmount - used;
+        _npcApplyGrowth(npc, remaining, stats);
+        plant.setWeight(plant.getWeight() - eatAmount);
+    }
+
+    private void _npcConsumeMeat(NPCAnimal npc, NPCAnimal carcass, Object stats) {
+        double energyNeeded = 100.0 - npc.getEnergy();
+        double weightForEnergy = energyNeeded * npc.getWeight() / 1000.0;
+        double growthTarget = _npcMaxGrowthGain(npc.getWeight(), stats);
+        double eatAmount = Math.min(carcass.getWeight(), weightForEnergy + growthTarget);
+        double energyGainPossible = 1000 * eatAmount / Math.max(npc.getWeight(), 0.1);
+        double actualGain = Math.min(energyNeeded, energyGainPossible);
+        npc.setEnergy(Math.min(100.0, npc.getEnergy() + actualGain));
+        double used = actualGain * npc.getWeight() / 1000.0;
+        double remaining = eatAmount - used;
+        _npcApplyGrowth(npc, remaining, stats);
+        carcass.setWeight(carcass.getWeight() - eatAmount);
+    }
+
+    private void _npcConsumeEggs(NPCAnimal npc, EggCluster egg, Object stats) {
+        double energyNeeded = 100.0 - npc.getEnergy();
+        double growthTarget = _npcMaxGrowthGain(npc.getWeight(), stats);
+        double eatAmount = egg.getWeight();
+        double energyGainPossible = 1000 * eatAmount / Math.max(npc.getWeight(), 0.1);
+        double actualGain = Math.min(energyNeeded, energyGainPossible);
+        npc.setEnergy(Math.min(100.0, npc.getEnergy() + actualGain));
+        double used = actualGain * npc.getWeight() / 1000.0;
+        double remaining = eatAmount - used;
+        _npcApplyGrowth(npc, remaining, stats);
+        egg.setWeight(egg.getWeight() - eatAmount);
+    }
+
+    private boolean _npcDigBurrow(int x, int y) {
+        Burrow b = map.getBurrow(x, y);
+        if (b == null || !b.isFull()) {
+            return false;
+        }
+        b.setFull(false);
+        b.setProgress(0.0);
+        return true;
+    }
+
+    private double npcEffectiveSpeed(NPCAnimal npc, Object stats) {
+        double speed;
+        double adultW = getStat(stats, "adult_weight");
+        double hatchSpeed = getStat(stats, "hatchling_speed");
+        double adultSpeed = getStat(stats, "adult_speed");
+        if (hatchSpeed > 0 || adultSpeed > 0) {
+            speed = statFromWeight(npc.getWeight(), adultW, hatchSpeed, adultSpeed);
+        } else {
+            speed = adultSpeed;
+        }
+        if (npc.getAbilities().contains("ambush")) {
+            speed *= 1 + Math.min(npc.getAmbushStreak(), 3) * 0.05;
+        }
+        if (npc.getBrokenBone() > 0) {
+            speed *= 0.5;
+        }
+        return Math.max(speed, 0.1);
+    }
+
+    private void _npcChooseMove(int x, int y, NPCAnimal npc, Object stats) {
+        Random r = new Random();
+        if (r.nextDouble() < 0.5) {
+            npc.setNextMove("None");
+            return;
+        }
+        java.util.Map<String, int[]> dirs = java.util.Map.of(
+                "Up", new int[]{0, -1},
+                "Right", new int[]{1, 0},
+                "Down", new int[]{0, 1},
+                "Left", new int[]{-1, 0});
+        boolean canWalk = !getBool(stats, "can_walk", true) ? false : true;
+        List<String> candidates = new ArrayList<>();
+        for (var e : dirs.entrySet()) {
+            int nx = x + e.getValue()[0];
+            int ny = y + e.getValue()[1];
+            if (nx < 0 || ny < 0 || nx >= map.getWidth() || ny >= map.getHeight())
+                continue;
+            Terrain t = map.terrainAt(nx, ny);
+            if (t == Terrain.TOXIC_BADLANDS) continue;
+            if (!canWalk && t != Terrain.LAKE) continue;
+            candidates.add(e.getKey());
+        }
+        if (candidates.isEmpty()) {
+            npc.setNextMove("None");
+        } else {
+            npc.setNextMove(candidates.get(r.nextInt(candidates.size())));
+        }
+    }
+
+    private void _moveNpcs() {
+        class Move { int x; int y; int nx; int ny; NPCAnimal npc; Move(int x,int y,int nx,int ny,NPCAnimal n){this.x=x;this.y=y;this.nx=nx;this.ny=ny;this.npc=n;} }
+        List<Move> moves = new ArrayList<>();
+        java.util.Map<String,int[]> dirs = java.util.Map.of(
+                "Up", new int[]{0,-1},
+                "Right", new int[]{1,0},
+                "Down", new int[]{0,1},
+                "Left", new int[]{-1,0});
+        for (int ty=0; ty<map.getHeight(); ty++) {
+            for (int tx=0; tx<map.getWidth(); tx++) {
+                for (NPCAnimal npc : map.getAnimals(tx, ty)) {
+                    String d = npc.getNextMove();
+                    if (d == null || d.equals("None")) continue;
+                    if (npc.getBleeding() > 0 || !npc.isAlive()) { npc.setNextMove("None"); continue; }
+                    int[] dd = dirs.getOrDefault(d, new int[]{0,0});
+                    int nx = tx + dd[0];
+                    int ny = ty + dd[1];
+                    if (nx>=0 && nx<map.getWidth() && ny>=0 && ny<map.getHeight()) {
+                        moves.add(new Move(tx,ty,nx,ny,npc));
+                    }
+                }
+            }
+        }
+        for (Move m : moves) {
+            map.removeAnimal(m.x, m.y, m.npc);
+            map.addAnimal(m.nx, m.ny, m.npc);
+            m.npc.setNextMove("None");
+        }
+    }
+
 
     public Map getMap() {
         return map;
