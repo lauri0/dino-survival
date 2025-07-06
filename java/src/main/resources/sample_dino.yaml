@@ -1,6 +1,5 @@
 name: Testosaurus
 stats:
-  health: 10
+  hp: 10
   attack: 5
-  defense: 2
-diet: CARNIVORE
+diet: MEAT

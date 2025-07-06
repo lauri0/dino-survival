@@ -12,7 +12,7 @@ public class YamlLoaderTest {
         try (InputStream in = getClass().getResourceAsStream("/sample_dino.yaml")) {
             DinosaurData data = YamlLoader.load(in, DinosaurData.class);
             Assertions.assertEquals("Testosaurus", data.getName());
-            Assertions.assertEquals(10, data.getStats().getHealth());
+            Assertions.assertEquals(10, data.getStats().getHp());
         }
     }
 }
