@@ -9,6 +9,9 @@ import com.dinosurvival.model.NPCAnimal;
 import com.dinosurvival.util.StatsLoader;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import javax.imageio.ImageIO;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,6 +39,33 @@ public class GameWindow extends JFrame {
     private final JButton threatenButton = new JButton("Threaten");
     private final JButton layButton = new JButton("Lay Eggs");
 
+    private ImageIcon loadScaledIcon(String path, int width, int height) {
+        java.net.URL url = getClass().getResource(path);
+        if (url == null) {
+            return null;
+        }
+        try {
+            BufferedImage img = ImageIO.read(url);
+            double scaleW = (double) width / img.getWidth();
+            double scaleH = (double) height / img.getHeight();
+            double scale = Math.max(scaleW, scaleH);
+            int newW = (int) Math.round(img.getWidth() * scale);
+            int newH = (int) Math.round(img.getHeight() * scale);
+            Image scaled = img.getScaledInstance(newW, newH, Image.SCALE_SMOOTH);
+            BufferedImage resized = new BufferedImage(newW, newH, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g2 = resized.createGraphics();
+            g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            g2.drawImage(scaled, 0, 0, null);
+            g2.dispose();
+            int x = Math.max(0, (newW - width) / 2);
+            int y = Math.max(0, (newH - height) / 2);
+            BufferedImage cropped = resized.getSubimage(x, y, width, height);
+            return new ImageIcon(cropped);
+        } catch (IOException ex) {
+            return null;
+        }
+    }
+
     public GameWindow(Game game) {
         super("Dino Survival");
         this.game = game;
@@ -57,9 +87,9 @@ public class GameWindow extends JFrame {
         dinoPanel.add(dinoImageLabel, BorderLayout.CENTER);
         String dName = game.getPlayer().getName();
         String imgPath = "/assets/dinosaurs/" + dName.toLowerCase().replace(" ", "_") + ".png";
-        java.net.URL dUrl = getClass().getResource(imgPath);
-        if (dUrl != null) {
-            dinoImageLabel.setIcon(new ImageIcon(dUrl));
+        ImageIcon dIcon = loadScaledIcon(imgPath, 400, 250);
+        if (dIcon != null) {
+            dinoImageLabel.setIcon(dIcon);
         }
         c.gridx = 0;
         c.gridy = 0;
@@ -198,6 +228,8 @@ public class GameWindow extends JFrame {
         buildMap();
         refreshAll();
         pack();
+        setMinimumSize(new Dimension(1700, 1000));
+        setSize(1700, 1000);
         setLocationRelativeTo(null);
     }
 
@@ -271,9 +303,8 @@ public class GameWindow extends JFrame {
         Terrain t = game.getMap().terrainAt(game.getPlayerX(), game.getPlayerY());
         ImageIcon icon = biomeImages.get(t.getName());
         if (icon == null) {
-            java.net.URL url = getClass().getResource("/assets/biomes/" + t.getName() + ".png");
-            if (url != null) {
-                icon = new ImageIcon(url);
+            icon = loadScaledIcon("/assets/biomes/" + t.getName() + ".png", 400, 250);
+            if (icon != null) {
                 biomeImages.put(t.getName(), icon);
             }
         }
@@ -284,9 +315,9 @@ public class GameWindow extends JFrame {
     private void updateDinoImage() {
         String dName = game.getPlayer().getName();
         String path = "/assets/dinosaurs/" + dName.toLowerCase().replace(" ", "_") + ".png";
-        java.net.URL url = getClass().getResource(path);
-        if (url != null) {
-            dinoImageLabel.setIcon(new ImageIcon(url));
+        ImageIcon icon = loadScaledIcon(path, 400, 250);
+        if (icon != null) {
+            dinoImageLabel.setIcon(icon);
         }
         dinoImageLabel.setText(dName);
     }
@@ -309,9 +340,8 @@ public class GameWindow extends JFrame {
                 if (icon == null) {
                     String path = stats.getImage();
                     if (path != null && !path.isEmpty()) {
-                        java.net.URL u = getClass().getResource("/" + path);
-                        if (u != null) {
-                            icon = new ImageIcon(u);
+                        icon = loadScaledIcon("/" + path, 100, 63);
+                        if (icon != null) {
                             plantImages.put(p.getName(), icon);
                         }
                     }
@@ -363,8 +393,8 @@ public class GameWindow extends JFrame {
             row.add(btns, BorderLayout.EAST);
 
             if (e.getBurrow() != null) {
-                java.net.URL u = getClass().getResource("/assets/other/burrow.png");
-                if (u != null) img.setIcon(new ImageIcon(u));
+                ImageIcon bIcon = loadScaledIcon("/assets/other/burrow.png", 100, 70);
+                if (bIcon != null) img.setIcon(bIcon);
                 info.add(new JLabel("Burrow" + (e.getBurrow().isFull() ? " (Full)" : " (Empty)")));
                 info.add(new JLabel(String.format("Dig: %.0f%%", e.getBurrow().getProgress())));
                 actBtn.setText("Dig");
@@ -382,9 +412,8 @@ public class GameWindow extends JFrame {
                 ImageIcon icon = npcImages.get(name);
                 if (icon == null) {
                     String path = "/assets/dinosaurs/" + name.toLowerCase().replace(" ", "_") + ".png";
-                    java.net.URL u = getClass().getResource(path);
-                    if (u != null) {
-                        icon = new ImageIcon(u);
+                    icon = loadScaledIcon(path, 100, 70);
+                    if (icon != null) {
                         npcImages.put(name, icon);
                     }
                 }
