@@ -32,3 +32,19 @@ successful hunts and total turns across every dinosaur you've played.
 
 Each dinosaur's base attributes are defined in `dinosurvival/dino_stats_morrison.yaml`.
 
+
+## Java Version
+
+A simple Java implementation is included under the `java` directory. It uses Maven for builds.
+
+### Building
+
+```bash
+mvn -f java/pom.xml package
+```
+
+### Running
+
+```bash
+java -cp java/target/dino-survival.jar com.dinosurvival.ui.Main
+```
