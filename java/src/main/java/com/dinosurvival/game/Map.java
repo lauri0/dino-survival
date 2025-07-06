@@ -291,6 +291,33 @@ public class Map {
     }
 
     // ---------------------------------------------------------------------
+    // Basic accessors for animals used by the Game logic. These mirror the
+    // simple data structures in the Python implementation and allow the Java
+    // Game class to manipulate NPCs.
+    // ---------------------------------------------------------------------
+
+    /**
+     * Get the mutable list of animals present at the given coordinates.
+     */
+    public List<NPCAnimal> getAnimals(int x, int y) {
+        return animals[y][x];
+    }
+
+    /**
+     * Add an animal to the specified tile.
+     */
+    public void addAnimal(int x, int y, NPCAnimal npc) {
+        animals[y][x].add(npc);
+    }
+
+    /**
+     * Remove an animal from the specified tile.
+     */
+    public void removeAnimal(int x, int y, NPCAnimal npc) {
+        animals[y][x].remove(npc);
+    }
+
+    // ---------------------------------------------------------------------
     // Minimal implementations of dynamic map effects. These are greatly
     // simplified compared to the Python version but allow tests to invoke
     // the methods without throwing errors.
