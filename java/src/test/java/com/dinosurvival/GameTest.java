@@ -15,9 +15,9 @@ import org.junit.jupiter.api.Test;
 public class GameTest {
     @BeforeAll
     public static void setup() throws Exception {
-        Path link = Path.of("dinosurvival");
-        if (!Files.exists(link)) {
-            Files.createSymbolicLink(link, Path.of("..", "dinosurvival"));
+        Path base = Path.of("..", "dinosurvival");
+        if (Files.exists(base)) {
+            StatsLoader.load(base, "Morrison");
         }
     }
 
