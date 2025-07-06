@@ -1,8 +1,16 @@
 package com.dinosurvival.model;
 
+/**
+ * A plant instance present on the map. Mirrors the Python {@code Plant} dataclass.
+ */
 public class Plant {
+
     private String name;
-    private PlantStats stats;
+    private double weight;
+
+    public Plant() {
+        // default constructor
+    }
 
     public String getName() {
         return name;
@@ -12,11 +20,11 @@ public class Plant {
         this.name = name;
     }
 
-    public PlantStats getStats() {
-        return stats;
+    public double getWeight() {
+        return weight;
     }
 
-    public void setStats(PlantStats stats) {
-        this.stats = stats;
+    public void setWeight(double weight) {
+        this.weight = weight;
     }
 }
