@@ -12,6 +12,7 @@ public class GameWindow extends JFrame {
     private final JTextArea logArea = new JTextArea();
     private final JPanel mapPanel = new JPanel();
     private final JLabel biomeLabel = new JLabel();
+    private final JLabel dinoImageLabel = new JLabel();
     private final Game game;
     private JLabel[][] mapCells;
     private final Map<String, ImageIcon> biomeImages = new HashMap<>();
@@ -20,15 +21,66 @@ public class GameWindow extends JFrame {
         super("Dino Survival");
         this.game = game;
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setLayout(new BorderLayout());
+
+        JPanel main = new JPanel(new GridBagLayout());
+        setContentPane(main);
 
         mapPanel.setLayout(new GridLayout(game.getMap().getHeight(), game.getMap().getWidth()));
-        add(mapPanel, BorderLayout.CENTER);
 
-        JPanel right = new JPanel();
-        right.setLayout(new BoxLayout(right, BoxLayout.Y_AXIS));
-        add(right, BorderLayout.EAST);
+        GridBagConstraints c = new GridBagConstraints();
+        c.insets = new Insets(10, 10, 10, 10);
+        c.fill = GridBagConstraints.BOTH;
 
+        // Dinosaur image (row 0, column 0)
+        dinoImageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        JPanel dinoPanel = new JPanel(new BorderLayout());
+        dinoPanel.setPreferredSize(new Dimension(200, 250));
+        dinoPanel.add(dinoImageLabel, BorderLayout.CENTER);
+        String dName = game.getPlayer().getName();
+        String imgPath = "/assets/dinosaurs/" + dName.toLowerCase().replace(" ", "_") + ".png";
+        java.net.URL dUrl = getClass().getResource(imgPath);
+        if (dUrl != null) {
+            dinoImageLabel.setIcon(new ImageIcon(dUrl));
+        }
+        c.gridx = 0;
+        c.gridy = 0;
+        c.weightx = 0;
+        c.weighty = 0;
+        main.add(dinoPanel, c);
+
+        // Stats and misc buttons under the dinosaur image (row 1, column 0)
+        JPanel statsPanel = new JPanel();
+        statsPanel.setPreferredSize(new Dimension(200, 200));
+        statsPanel.setLayout(new BoxLayout(statsPanel, BoxLayout.Y_AXIS));
+        JButton stats = new JButton("Stats");
+        stats.addActionListener(e -> new StatsDialog(this, game).setVisible(true));
+        JButton legacy = new JButton("Legacy Stats");
+        legacy.addActionListener(e -> new LegacyStatsDialog(this, "Morrison", game.getPlayer().getName()).setVisible(true));
+        JButton quit = new JButton("Quit");
+        quit.addActionListener(e -> dispose());
+        statsPanel.add(stats);
+        statsPanel.add(legacy);
+        statsPanel.add(quit);
+        c.gridx = 0;
+        c.gridy = 1;
+        c.weightx = 0;
+        c.weighty = 1;
+        main.add(statsPanel, c);
+
+        // Biome display (row 0, column 1)
+        JPanel biomePanel = new JPanel(new BorderLayout());
+        biomePanel.setPreferredSize(new Dimension(200, 250));
+        biomeLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        biomePanel.add(biomeLabel, BorderLayout.CENTER);
+        c.gridx = 1;
+        c.gridy = 0;
+        c.weightx = 0;
+        c.weighty = 0;
+        main.add(biomePanel, c);
+
+        // Movement buttons and plant list (row 1, column 1)
+        JPanel btnFrame = new JPanel(new BorderLayout());
+        btnFrame.setPreferredSize(new Dimension(200, 200));
         JPanel btns = new JPanel(new GridLayout(4, 2, 5, 5));
         JButton north = new JButton("North");
         JButton south = new JButton("South");
@@ -38,27 +90,79 @@ public class GameWindow extends JFrame {
         JButton drink = new JButton("Drink");
         JButton threaten = new JButton("Threaten");
         JButton lay = new JButton("Lay Eggs");
-        btns.add(north); btns.add(south); btns.add(east); btns.add(west);
-        btns.add(stay); btns.add(drink); btns.add(threaten); btns.add(lay);
-        right.add(btns);
+        btns.add(north);
+        btns.add(south);
+        btns.add(east);
+        btns.add(west);
+        btns.add(stay);
+        btns.add(drink);
+        btns.add(threaten);
+        btns.add(lay);
+        btnFrame.add(btns, BorderLayout.NORTH);
+        JPanel plantList = new JPanel();
+        btnFrame.add(plantList, BorderLayout.CENTER);
+        c.gridx = 1;
+        c.gridy = 1;
+        c.weightx = 0;
+        c.weighty = 1;
+        main.add(btnFrame, c);
 
-        JButton stats = new JButton("Stats");
-        stats.addActionListener(e -> new StatsDialog(this, game).setVisible(true));
-        JButton legacy = new JButton("Legacy Stats");
-        legacy.addActionListener(e -> new LegacyStatsDialog(this, "Morrison", game.getPlayer().getName()).setVisible(true));
-        JButton quit = new JButton("Quit");
-        quit.addActionListener(e -> dispose());
-        JPanel misc = new JPanel();
-        misc.add(stats); misc.add(legacy); misc.add(quit);
-        right.add(misc);
+        // Map (row 0, column 2)
+        c.gridx = 2;
+        c.gridy = 0;
+        c.weightx = 1;
+        c.weighty = 0;
+        main.add(mapPanel, c);
 
+        // Encounter list (row 1, column 2)
+        JTextArea encounterArea = new JTextArea();
+        encounterArea.setEditable(false);
+        JScrollPane encounterScroll = new JScrollPane(encounterArea);
+        c.gridx = 2;
+        c.gridy = 1;
+        c.weightx = 1;
+        c.weighty = 1;
+        main.add(encounterScroll, c);
+
+        // Weather info (row 0, column 3)
+        JPanel weatherPanel = new JPanel();
+        weatherPanel.setPreferredSize(new Dimension(200, 250));
+        JLabel weatherLabel = new JLabel();
+        JLabel weatherInfo = new JLabel();
+        weatherLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        weatherPanel.setLayout(new BoxLayout(weatherPanel, BoxLayout.Y_AXIS));
+        weatherPanel.add(weatherLabel);
+        weatherPanel.add(weatherInfo);
+        c.gridx = 3;
+        c.gridy = 0;
+        c.weightx = 0;
+        c.weighty = 0;
+        main.add(weatherPanel, c);
+
+        // Population tracker (row 1, column 3)
+        JTextArea popArea = new JTextArea();
+        popArea.setEditable(false);
+        JScrollPane popScroll = new JScrollPane(popArea);
+        popScroll.setPreferredSize(new Dimension(200, 200));
+        c.gridx = 3;
+        c.gridy = 1;
+        c.weightx = 0;
+        c.weighty = 1;
+        main.add(popScroll, c);
+
+        // Log area at the bottom spanning two columns
         JScrollPane scroll = new JScrollPane(logArea);
         logArea.setEditable(false);
-        scroll.setPreferredSize(new Dimension(200, 150));
-        add(scroll, BorderLayout.SOUTH);
+        scroll.setPreferredSize(new Dimension(400, 150));
+        c.gridx = 0;
+        c.gridy = 2;
+        c.gridwidth = 2;
+        c.weightx = 0;
+        c.weighty = 0;
+        main.add(scroll, c);
+        c.gridwidth = 1;
 
-        add(biomeLabel, BorderLayout.NORTH);
-
+        // Wire button actions
         north.addActionListener(e -> doAction(() -> game.moveNorth(), "Moved north"));
         south.addActionListener(e -> doAction(() -> game.moveSouth(), "Moved south"));
         east.addActionListener(e -> doAction(() -> game.moveEast(), "Moved east"));
@@ -92,7 +196,7 @@ public class GameWindow extends JFrame {
             for (int x = 0; x < gmap.getWidth(); x++) {
                 JLabel lbl = new JLabel(" ", SwingConstants.CENTER);
                 lbl.setOpaque(true);
-                lbl.setPreferredSize(new Dimension(20, 20));
+                lbl.setPreferredSize(new Dimension(22, 22));
                 mapPanel.add(lbl);
                 mapCells[y][x] = lbl;
             }
@@ -119,6 +223,7 @@ public class GameWindow extends JFrame {
     private void refreshAll() {
         refreshMap();
         updateBiomeImage();
+        updateDinoImage();
     }
 
     private void refreshMap() {
@@ -148,5 +253,15 @@ public class GameWindow extends JFrame {
         }
         biomeLabel.setIcon(icon);
         biomeLabel.setText(t.getName());
+    }
+
+    private void updateDinoImage() {
+        String dName = game.getPlayer().getName();
+        String path = "/assets/dinosaurs/" + dName.toLowerCase().replace(" ", "_") + ".png";
+        java.net.URL url = getClass().getResource(path);
+        if (url != null) {
+            dinoImageLabel.setIcon(new ImageIcon(url));
+        }
+        dinoImageLabel.setText(dName);
     }
 }
