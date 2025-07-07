@@ -950,8 +950,20 @@ public class Game {
         }
     }
 
+    /**
+     * Base energy drain depends on the player's current weight.
+     * Hatchling drain is used until the player exceeds half of its
+     * adult weight.
+     */
+    private double baseEnergyDrain() {
+        double halfAdult = player.getAdultWeight() / 2.0;
+        return player.getWeight() <= halfAdult
+                ? player.getHatchlingEnergyDrain()
+                : player.getAdultEnergyDrain();
+    }
+
     void applyTurnCosts(boolean moved, double multiplier) {
-        double drain = player.getHatchlingEnergyDrain();
+        double drain = baseEnergyDrain();
         if (moved) {
             drain *= WALKING_ENERGY_DRAIN_MULTIPLIER;
             if (player.getBrokenBone() > 0) {
