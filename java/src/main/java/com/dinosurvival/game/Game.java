@@ -35,6 +35,7 @@ public class Game {
     private List<Plant> currentPlants = new ArrayList<>();
     private String lastAction = "";
     private final java.util.Map<String, List<Integer>> populationHistory = new java.util.HashMap<>();
+    private final java.util.Map<String, int[]> huntStats = new java.util.HashMap<>();
     private final List<Integer> turnHistory = new ArrayList<>();
     private String formation;
 
@@ -86,6 +87,7 @@ public class Game {
         weatherTurns = 0;
         populateAnimals();
         spawnCritters(true);
+        huntStats.clear();
         populationHistory.clear();
         for (String name : StatsLoader.getDinoStats().keySet()) {
             populationHistory.put(name, new ArrayList<>());
@@ -561,6 +563,11 @@ public class Game {
                 }
             }
         }
+        for (int ty = 0; ty < map.getHeight(); ty++) {
+            for (int tx = 0; tx < map.getWidth(); tx++) {
+                npcSimpleHunt(tx, ty, map.getAnimals(tx, ty));
+            }
+        }
         moveNpcs();
     }
 
@@ -864,6 +871,13 @@ public class Game {
             return;
         }
 
+        boolean wasAlive = target.isAlive();
+        int[] hunt = null;
+        if (wasAlive) {
+            hunt = huntStats.computeIfAbsent(target.getName(), k -> new int[]{0, 0});
+            hunt[0]++;
+        }
+
         Object stats = StatsLoader.getDinoStats().get(target.getName());
         if (stats == null) stats = StatsLoader.getCritterStats().get(target.getName());
 
@@ -912,6 +926,9 @@ public class Game {
             target.setWeight(Math.max(0.0, target.getWeight() - (used + growth[0])));
             if (target.getWeight() <= 0) {
                 map.removeAnimal(x, y, target);
+            }
+            if (wasAlive && hunt != null) {
+                hunt[1]++;
             }
         }
 
@@ -1288,6 +1305,33 @@ public class Game {
         }
     }
 
+    private void npcSimpleHunt(int x, int y, List<NPCAnimal> animals) {
+        if (animals.size() < 2) return;
+        NPCAnimal predator = null;
+        NPCAnimal prey = null;
+        for (NPCAnimal npc : animals) {
+            if (!npc.isAlive()) continue;
+            Object stats = StatsLoader.getDinoStats().get(npc.getName());
+            if (stats == null) stats = StatsLoader.getCritterStats().get(npc.getName());
+            if (stats == null) continue;
+            if (statsDietHas(stats, "meat")) { predator = npc; break; }
+        }
+        if (predator == null) return;
+        for (NPCAnimal npc : animals) {
+            if (npc != predator && npc.isAlive()) { prey = npc; break; }
+        }
+        if (prey == null) return;
+
+        Object predStats = StatsLoader.getDinoStats().get(predator.getName());
+        if (predStats == null) predStats = StatsLoader.getCritterStats().get(predator.getName());
+        Object preyStats = StatsLoader.getDinoStats().get(prey.getName());
+        if (preyStats == null) preyStats = StatsLoader.getCritterStats().get(prey.getName());
+        double predatorAtk = npcEffectiveAttack(predator, predStats, x, y);
+        double preyAtk = npcEffectiveAttack(prey, preyStats, x, y);
+        applyDamage(preyAtk, predator, predStats);
+        applyDamage(predatorAtk, prey, preyStats);
+    }
+
     private void moveNpcs() {
         class Move { int x; int y; int nx; int ny; NPCAnimal npc; Move(int x,int y,int nx,int ny,NPCAnimal n){this.x=x;this.y=y;this.nx=nx;this.ny=ny;this.npc=n;} }
         List<Move> moves = new ArrayList<>();
@@ -1509,6 +1553,10 @@ public class Game {
 
     public java.util.List<Integer> getTurnHistory() {
         return java.util.Collections.unmodifiableList(turnHistory);
+    }
+
+    public java.util.Map<String, int[]> getHuntStats() {
+        return java.util.Collections.unmodifiableMap(huntStats);
     }
 
     public int getPlayerX() {
