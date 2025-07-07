@@ -6,6 +6,8 @@ import com.dinosurvival.model.Plant;
 import com.dinosurvival.game.EncounterEntry;
 import com.dinosurvival.game.EggCluster;
 import com.dinosurvival.game.Burrow;
+import com.dinosurvival.game.Setting;
+import com.dinosurvival.game.Terrain;
 import java.util.Iterator;
 import com.dinosurvival.util.StatsLoader;
 import java.io.IOException;
@@ -54,7 +56,9 @@ public class Game {
      * world without depending on the Python code.
      */
     public void start() {
-        start("Morrison", null, new Random().nextLong());
+        Setting s = defaultSetting();
+        s.setFormation("Morrison");
+        start(s, null, new Random().nextLong());
     }
 
     /**
@@ -62,7 +66,9 @@ public class Game {
      * If {@code dinoName} is null the first available dinosaur is used.
      */
     public void start(String formation, String dinoName) {
-        start(formation, dinoName, new Random().nextLong());
+        Setting s = defaultSetting();
+        s.setFormation(formation);
+        start(s, dinoName, new Random().nextLong());
     }
 
     /**
@@ -70,15 +76,28 @@ public class Game {
      * the provided random seed for map generation.
      */
     public void start(String formation, String dinoName, long seed) {
+        Setting s = defaultSetting();
+        s.setFormation(formation);
+        start(s, dinoName, seed);
+    }
+
+    /**
+     * Start a new game using the provided {@link Setting} configuration.
+     *
+     * @param setting   world configuration to use
+     * @param dinoName  name of the player dinosaur (uses first available if null)
+     * @param seed      random seed for map generation
+     */
+    public void start(Setting setting, String dinoName, long seed) {
         try {
-            StatsLoader.load(Path.of("dinosurvival"), formation);
-            this.formation = formation;
+            StatsLoader.load(Path.of("dinosurvival"), setting.getFormation());
+            this.formation = setting.getFormation();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
-        map = new Map(18, 10, seed);
-        map.populateBurrows(5);
+        map = new Map(18, 10, setting, seed);
+        map.populateBurrows(setting.getNumBurrows());
         mammalSpecies.clear();
         for (var entry : StatsLoader.getCritterStats().entrySet()) {
             Object cls = entry.getValue().get("class");
@@ -96,7 +115,15 @@ public class Game {
             if (base == null) {
                 base = StatsLoader.getDinoStats().values().iterator().next();
             }
-            initialisePlayer(base);
+            DinosaurStats combined = cloneStats(base);
+            java.util.Map<String, java.util.Map<String, Object>> p = setting.getPlayableDinos();
+            if (p != null) {
+                java.util.Map<String, Object> overrides = p.get(combined.getName());
+                if (overrides != null) {
+                    applyDinoOverrides(combined, overrides);
+                }
+            }
+            initialisePlayer(combined);
         } else {
             player = new DinosaurStats();
         }
@@ -145,6 +172,63 @@ public class Game {
         dst.setDiet(new ArrayList<>(src.getDiet()));
         dst.setAbilities(new ArrayList<>(src.getAbilities()));
         return dst;
+    }
+
+    /**
+     * Apply any overrides from the provided map to the given statistics
+     * instance. Only recognised fields are updated.
+     */
+    private void applyDinoOverrides(DinosaurStats stats, java.util.Map<String, Object> overrides) {
+        Object gs = overrides.get("growth_stages");
+        if (gs == null) {
+            gs = overrides.get("growthStages");
+        }
+        if (gs instanceof Number num) {
+            stats.setGrowthStages(num.intValue());
+        } else if (gs != null) {
+            try {
+                stats.setGrowthStages(Integer.parseInt(gs.toString()));
+            } catch (NumberFormatException ignored) {
+                // ignore invalid value
+            }
+        }
+    }
+
+    /**
+     * Build a basic default {@link Setting} mirroring the one used by
+     * {@link Map} when no configuration is provided.
+     */
+    private static Setting defaultSetting() {
+        Setting s = new Setting();
+        java.util.Map<String, Terrain> terrains = new java.util.HashMap<>();
+        terrains.put("desert", Terrain.DESERT);
+        terrains.put("plains", Terrain.PLAINS);
+        terrains.put("woodlands", Terrain.WOODLANDS);
+        terrains.put("forest", Terrain.FOREST);
+        terrains.put("highland_forest", Terrain.HIGHLAND_FOREST);
+        terrains.put("swamp", Terrain.SWAMP);
+        terrains.put("lake", Terrain.LAKE);
+        terrains.put("mountain", Terrain.MOUNTAIN);
+        terrains.put("volcano", Terrain.VOLCANO);
+        terrains.put("volcano_erupting", Terrain.VOLCANO_ERUPTING);
+        terrains.put("lava", Terrain.LAVA);
+        terrains.put("solidified_lava_field", Terrain.SOLIDIFIED_LAVA_FIELD);
+        s.setTerrains(terrains);
+
+        java.util.Map<String, Double> heights = new java.util.HashMap<>();
+        heights.put("low", 0.3);
+        heights.put("normal", 0.4);
+        heights.put("hilly", 0.2);
+        heights.put("mountain", 0.1);
+        s.setHeightLevels(heights);
+
+        java.util.Map<String, Double> humidity = new java.util.HashMap<>();
+        humidity.put("arid", 0.35);
+        humidity.put("normal", 0.4);
+        humidity.put("humid", 0.25);
+        s.setHumidityLevels(humidity);
+        s.setNumBurrows(5);
+        return s;
     }
 
     /**
