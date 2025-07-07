@@ -112,6 +112,12 @@ public class Game {
         dst.setAdultEnergyDrain(src.getAdultEnergyDrain());
         dst.setGrowthRate(src.getGrowthRate());
         dst.setWalkingEnergyDrainMultiplier(src.getWalkingEnergyDrainMultiplier());
+        dst.setHealthRegen(src.getHealthRegen());
+        dst.setHydrationDrain(src.getHydrationDrain());
+        dst.setAquaticBoost(src.getAquaticBoost());
+        dst.setCanWalk(src.isCanWalk());
+        dst.setCanBeJuvenile(src.isCanBeJuvenile());
+        dst.setInitialSpawnMultiplier(src.getInitialSpawnMultiplier());
         dst.setDiet(new ArrayList<>(src.getDiet()));
         dst.setAbilities(new ArrayList<>(src.getAbilities()));
         return dst;
@@ -209,30 +215,99 @@ public class Game {
     /** Populate the map with initial dinosaur NPCs. */
     private void populateAnimals() {
         List<int[]> land = new ArrayList<>();
+        List<int[]> lake = new ArrayList<>();
         for (int ty = 0; ty < map.getHeight(); ty++) {
             for (int tx = 0; tx < map.getWidth(); tx++) {
                 Terrain t = map.terrainAt(tx, ty);
-                if (t != Terrain.LAKE && t != Terrain.TOXIC_BADLANDS) {
+                if (t == Terrain.LAKE) {
+                    lake.add(new int[]{tx, ty});
+                } else if (t != Terrain.TOXIC_BADLANDS) {
                     land.add(new int[]{tx, ty});
                 }
             }
         }
 
-        Random r = new Random();
-        StatsLoader.getDinoStats().forEach((name, stats) -> {
-            int spawnCount = (int) Math.max(1, stats.getAdultWeight() / 1000);
-            for (int i = 0; i < spawnCount && !land.isEmpty(); i++) {
-                int[] pos = land.get(r.nextInt(land.size()));
-                NPCAnimal npc = new NPCAnimal();
-                npc.setId(nextNpcId++);
-                npc.setName(name);
-                npc.setWeight(stats.getAdultWeight());
-                npc.setMaxHp(stats.getAdultHp());
-                npc.setHp(npc.getMaxHp());
-                map.addAnimal(pos[0], pos[1], npc);
-                spawned.add(npc);
+        List<java.util.Map.Entry<String, DinosaurStats>> species =
+                new ArrayList<>(StatsLoader.getDinoStats().entrySet());
+
+        java.util.Map<String, Double> multipliers = new java.util.HashMap<>();
+        double totalMult = 0.0;
+        for (var e : species) {
+            double m = e.getValue().getInitialSpawnMultiplier();
+            multipliers.put(e.getKey(), m);
+            totalMult += m;
+        }
+
+        int totalAnimals = 100;
+        java.util.Map<String, Integer> spawnCounts = new java.util.HashMap<>();
+        if (totalMult > 0) {
+            java.util.Map<String, Double> raw = new java.util.HashMap<>();
+            for (var e : multipliers.entrySet()) {
+                raw.put(e.getKey(), totalAnimals * e.getValue() / totalMult);
             }
-        });
+            java.util.Map<String, Integer> base = new java.util.HashMap<>();
+            int sum = 0;
+            for (var e : raw.entrySet()) {
+                int v = (int) Math.floor(e.getValue());
+                base.put(e.getKey(), v);
+                sum += v;
+            }
+            int leftover = totalAnimals - sum;
+            java.util.List<java.util.Map.Entry<String, Double>> rem = new java.util.ArrayList<>();
+            for (var e : raw.entrySet()) {
+                rem.add(new java.util.AbstractMap.SimpleEntry<>(e.getKey(), e.getValue() - base.get(e.getKey())));
+            }
+            rem.sort((a, b) -> Double.compare(b.getValue(), a.getValue()));
+            for (int i = 0; i < leftover; i++) {
+                String n = rem.get(i % rem.size()).getKey();
+                base.put(n, base.get(n) + 1);
+            }
+            spawnCounts = base;
+        }
+
+        Random r = new Random();
+        for (var e : species) {
+            String name = e.getKey();
+            DinosaurStats stats = e.getValue();
+            int oldCount = (int) Math.round(stats.getInitialSpawnMultiplier());
+            int spawnCount = spawnCounts.getOrDefault(name, 0);
+            List<int[]> tiles = stats.isCanWalk() ? land : lake;
+            int loopCount = Math.max(oldCount, spawnCount);
+            if (tiles.isEmpty() || loopCount <= 0) {
+                for (int i = 0; i < loopCount; i++) {
+                    if (!tiles.isEmpty()) {
+                        r.nextInt(tiles.size());
+                    }
+                    if (stats.isCanBeJuvenile()) {
+                        r.nextDouble();
+                    }
+                }
+                continue;
+            }
+            for (int i = 0; i < loopCount; i++) {
+                int[] pos = tiles.get(r.nextInt(tiles.size()));
+                double weight;
+                if (stats.isCanBeJuvenile()) {
+                    double max = Math.max(stats.getAdultWeight(), 0.0);
+                    weight = 3.0 + r.nextDouble() * (max - 3.0);
+                    if (weight > max) weight = max;
+                } else {
+                    weight = stats.getAdultWeight();
+                }
+                if (i < spawnCount) {
+                    double maxHp = scaleByWeight(weight, stats.getAdultWeight(), stats.getAdultHp());
+                    NPCAnimal npc = new NPCAnimal();
+                    npc.setId(nextNpcId++);
+                    npc.setName(name);
+                    npc.setWeight(weight);
+                    npc.setMaxHp(maxHp);
+                    npc.setHp(maxHp);
+                    npc.setAbilities(new ArrayList<>(stats.getAbilities()));
+                    map.addAnimal(pos[0], pos[1], npc);
+                    spawned.add(npc);
+                }
+            }
+        }
     }
 
     /** Spawn critter NPCs either for the initial game setup or a normal turn. */

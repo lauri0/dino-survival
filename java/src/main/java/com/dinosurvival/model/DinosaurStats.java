@@ -24,6 +24,9 @@ public class DinosaurStats {
     private double adultEnergyDrain = 0.0;
     private double growthRate = 0.35;
     private double walkingEnergyDrainMultiplier = 1.0;
+    private boolean canWalk = true;
+    private boolean canBeJuvenile = true;
+    private double initialSpawnMultiplier = 0.0;
 
     private double attack = 0.0;
     private double maxHp = 100.0;
@@ -169,6 +172,22 @@ public class DinosaurStats {
         this.walkingEnergyDrainMultiplier = walkingEnergyDrainMultiplier;
     }
 
+    public boolean isCanWalk() {
+        return canWalk;
+    }
+
+    public void setCanWalk(boolean canWalk) {
+        this.canWalk = canWalk;
+    }
+
+    public boolean isCanBeJuvenile() {
+        return canBeJuvenile;
+    }
+
+    public void setCanBeJuvenile(boolean canBeJuvenile) {
+        this.canBeJuvenile = canBeJuvenile;
+    }
+
     public double getAttack() {
         return attack;
     }
@@ -247,6 +266,14 @@ public class DinosaurStats {
 
     public void setAquaticBoost(double aquaticBoost) {
         this.aquaticBoost = aquaticBoost;
+    }
+
+    public double getInitialSpawnMultiplier() {
+        return initialSpawnMultiplier;
+    }
+
+    public void setInitialSpawnMultiplier(double initialSpawnMultiplier) {
+        this.initialSpawnMultiplier = initialSpawnMultiplier;
     }
 
     public boolean isMated() {
