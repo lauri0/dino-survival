@@ -15,6 +15,7 @@ public class StatsLoaderTest {
         DinosaurStats allo = StatsLoader.getDinoStats().get("Allosaurus");
         Assertions.assertNotNull(allo);
         Assertions.assertTrue(allo.getHatchlingWeight() >= 2.0);
+        Assertions.assertFalse(allo.getPreferredBiomes().isEmpty());
         PlantStats ferns = StatsLoader.getPlantStats().get("Ferns");
         Assertions.assertNotNull(ferns);
         Assertions.assertEquals("Ferns", ferns.getName());

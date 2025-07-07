@@ -42,6 +42,7 @@ public class DinosaurStats {
     private int turnsUntilLayEggs = 0;
     private List<Diet> diet = new ArrayList<>();
     private List<String> abilities = new ArrayList<>();
+    private List<String> preferredBiomes = new ArrayList<>();
     private int ambushStreak = 0;
     private int bleeding = 0;
     private int brokenBone = 0;
@@ -306,6 +307,14 @@ public class DinosaurStats {
 
     public void setAbilities(List<String> abilities) {
         this.abilities = abilities;
+    }
+
+    public List<String> getPreferredBiomes() {
+        return preferredBiomes;
+    }
+
+    public void setPreferredBiomes(List<String> preferredBiomes) {
+        this.preferredBiomes = preferredBiomes;
     }
 
     public int getAmbushStreak() {

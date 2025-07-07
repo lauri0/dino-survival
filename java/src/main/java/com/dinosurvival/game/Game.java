@@ -1426,6 +1426,8 @@ public class Game {
                 "Left", new int[]{-1, 0});
         boolean canWalk = !getBool(stats, "can_walk", true) ? false : true;
         List<String> candidates = new ArrayList<>();
+        List<String> preferredCandidates = new ArrayList<>();
+        List<String> prefBiomes = preferredBiomes(stats);
         for (var e : dirs.entrySet()) {
             int nx = x + e.getValue()[0];
             int ny = y + e.getValue()[1];
@@ -1435,12 +1437,19 @@ public class Game {
             if (t == Terrain.TOXIC_BADLANDS) continue;
             if (!canWalk && t != Terrain.LAKE) continue;
             candidates.add(e.getKey());
+            if (prefBiomes.contains(t.getName())) {
+                preferredCandidates.add(e.getKey());
+            }
         }
-        if (candidates.isEmpty()) {
-            npc.setNextMove("None");
-        } else {
-            npc.setNextMove(candidates.get(r.nextInt(candidates.size())));
+        String moveChoice = null;
+        if (!preferredCandidates.isEmpty() && !candidates.isEmpty() && r.nextDouble() < 0.2) {
+            moveChoice = candidates.get(r.nextInt(candidates.size()));
+        } else if (!preferredCandidates.isEmpty()) {
+            moveChoice = preferredCandidates.get(r.nextInt(preferredCandidates.size()));
+        } else if (!candidates.isEmpty()) {
+            moveChoice = candidates.get(r.nextInt(candidates.size()));
         }
+        npc.setNextMove(moveChoice != null ? moveChoice : "None");
     }
 
     /**
@@ -1617,6 +1626,21 @@ public class Game {
             return ds.getAbilities();
         } else if (stats instanceof java.util.Map<?,?> map) {
             Object val = map.get("abilities");
+            if (val instanceof List<?> list) {
+                List<String> out = new ArrayList<>();
+                for (Object o : list) out.add(o.toString());
+                return out;
+            }
+        }
+        return List.of();
+    }
+
+    private List<String> preferredBiomes(Object stats) {
+        if (stats instanceof DinosaurStats ds) {
+            List<String> pref = ds.getPreferredBiomes();
+            return pref != null ? pref : List.of();
+        } else if (stats instanceof java.util.Map<?,?> map) {
+            Object val = map.get("preferred_biomes");
             if (val instanceof List<?> list) {
                 List<String> out = new ArrayList<>();
                 for (Object o : list) out.add(o.toString());
