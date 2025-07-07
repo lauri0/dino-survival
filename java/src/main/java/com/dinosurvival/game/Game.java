@@ -762,6 +762,10 @@ public class Game {
         applyBleedAndRegen(player, player.getHealthRegen(), moved, !player.isExhausted());
     }
 
+    void applyTurnCosts(boolean moved) {
+        applyTurnCosts(moved, 1.0);
+    }
+
     private void startTurn() {
         turn++;
         recordPopulation();
