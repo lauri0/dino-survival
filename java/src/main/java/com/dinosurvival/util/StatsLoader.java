@@ -136,6 +136,15 @@ public class StatsLoader {
             stats.put("abilities", abil);
         }
 
+        Object pref = stats.get("preferred_biomes");
+        if (pref instanceof List<?> list) {
+            List<String> biomes = new ArrayList<>();
+            for (Object b : list) {
+                biomes.add(b.toString());
+            }
+            stats.put("preferred_biomes", biomes);
+        }
+
         double adultWeight = getDouble(stats.get("adult_weight"));
         double hatchWeight;
         if (stats.containsKey("hatchling_weight")) {
