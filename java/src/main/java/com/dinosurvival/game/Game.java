@@ -38,6 +38,7 @@ public class Game {
     private final java.util.Map<String, int[]> huntStats = new java.util.HashMap<>();
     private final List<Integer> turnHistory = new ArrayList<>();
     private List<String> turnMessages = new ArrayList<>();
+    private final List<String> mammalSpecies = new ArrayList<>();
     private String formation;
 
     /** Number of descendants required to win the game. */
@@ -75,6 +76,13 @@ public class Game {
 
         map = new Map(18, 10, seed);
         map.populateBurrows(5);
+        mammalSpecies.clear();
+        for (var entry : StatsLoader.getCritterStats().entrySet()) {
+            Object cls = entry.getValue().get("class");
+            if (cls != null && cls.toString().equals("mammal")) {
+                mammalSpecies.add(entry.getKey());
+            }
+        }
 
         // choose player dinosaur
         if (!StatsLoader.getDinoStats().isEmpty()) {
@@ -1051,6 +1059,32 @@ public class Game {
             if (b.getProgress() >= 100.0) {
                 b.setFull(false);
                 b.setProgress(0.0);
+                if (!mammalSpecies.isEmpty()) {
+                    String name = mammalSpecies.get(new Random().nextInt(mammalSpecies.size()));
+                    java.util.Map<String, Object> stats = StatsLoader.getCritterStats().get(name);
+                    double weight = 0.0;
+                    Object wObj = stats.get("adult_weight");
+                    if (wObj instanceof Number n) weight = n.doubleValue();
+                    double hp = scaleByWeight(weight, getStat(stats, "adult_weight"), getStat(stats, "hp"));
+                    NPCAnimal npc = new NPCAnimal();
+                    npc.setId(nextNpcId++);
+                    npc.setName(name);
+                    npc.setWeight(weight);
+                    npc.setMaxHp(hp);
+                    npc.setHp(hp);
+                    Object abil = stats.get("abilities");
+                    if (abil instanceof java.util.List<?> list) {
+                        java.util.List<String> abilList = new java.util.ArrayList<>();
+                        for (Object a : list) {
+                            abilList.add(a.toString());
+                        }
+                        npc.setAbilities(abilList);
+                    }
+                    npc.setLastAction("spawned");
+                    map.addAnimal(x, y, npc);
+                    spawned.add(npc);
+                    turnMessages.add("You dug out a " + name + "!");
+                }
             }
         }
         generateEncounters();
@@ -1314,6 +1348,31 @@ public class Game {
         }
         b.setFull(false);
         b.setProgress(0.0);
+        if (!mammalSpecies.isEmpty()) {
+            String name = mammalSpecies.get(new Random().nextInt(mammalSpecies.size()));
+            java.util.Map<String, Object> stats = StatsLoader.getCritterStats().get(name);
+            double weight = 0.0;
+            Object wObj = stats.get("adult_weight");
+            if (wObj instanceof Number n) weight = n.doubleValue();
+            double hp = scaleByWeight(weight, getStat(stats, "adult_weight"), getStat(stats, "hp"));
+            NPCAnimal npc = new NPCAnimal();
+            npc.setId(nextNpcId++);
+            npc.setName(name);
+            npc.setWeight(weight);
+            npc.setMaxHp(hp);
+            npc.setHp(hp);
+            Object abil = stats.get("abilities");
+            if (abil instanceof java.util.List<?> list) {
+                java.util.List<String> abilList = new java.util.ArrayList<>();
+                for (Object a : list) {
+                    abilList.add(a.toString());
+                }
+                npc.setAbilities(abilList);
+            }
+            npc.setLastAction("spawned");
+            map.addAnimal(x, y, npc);
+            spawned.add(npc);
+        }
         return true;
     }
 
@@ -1821,6 +1880,19 @@ public class Game {
             stats = StatsLoader.getCritterStats().get(npc.getName());
         }
         return npcEffectiveSpeed(npc, stats);
+    }
+
+    /**
+     * Calculate the chance of catching prey based on relative speed.
+     */
+    public double calculateCatchChance(double relSpeed) {
+        if (relSpeed < 0.5) {
+            return 1.0;
+        }
+        if (relSpeed <= 1.0) {
+            return 1.0 - (relSpeed - 0.5);
+        }
+        return 0.0;
     }
 
     /**
