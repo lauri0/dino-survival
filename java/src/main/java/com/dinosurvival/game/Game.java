@@ -832,6 +832,7 @@ public class Game {
         player.setEnergy(Math.max(0.0, player.getEnergy() - drain));
         if (player.isExhausted()) {
             player.setHp(0.0);
+            turnMessages.add("You have collapsed from exhaustion! Game Over.");
         }
         applyBleedAndRegen(player, player.getHealthRegen(), moved, !player.isExhausted());
     }
@@ -874,6 +875,7 @@ public class Game {
                 player.getHydration() - player.getHydrationDrain() * weather.getPlayerHydrationMult()));
         if (player.isDehydrated()) {
             player.setHp(0.0);
+            turnMessages.add("You have perished from dehydration! Game Over.");
         }
 
         updateNpcs();
@@ -952,6 +954,25 @@ public class Game {
 
         double playerAtk = playerEffectiveAttack();
         double targetAtk = target.isAlive() ? npcEffectiveAttack(target, stats, x, y) : 0.0;
+
+        if (target.isAlive()) {
+            double playerSpeed = playerEffectiveSpeed();
+            double targetSpeed = npcEffectiveSpeed(target, stats);
+            double relSpeed = targetSpeed / Math.max(playerSpeed, 0.1);
+            double catchChance = calculateCatchChance(relSpeed);
+            if (relSpeed <= 0.7) {
+                catchChance = 1.0;
+            }
+            if (Math.random() > catchChance) {
+                turnMessages.add("The " + npcLabel(target) + " escaped before you could catch it.");
+                generateEncounters();
+                aggressiveAttackCheck();
+                applyTurnCosts(false, 5.0);
+                checkVictory();
+                lastAction = "hunt";
+                return;
+            }
+        }
 
         if (target.isAlive()) {
             DinosaurStats playerBase = StatsLoader.getDinoStats().get(player.getName());
@@ -1487,6 +1508,17 @@ public class Game {
             }
         }
         if (prey == null) return;
+
+        double predatorSpeed = npcEffectiveSpeed(predator, predStats);
+        double preySpeed = npcEffectiveSpeed(prey, preyStats);
+        double relSpeed = preySpeed / Math.max(predatorSpeed, 0.1);
+        double chance = calculateCatchChance(relSpeed);
+        if (relSpeed <= 0.7) {
+            chance = 1.0;
+        }
+        if (Math.random() > chance) {
+            return;
+        }
 
         double preyAtk = npcEffectiveAttack(prey, preyStats, x, y);
         double beforePred = predator.getHp();
