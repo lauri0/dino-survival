@@ -476,7 +476,9 @@ public class Game {
                             && npc.getEnergy() >= 80 && npc.getHp() >= npc.getMaxHp() * 0.8
                             && npc.getTurnsUntilLayEggs() == 0) {
                         if (animals.size() >= 4) {
-                            npcChooseMove(tx, ty, npc, stats);
+                            npcChooseMoveForced(tx, ty, npc, stats);
+                            npc.setLastAction("move");
+                            continue;
                         } else {
                             npc.setEnergy(npc.getEnergy() * 0.7);
                             int numEggs = (int) getStat(stats, "num_eggs");
@@ -1229,6 +1231,35 @@ public class Game {
             npc.setNextMove("None");
             return;
         }
+        java.util.Map<String, int[]> dirs = java.util.Map.of(
+                "Up", new int[]{0, -1},
+                "Right", new int[]{1, 0},
+                "Down", new int[]{0, 1},
+                "Left", new int[]{-1, 0});
+        boolean canWalk = !getBool(stats, "can_walk", true) ? false : true;
+        List<String> candidates = new ArrayList<>();
+        for (var e : dirs.entrySet()) {
+            int nx = x + e.getValue()[0];
+            int ny = y + e.getValue()[1];
+            if (nx < 0 || ny < 0 || nx >= map.getWidth() || ny >= map.getHeight())
+                continue;
+            Terrain t = map.terrainAt(nx, ny);
+            if (t == Terrain.TOXIC_BADLANDS) continue;
+            if (!canWalk && t != Terrain.LAKE) continue;
+            candidates.add(e.getKey());
+        }
+        if (candidates.isEmpty()) {
+            npc.setNextMove("None");
+        } else {
+            npc.setNextMove(candidates.get(r.nextInt(candidates.size())));
+        }
+    }
+
+    /**
+     * Choose a direction for the NPC and always move if a candidate exists.
+     */
+    private void npcChooseMoveForced(int x, int y, NPCAnimal npc, Object stats) {
+        Random r = new Random();
         java.util.Map<String, int[]> dirs = java.util.Map.of(
                 "Up", new int[]{0, -1},
                 "Right", new int[]{1, 0},
