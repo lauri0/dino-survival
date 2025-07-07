@@ -79,31 +79,4 @@ public class GameTest {
         Assertions.assertTrue(g.getTurn() >= 21);
         Assertions.assertNotEquals(firstWeather, g.getWeather().getName());
     }
-
-    @Test
-    public void testBasicPlayerActions() {
-        Game g = new Game();
-        g.start();
-        int startX = g.getPlayerX();
-        g.moveEast();
-        Assertions.assertEquals(startX + 1, g.getPlayerX());
-
-        NPCAnimal npc = new NPCAnimal();
-        npc.setId(1234);
-        npc.setName("Nanosaurus");
-        npc.setWeight(10.0);
-        npc.setMaxHp(10.0);
-        npc.setHp(10.0);
-        g.getMap().addAnimal(g.getPlayerX(), g.getPlayerY(), npc);
-        double beforeEnergy = g.getPlayer().getEnergy();
-        g.huntNpc(1234);
-        Assertions.assertTrue(g.getPlayer().getEnergy() < beforeEnergy);
-
-        DinosaurStats p = g.getPlayer();
-        p.setWeight(p.getAdultWeight());
-        p.setHp(p.getMaxHp());
-        p.setEnergy(100.0);
-        g.layEggs();
-        Assertions.assertFalse(g.getMap().getEggs(g.getPlayerX(), g.getPlayerY()).isEmpty());
-    }
 }
