@@ -1018,8 +1018,10 @@ public class Game {
             if (npcA > playerA) stronger.add(npc); else weaker.add(npc);
         }
         Random r = new Random();
+        boolean killed = false;
         if (!stronger.isEmpty()) {
             player.setHp(0.0);
+            killed = true;
         } else {
             java.util.Map<String,int[]> dirs = java.util.Map.of(
                     "Up", new int[]{0,-1}, "Right", new int[]{1,0},
@@ -1043,6 +1045,9 @@ public class Game {
         generateEncounters();
         aggressiveAttackCheck();
         applyTurnCosts(false, 2.0);
+        if (killed) {
+            player.setHp(0.0);
+        }
         checkVictory();
         lastAction = "threaten";
     }
