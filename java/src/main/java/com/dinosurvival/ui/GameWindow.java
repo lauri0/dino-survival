@@ -138,6 +138,7 @@ public class GameWindow extends JFrame {
 
         // Dinosaur image (row 0, column 0)
         dinoImageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        dinoImageLabel.setVerticalAlignment(SwingConstants.TOP);
         dinoImageLabel.setPreferredSize(new Dimension(400, 250));
         JPanel dinoPanel = new JPanel(new BorderLayout());
         dinoPanel.setPreferredSize(new Dimension(400, 300));
@@ -255,6 +256,7 @@ public class GameWindow extends JFrame {
         JPanel biomePanel = new JPanel(new BorderLayout());
         biomePanel.setPreferredSize(new Dimension(400, 250));
         biomeLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        biomeLabel.setVerticalAlignment(SwingConstants.TOP);
         biomeLabel.setVerticalTextPosition(SwingConstants.BOTTOM);
         biomeLabel.setHorizontalTextPosition(SwingConstants.CENTER);
         biomePanel.add(biomeLabel, BorderLayout.CENTER);
@@ -661,19 +663,7 @@ public class GameWindow extends JFrame {
                     }
                     img.setIcon(icon);
                 }
-                JLabel npcNameLabel = new JLabel();
-                String disp = name + " (" + npc.getId() + ")";
-                if (npc.getBleeding() > 0) {
-                    npcNameLabel.setIcon(bleedIcon);
-                    npcNameLabel.setHorizontalTextPosition(SwingConstants.LEFT);
-                    npcNameLabel.setText(disp + " " + npc.getBleeding());
-                } else if (npc.getBrokenBone() > 0) {
-                    npcNameLabel.setIcon(brokenBoneIcon);
-                    npcNameLabel.setHorizontalTextPosition(SwingConstants.LEFT);
-                    npcNameLabel.setText(disp + " " + npc.getBrokenBone());
-                } else {
-                    npcNameLabel.setText(disp);
-                }
+                JLabel npcNameLabel = getNpcNameLabel(name, npc);
                 info.add(npcNameLabel);
                 info.add(new JLabel(String.format("A: %.1f  HP: %.1f/%.1f", game.npcEffectiveAttack(npc), npc.getHp(), game.npcMaxHp(npc))));
                 double rel = game.npcEffectiveSpeed(npc) / Math.max(0.1, game.playerEffectiveSpeed());
@@ -688,6 +678,23 @@ public class GameWindow extends JFrame {
         }
         encounterList.revalidate();
         encounterList.repaint();
+    }
+
+    private JLabel getNpcNameLabel(String name, NPCAnimal npc) {
+        JLabel npcNameLabel = new JLabel();
+        String nameWithId = name + " (" + npc.getId() + ")";
+        if (npc.getBleeding() > 0) {
+            npcNameLabel.setIcon(bleedIcon);
+            npcNameLabel.setHorizontalTextPosition(SwingConstants.LEFT);
+            npcNameLabel.setText(nameWithId + " " + npc.getBleeding());
+        } else if (npc.getBrokenBone() > 0) {
+            npcNameLabel.setIcon(brokenBoneIcon);
+            npcNameLabel.setHorizontalTextPosition(SwingConstants.LEFT);
+            npcNameLabel.setText(nameWithId + " " + npc.getBrokenBone());
+        } else {
+            npcNameLabel.setText(nameWithId);
+        }
+        return npcNameLabel;
     }
 
     private void updateStatsPanel() {
