@@ -55,14 +55,20 @@ public class ThreatenTest {
         npc2.setLastAction("spawned");
         map.addAnimal(x, y, npc1);
         map.addAnimal(x, y, npc2);
-        double base = g.getPlayer().getHatchlingEnergyDrain();
+        double base;
+        try {
+            java.lang.reflect.Method m = Game.class.getDeclaredMethod("baseEnergyDrain");
+            m.setAccessible(true);
+            base = (double) m.invoke(g);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         g.getPlayer().setEnergy(100.0);
         g.threaten();
         StatsLoader.getCritterStats().putAll(saved);
         double expected = 100.0 - base * 2 * g.getWeather().getPlayerEnergyMult();
         Assertions.assertEquals(expected, g.getPlayer().getEnergy(), 0.0001);
-        Assertions.assertNotEquals("None", npc1.getNextMove());
-        Assertions.assertNotEquals("None", npc2.getNextMove());
+        Assertions.assertTrue(map.getAnimals(x, y).isEmpty());
     }
 
     @Test

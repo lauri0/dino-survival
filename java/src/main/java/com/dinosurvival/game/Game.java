@@ -7,6 +7,8 @@ import com.dinosurvival.game.EncounterEntry;
 import com.dinosurvival.game.EggCluster;
 import com.dinosurvival.game.Burrow;
 import com.dinosurvival.game.MapUtils;
+import com.dinosurvival.game.Setting;
+import com.dinosurvival.game.Terrain;
 import java.util.Iterator;
 import com.dinosurvival.util.StatsLoader;
 import java.io.IOException;
@@ -55,7 +57,9 @@ public class Game {
      * world without depending on the Python code.
      */
     public void start() {
-        start("Morrison", null, new Random().nextLong());
+        Setting s = defaultSetting();
+        s.setFormation("Morrison");
+        start(s, null, new Random().nextLong());
     }
 
     /**
@@ -63,7 +67,9 @@ public class Game {
      * If {@code dinoName} is null the first available dinosaur is used.
      */
     public void start(String formation, String dinoName) {
-        start(formation, dinoName, new Random().nextLong());
+        Setting s = defaultSetting();
+        s.setFormation(formation);
+        start(s, dinoName, new Random().nextLong());
     }
 
     /**
@@ -71,21 +77,38 @@ public class Game {
      * the provided random seed for map generation.
      */
     public void start(String formation, String dinoName, long seed) {
+        Setting s = defaultSetting();
+        s.setFormation(formation);
+        start(s, dinoName, seed);
+    }
+
+    /**
+     * Start a new game using the provided {@link Setting} configuration.
+     *
+     * @param setting   world configuration to use
+     * @param dinoName  name of the player dinosaur (uses first available if null)
+     * @param seed      random seed for map generation
+     */
+    public void start(Setting setting, String dinoName, long seed) {
         try {
-            StatsLoader.load(Path.of("dinosurvival"), formation);
-            this.formation = formation;
+            StatsLoader.load(Path.of("dinosurvival"), setting.getFormation());
+            this.formation = setting.getFormation();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
-        map = new Map(18, 10, seed);
-        map.populateBurrows(5);
+        map = new Map(18, 10, setting, seed);
+        map.populateBurrows(setting.getNumBurrows());
         mammalSpecies.clear();
         for (var entry : StatsLoader.getCritterStats().entrySet()) {
             Object cls = entry.getValue().get("class");
             if (cls != null && cls.toString().equals("mammal")) {
                 mammalSpecies.add(entry.getKey());
             }
+        }
+        if (mammalSpecies.isEmpty() && "Hell Creek".equals(formation)
+                && StatsLoader.getCritterStats().containsKey("Didelphodon")) {
+            mammalSpecies.add("Didelphodon");
         }
 
         // choose player dinosaur
@@ -97,7 +120,15 @@ public class Game {
             if (base == null) {
                 base = StatsLoader.getDinoStats().values().iterator().next();
             }
-            initialisePlayer(base);
+            DinosaurStats combined = cloneStats(base);
+            java.util.Map<String, java.util.Map<String, Object>> p = setting.getPlayableDinos();
+            if (p != null) {
+                java.util.Map<String, Object> overrides = p.get(combined.getName());
+                if (overrides != null) {
+                    applyDinoOverrides(combined, overrides);
+                }
+            }
+            initialisePlayer(combined);
         } else {
             player = new DinosaurStats();
         }
@@ -148,6 +179,63 @@ public class Game {
         dst.setDiet(new ArrayList<>(src.getDiet()));
         dst.setAbilities(new ArrayList<>(src.getAbilities()));
         return dst;
+    }
+
+    /**
+     * Apply any overrides from the provided map to the given statistics
+     * instance. Only recognised fields are updated.
+     */
+    private void applyDinoOverrides(DinosaurStats stats, java.util.Map<String, Object> overrides) {
+        Object gs = overrides.get("growth_stages");
+        if (gs == null) {
+            gs = overrides.get("growthStages");
+        }
+        if (gs instanceof Number num) {
+            stats.setGrowthStages(num.intValue());
+        } else if (gs != null) {
+            try {
+                stats.setGrowthStages(Integer.parseInt(gs.toString()));
+            } catch (NumberFormatException ignored) {
+                // ignore invalid value
+            }
+        }
+    }
+
+    /**
+     * Build a basic default {@link Setting} mirroring the one used by
+     * {@link Map} when no configuration is provided.
+     */
+    private static Setting defaultSetting() {
+        Setting s = new Setting();
+        java.util.Map<String, Terrain> terrains = new java.util.HashMap<>();
+        terrains.put("desert", Terrain.DESERT);
+        terrains.put("plains", Terrain.PLAINS);
+        terrains.put("woodlands", Terrain.WOODLANDS);
+        terrains.put("forest", Terrain.FOREST);
+        terrains.put("highland_forest", Terrain.HIGHLAND_FOREST);
+        terrains.put("swamp", Terrain.SWAMP);
+        terrains.put("lake", Terrain.LAKE);
+        terrains.put("mountain", Terrain.MOUNTAIN);
+        terrains.put("volcano", Terrain.VOLCANO);
+        terrains.put("volcano_erupting", Terrain.VOLCANO_ERUPTING);
+        terrains.put("lava", Terrain.LAVA);
+        terrains.put("solidified_lava_field", Terrain.SOLIDIFIED_LAVA_FIELD);
+        s.setTerrains(terrains);
+
+        java.util.Map<String, Double> heights = new java.util.HashMap<>();
+        heights.put("low", 0.3);
+        heights.put("normal", 0.4);
+        heights.put("hilly", 0.2);
+        heights.put("mountain", 0.1);
+        s.setHeightLevels(heights);
+
+        java.util.Map<String, Double> humidity = new java.util.HashMap<>();
+        humidity.put("arid", 0.35);
+        humidity.put("normal", 0.4);
+        humidity.put("humid", 0.25);
+        s.setHumidityLevels(humidity);
+        s.setNumBurrows(5);
+        return s;
     }
 
     /**
@@ -865,8 +953,20 @@ public class Game {
         }
     }
 
+    /**
+     * Base energy drain depends on the player's current weight.
+     * Hatchling drain is used until the player exceeds half of its
+     * adult weight.
+     */
+    private double baseEnergyDrain() {
+        double halfAdult = player.getAdultWeight() / 2.0;
+        return player.getWeight() <= halfAdult
+                ? player.getHatchlingEnergyDrain()
+                : player.getAdultEnergyDrain();
+    }
+
     void applyTurnCosts(boolean moved, double multiplier) {
-        double drain = player.getHatchlingEnergyDrain();
+        double drain = baseEnergyDrain();
         if (moved) {
             drain *= WALKING_ENERGY_DRAIN_MULTIPLIER;
             if (player.getBrokenBone() > 0) {
@@ -923,7 +1023,9 @@ public class Game {
             player.setHp(0.0);
             turnMessages.add("You have perished from dehydration! Game Over.");
         }
+    }
 
+    private void endTurn() {
         updateNpcs();
         _apply_terrain_effects();
         spoilCarcasses();
@@ -943,23 +1045,21 @@ public class Game {
                 t == Terrain.VOLCANO_ERUPTING) {
             MapUtils.revealSurrounding(map, x, y);
         }
-        generateEncounters();
-        aggressiveAttackCheck();
         applyTurnCosts(true, 1.0);
         checkVictory();
         MapUtils.revealAdjacentMountains(map, x, y);
         lastAction = "move";
+        endTurn();
     }
 
     /** Skip a turn without moving. */
     public void rest() {
         startTurn();
-        generateEncounters();
-        aggressiveAttackCheck();
         applyTurnCosts(false, 1.0);
         checkVictory();
         MapUtils.revealAdjacentMountains(map, x, y);
         lastAction = "stay";
+        endTurn();
     }
 
     /** Drink if the player is on a lake tile. */
@@ -968,12 +1068,11 @@ public class Game {
         if (map.terrainAt(x, y) == Terrain.LAKE) {
             player.setHydration(100.0);
         }
-        generateEncounters();
-        aggressiveAttackCheck();
         applyTurnCosts(false, 1.0);
         checkVictory();
         MapUtils.revealAdjacentMountains(map, x, y);
         lastAction = "drink";
+        endTurn();
     }
 
     /** Convenience movement helpers matching the Python API. */
@@ -990,12 +1089,11 @@ public class Game {
         }
         startTurn();
         if (target == null) {
-            generateEncounters();
-            aggressiveAttackCheck();
             applyTurnCosts(false, 1.0);
-        
             MapUtils.revealAdjacentMountains(map, x, y);
+            checkVictory();
             lastAction = "hunt";
+            endTurn();
             return;
         }
 
@@ -1019,12 +1117,11 @@ public class Game {
             double catchChance = calculateCatchChance(relSpeed);
             if (Math.random() > catchChance) {
                 turnMessages.add("The " + npcLabel(target) + " escaped before you could catch it.");
-                generateEncounters();
-                aggressiveAttackCheck();
                 applyTurnCosts(false, 5.0);
                 checkVictory();
                 MapUtils.revealAdjacentMountains(map, x, y);
                 lastAction = "hunt";
+                endTurn();
                 return;
             }
         }
@@ -1049,9 +1146,9 @@ public class Game {
                 player.setBrokenBone(10);
             }
             if (died) {
-                generateEncounters();
                 MapUtils.revealAdjacentMountains(map, x, y);
                 lastAction = "hunt";
+                endTurn();
                 return;
             }
         }
@@ -1092,12 +1189,11 @@ public class Game {
             }
         }
 
-        generateEncounters();
-        aggressiveAttackCheck();
         applyTurnCosts(false, 1.0);
         checkVictory();
         MapUtils.revealAdjacentMountains(map, x, y);
         lastAction = "hunt";
+        endTurn();
     }
 
     /** Eat eggs present on the current tile. */
@@ -1105,11 +1201,11 @@ public class Game {
         startTurn();
         List<EggCluster> eggs = map.getEggs(x, y);
         if (eggs.isEmpty()) {
-            generateEncounters();
-            aggressiveAttackCheck();
             applyTurnCosts(false, 1.0);
             MapUtils.revealAdjacentMountains(map, x, y);
+            checkVictory();
             lastAction = "eggs";
+            endTurn();
             return;
         }
         EggCluster egg = map.takeEggs(x, y);
@@ -1121,12 +1217,11 @@ public class Game {
         double used = actual * player.getWeight() / 1000.0;
         double leftover = Math.max(0.0, weight - used);
         applyGrowth(leftover);
-        generateEncounters();
-        aggressiveAttackCheck();
         applyTurnCosts(false, 1.0);
         checkVictory();
         MapUtils.revealAdjacentMountains(map, x, y);
         lastAction = "eggs";
+        endTurn();
     }
 
     /** Dig into a burrow on the current tile if present. */
@@ -1167,36 +1262,43 @@ public class Game {
                 }
             }
         }
-        generateEncounters();
-        aggressiveAttackCheck();
         applyTurnCosts(false, 1.0);
         checkVictory();
         MapUtils.revealAdjacentMountains(map, x, y);
         lastAction = "dig";
+        endTurn();
     }
 
     /** Lay eggs if conditions allow. */
     public void layEggs() {
         startTurn();
         if (!canPlayerLayEggs()) {
-            generateEncounters();
-            aggressiveAttackCheck();
             applyTurnCosts(false, 1.0);
             MapUtils.revealAdjacentMountains(map, x, y);
+            checkVictory();
             lastAction = "lay_eggs";
+            endTurn();
             return;
         }
         player.setEnergy(player.getEnergy() * 0.7);
-        double hatchW = player.getHatchlingWeight();
-        EggCluster ec = new EggCluster(player.getName(), 1, hatchW, 5, true);
+        Object stats = StatsLoader.getDinoStats().get(player.getName());
+        int numEggs = (int) getStat(stats, "num_eggs");
+        double hatchW = getStat(stats, "hatchling_weight");
+        if (hatchW <= 0) {
+            double adultW = getStat(stats, "adult_weight");
+            hatchW = Math.max(1.0, adultW * 0.001);
+        }
+        EggCluster ec = new EggCluster(player.getName(), numEggs,
+                hatchW * numEggs, 5, true);
         map.getEggs(x, y).add(ec);
         player.setTurnsUntilLayEggs(10);
-        generateEncounters();
-        aggressiveAttackCheck();
+        int interval = (int) getStat(stats, "egg_laying_interval");
+        player.setTurnsUntilLayEggs(interval);
         applyTurnCosts(false, 1.0);
         checkVictory();
         MapUtils.revealAdjacentMountains(map, x, y);
         lastAction = "lay_eggs";
+        endTurn();
     }
 
     /** Mate with an NPC on the current tile. */
@@ -1211,12 +1313,11 @@ public class Game {
             cell.remove(partner);
             player.setMated(true);
         }
-        generateEncounters();
-        aggressiveAttackCheck();
         applyTurnCosts(false, 1.0);
         checkVictory();
         MapUtils.revealAdjacentMountains(map, x, y);
         lastAction = "mate";
+        endTurn();
     }
 
     /** Attempt to frighten nearby animals. */
@@ -1258,8 +1359,6 @@ public class Game {
                 npc.setNextMove(opts.isEmpty()?"None":opts.get(r.nextInt(opts.size())));
             }
         }
-        generateEncounters();
-        aggressiveAttackCheck();
         applyTurnCosts(false, 2.0);
         if (killed) {
             player.setHp(0.0);
@@ -1267,6 +1366,7 @@ public class Game {
         checkVictory();
         MapUtils.revealAdjacentMountains(map, x, y);
         lastAction = "threaten";
+        endTurn();
     }
 
     // ------------------------------------------------------------------
@@ -1283,6 +1383,8 @@ public class Game {
                 case "adult_speed" -> ds.getAdultSpeed();
                 case "attack" -> ds.getAttack();
                 case "hatchling_weight" -> ds.getHatchlingWeight();
+                case "num_eggs" -> ds.getNumEggs();
+                case "egg_laying_interval" -> ds.getEggLayingInterval();
                 case "hp" -> ds.getAdultHp();
                 default -> 0.0;
             };

@@ -30,6 +30,14 @@ public class DiggerTest {
         Assertions.assertNotNull(b);
         Assertions.assertFalse(b.isFull());
         Assertions.assertEquals(0.0, b.getProgress());
+        boolean found = false;
+        for (NPCAnimal a : map.getAnimals(x, y)) {
+            if ("Didelphodon".equals(a.getName())) {
+                found = true;
+                break;
+            }
+        }
+        Assertions.assertTrue(found);
     }
 
     @Test
@@ -58,6 +66,14 @@ public class DiggerTest {
         Burrow b = map.getBurrow(x, y);
         Assertions.assertNotNull(b);
         Assertions.assertFalse(b.isFull());
+        boolean found = false;
+        for (NPCAnimal a : map.getAnimals(x, y)) {
+            if (a != npc && "Didelphodon".equals(a.getName())) {
+                found = true;
+                break;
+            }
+        }
+        Assertions.assertTrue(found);
     }
 
     @Test
