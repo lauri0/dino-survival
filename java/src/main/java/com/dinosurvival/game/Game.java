@@ -862,8 +862,14 @@ public class Game {
         }
     }
 
+    private double baseEnergyDrain() {
+        return player.getGrowthStages() > 0
+                ? player.getHatchlingEnergyDrain()
+                : player.getAdultEnergyDrain();
+    }
+
     void applyTurnCosts(boolean moved, double multiplier) {
-        double drain = player.getHatchlingEnergyDrain();
+        double drain = baseEnergyDrain();
         if (moved) {
             drain *= WALKING_ENERGY_DRAIN_MULTIPLIER;
             if (player.getBrokenBone() > 0) {
