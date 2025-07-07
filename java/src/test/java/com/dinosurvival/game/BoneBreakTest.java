@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 public class BoneBreakTest {
     @Test
     public void testPlayerBreaksBonesTarget() throws Exception {
-        StatsLoader.load(Path.of("..", "dinosurvival"), "Hell Creek");
+        StatsLoader.load(Path.of("..", "conf"), "Hell Creek");
         Game g = new Game();
         g.start("Hell Creek", "Acheroraptor");
         Map map = g.getMap();

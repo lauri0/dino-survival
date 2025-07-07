@@ -40,7 +40,7 @@ public class SetupDialog extends JDialog {
     private void loadDinos() {
         String sel = (String) formationBox.getSelectedItem();
         try {
-            StatsLoader.load(Path.of("dinosurvival"), sel);
+            StatsLoader.load(Path.of("conf"), sel);
         } catch (IOException ex) {
             // ignore
         }

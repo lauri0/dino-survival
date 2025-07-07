@@ -12,7 +12,7 @@ public class InitialCritterSpawnTest {
 
     @Test
     public void testInitialCritterSpawnAndPlacement() throws Exception {
-        StatsLoader.load(Path.of("..", "dinosurvival"), "Morrison");
+        StatsLoader.load(Path.of("..", "conf"), "Morrison");
         Game game = new Game();
         game.start("Morrison", "Allosaurus");
         java.util.Map<String, java.util.Map<String, Object>> critters = StatsLoader.getCritterStats();

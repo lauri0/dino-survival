@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 public class EggConsumptionTest {
     @Test
     public void testNpcEggClusterRemovedAfterEating() throws Exception {
-        StatsLoader.load(Path.of("..", "dinosurvival"), "Morrison");
+        StatsLoader.load(Path.of("..", "conf"), "Morrison");
         Game g = new Game();
         g.start("Morrison", "Allosaurus");
         Map map = g.getMap();
@@ -33,7 +33,7 @@ public class EggConsumptionTest {
 
     @Test
     public void testPlayerCollectsEggsRemovesCluster() throws Exception {
-        StatsLoader.load(Path.of("..", "dinosurvival"), "Morrison");
+        StatsLoader.load(Path.of("..", "conf"), "Morrison");
         Game g = new Game();
         g.start("Morrison", "Allosaurus");
         Map map = g.getMap();

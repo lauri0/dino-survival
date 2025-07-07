@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 public class PopulationTest {
     @Test
     public void testHellCreekPopulationScaling() throws Exception {
-        StatsLoader.load(Path.of("..", "dinosurvival"), "Hell Creek");
+        StatsLoader.load(Path.of("..", "conf"), "Hell Creek");
         Game game = new Game();
         game.start("Hell Creek", "Tyrannosaurus");
         Map map = game.getMap();

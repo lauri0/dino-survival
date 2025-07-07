@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 public class OvercrowdingTest {
     @Test
     public void testOvercrowdedLayingMoves() throws Exception {
-        StatsLoader.load(Path.of("..", "dinosurvival"), "Morrison");
+        StatsLoader.load(Path.of("..", "conf"), "Morrison");
         Game g = new Game();
         g.start("Morrison", "Allosaurus");
         Map map = g.getMap();

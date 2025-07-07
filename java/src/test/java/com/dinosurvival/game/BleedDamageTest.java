@@ -11,7 +11,7 @@ public class BleedDamageTest {
 
     @Test
     public void testBleedDamageAndExpires() throws Exception {
-        StatsLoader.load(Path.of("..", "dinosurvival"), "Hell Creek");
+        StatsLoader.load(Path.of("..", "conf"), "Hell Creek");
         Game game = new Game();
         game.start("Hell Creek", "Acheroraptor");
         Map map = game.getMap();

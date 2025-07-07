@@ -86,7 +86,7 @@ public class Game {
      */
     public void start(Setting setting, String dinoName, long seed) {
         try {
-            StatsLoader.load(Path.of("dinosurvival"), setting.getFormation());
+            StatsLoader.load(Path.of("conf"), setting.getFormation());
             this.formation = setting.getFormation();
         } catch (IOException e) {
             throw new RuntimeException(e);

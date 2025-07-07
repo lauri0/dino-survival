@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
 public class CarcassBehaviorTest {
     @BeforeAll
     public static void loadStats() throws Exception {
-        Path base = Path.of("..", "dinosurvival");
+        Path base = Path.of("..", "conf");
         StatsLoader.load(base, "Morrison");
     }
 

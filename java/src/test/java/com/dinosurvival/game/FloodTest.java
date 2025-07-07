@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 public class FloodTest {
     @BeforeAll
     public static void loadStats() throws Exception {
-        StatsLoader.load(Path.of("..", "dinosurvival"), "Morrison");
+        StatsLoader.load(Path.of("..", "conf"), "Morrison");
     }
 
     private static Map prepareMap(DinosaurStats player) throws Exception {
