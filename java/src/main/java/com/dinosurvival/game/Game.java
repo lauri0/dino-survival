@@ -1013,7 +1013,7 @@ public class Game {
             lastAction = "eggs";
             return;
         }
-        EggCluster egg = eggs.remove(0);
+        EggCluster egg = map.takeEggs(x, y);
         double weight = egg.getWeight();
         double energyGain = 1000 * weight / Math.max(player.getWeight(), 0.1);
         double need = 100.0 - player.getEnergy();
@@ -1278,6 +1278,9 @@ public class Game {
         double remaining = eatAmount - used;
         npcApplyGrowth(npc, remaining, stats);
         egg.setWeight(egg.getWeight() - eatAmount);
+        if (eatAmount > 0) {
+            npc.setEggClustersEaten(npc.getEggClustersEaten() + 1);
+        }
     }
 
     private boolean npcDigBurrow(int x, int y) {
