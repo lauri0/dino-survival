@@ -862,8 +862,14 @@ public class Game {
         }
     }
 
+    /**
+     * Base energy drain depends on the player's current weight.
+     * Hatchling drain is used until the player exceeds half of its
+     * adult weight.
+     */
     private double baseEnergyDrain() {
-        return player.getGrowthStages() > 0
+        double halfAdult = player.getAdultWeight() / 2.0;
+        return player.getWeight() <= halfAdult
                 ? player.getHatchlingEnergyDrain()
                 : player.getAdultEnergyDrain();
     }
