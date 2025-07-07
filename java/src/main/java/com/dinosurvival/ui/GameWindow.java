@@ -98,6 +98,11 @@ public class GameWindow extends JFrame {
         }
     }
 
+    private ImageIcon toGrayscale(ImageIcon src) {
+        Image gray = GrayFilter.createDisabledImage(src.getImage());
+        return new ImageIcon(gray);
+    }
+
     private String formatBiomeName(String name) {
         String[] parts = name.split("_");
         StringBuilder sb = new StringBuilder();
@@ -632,7 +637,12 @@ public class GameWindow extends JFrame {
                         npcImages.put(key, icon);
                     }
                 }
-                if (icon != null) img.setIcon(icon);
+                if (icon != null) {
+                    if (!npc.isAlive()) {
+                        icon = toGrayscale(icon);
+                    }
+                    img.setIcon(icon);
+                }
                 info.add(new JLabel(name + " (" + npc.getId() + ")"));
                 info.add(new JLabel(String.format("A: %.1f  HP: %.1f/%.1f", game.npcEffectiveAttack(npc), npc.getHp(), game.npcMaxHp(npc))));
                 info.add(new JLabel(String.format("S: %.1f  W: %.1fkg", game.npcEffectiveSpeed(npc), npc.getWeight())));

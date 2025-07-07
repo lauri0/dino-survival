@@ -34,8 +34,9 @@ public class DamageMessageTest {
         map.addAnimal(game.getPlayerX(), game.getPlayerY(), npc);
 
         game.huntNpc(npc.getId());
+        String prefix = game.getPlayer().getName() + " (0) deals";
         long count = game.getTurnMessages().stream()
-                .filter(m -> m.startsWith("You deal"))
+                .filter(m -> m.startsWith(prefix))
                 .count();
         Assertions.assertEquals(1, count);
     }
