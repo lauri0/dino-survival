@@ -960,9 +960,6 @@ public class Game {
             double targetSpeed = npcEffectiveSpeed(target, stats);
             double relSpeed = targetSpeed / Math.max(playerSpeed, 0.1);
             double catchChance = calculateCatchChance(relSpeed);
-            if (relSpeed <= 0.7) {
-                catchChance = 1.0;
-            }
             if (Math.random() > catchChance) {
                 turnMessages.add("The " + npcLabel(target) + " escaped before you could catch it.");
                 generateEncounters();
@@ -1915,7 +1912,7 @@ public class Game {
     }
 
     /**
-     * Calculate the chance of catching prey based on relative speed.
+     * Calculate the chance of catching prey based on relative speed of the prey.
      */
     public double calculateCatchChance(double relSpeed) {
         if (relSpeed < 0.5) {
