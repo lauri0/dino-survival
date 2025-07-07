@@ -363,7 +363,33 @@ public class GameWindow extends JFrame {
     private void doAction(Runnable r, String msg) {
         r.run();
         log(msg);
-        refreshAll();
+        refreshMap();
+        updateBiomeImage();
+        updateDinoImage();
+        updateStatsPanel();
+        updateActionButtons();
+        updatePlantList();
+        updateEncounterList();
+        updateWeatherPanel();
+        updatePopulationList();
+        checkGameEnd();
+    }
+
+    private void disableActionButtons() {
+        northButton.setEnabled(false);
+        southButton.setEnabled(false);
+        eastButton.setEnabled(false);
+        westButton.setEnabled(false);
+        stayButton.setEnabled(false);
+        drinkButton.setEnabled(false);
+        threatenButton.setEnabled(false);
+        layButton.setEnabled(false);
+    }
+
+    private void checkGameEnd() {
+        if (game.getPlayer().getHp() <= 0 || game.hasWon()) {
+            disableActionButtons();
+        }
     }
 
     public void log(String msg) {
