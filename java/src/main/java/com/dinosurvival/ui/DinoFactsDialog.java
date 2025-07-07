@@ -158,41 +158,41 @@ public class DinoFactsDialog extends JDialog {
         }
 
         @Override
-        protected void paintComponent(Graphics g) {
-            super.paintComponent(g);
-            Graphics2D g2 = (Graphics2D) g;
+        protected void paintComponent(Graphics graphics) {
+            super.paintComponent(graphics);
+            Graphics2D graphics2D = (Graphics2D) graphics;
             int width = 320;
             int height = 200;
             int margin = 24;
             int topPad = 10;
-            int maxC = 1;
-            for (int c : counts) {
-                if (c > maxC) maxC = c;
+            int maxCount = 1;
+            for (int count : counts) {
+                if (count > maxCount) maxCount = count;
             }
             double step = counts.size() > 1 ? (double) width / (counts.size() - 1) : width;
-            g2.setColor(Color.BLACK);
-            g2.drawLine(margin, topPad, margin, topPad + height);
-            g2.drawLine(margin, topPad + height, margin + width, topPad + height);
-            g2.setColor(Color.BLUE);
-            for (int i = 1; i < counts.size(); i++) {
-                int x1 = (int) Math.round(margin + (i - 1) * step);
-                int y1 = (int) Math.round(topPad + height - counts.get(i - 1) * height / (double) maxC);
-                int x2 = (int) Math.round(margin + i * step);
-                int y2 = (int) Math.round(topPad + height - counts.get(i) * height / (double) maxC);
-                g2.drawLine(x1, y1, x2, y2);
+            graphics2D.setColor(Color.BLACK);
+            graphics2D.drawLine(margin, topPad, margin, topPad + height);
+            graphics2D.drawLine(margin, topPad + height, margin + width, topPad + height);
+            graphics2D.setColor(Color.BLUE);
+            for (int countsIndex = 1; countsIndex < counts.size(); countsIndex++) {
+                int x1 = (int) Math.round(margin + (countsIndex - 1) * step);
+                int y1 = (int) Math.round(topPad + height - counts.get(countsIndex - 1) * height / (double) maxCount);
+                int x2 = (int) Math.round(margin + countsIndex * step);
+                int y2 = (int) Math.round(topPad + height - counts.get(countsIndex) * height / (double) maxCount);
+                graphics2D.drawLine(x1, y1, x2, y2);
             }
-            g2.setColor(Color.BLACK);
-            g2.drawString("0", margin - 5, topPad + height);
-            g2.drawString(String.valueOf(maxC), margin - 5, topPad + 5);
+            graphics2D.setColor(Color.BLACK);
+            graphics2D.drawString("0", margin - 20, topPad + height);
+            graphics2D.drawString(String.valueOf(maxCount), margin - 20, topPad + 5);
             if (!turns.isEmpty()) {
-                g2.drawString(String.valueOf(turns.get(0)), margin, topPad + height + 15);
-                g2.drawString(String.valueOf(turns.get(turns.size() - 1)), margin + width - 20, topPad + height + 15);
+                graphics2D.drawString(String.valueOf(turns.get(0)), margin, topPad + height + 15);
+                graphics2D.drawString(String.valueOf(turns.get(turns.size() - 1)), margin + width - 20, topPad + height + 15);
             }
-            g2.drawString("Turn", margin + width / 2 - 15, topPad + height + 30);
-            Graphics2D g3 = (Graphics2D) g2.create();
-            g3.rotate(-Math.PI / 2);
-            g3.drawString("Population", -(topPad + height / 2 + 20), margin - 10);
-            g3.dispose();
+            graphics2D.drawString("Turn", margin + width / 2 - 15, topPad + height + 18);
+            Graphics2D populationTextGraphics = (Graphics2D) graphics2D.create();
+            populationTextGraphics.rotate(-Math.PI / 2);
+            populationTextGraphics.drawString("Population", -(topPad + height / 2 + 20), margin - 10);
+            populationTextGraphics.dispose();
         }
     }
 }
