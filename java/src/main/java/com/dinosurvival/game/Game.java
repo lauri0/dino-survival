@@ -731,6 +731,41 @@ public class Game {
         }
     }
 
+    /**
+     * Apply spoilage to all carcasses after NPC actions have completed.
+     * Dead animals lose weight each turn and are removed once fully decayed.
+     */
+    public java.util.List<String> spoilCarcasses() {
+        java.util.List<String> messages = new java.util.ArrayList<>();
+        for (int ty = 0; ty < map.getHeight(); ty++) {
+            for (int tx = 0; tx < map.getWidth(); tx++) {
+                java.util.List<NPCAnimal> animals = new java.util.ArrayList<>(map.getAnimals(tx, ty));
+                for (NPCAnimal npc : animals) {
+                    if (!npc.isAlive()) {
+                        double before = npc.getWeight();
+                        double spoiled = npc.getWeight() * 0.10 + 2;
+                        double after = Math.max(0.0, npc.getWeight() - spoiled);
+                        npc.setWeight(after);
+                        double lost = before - after;
+                        if (lost > 0 && tx == x && ty == y) {
+                            String msg = "The " + npcLabel(npc) + " carcass lost " +
+                                    String.format(java.util.Locale.US, "%.1f", lost) + "kg to spoilage.";
+                            messages.add(msg);
+                        }
+                        if (npc.getWeight() <= 0) {
+                            map.removeAnimal(tx, ty, npc);
+                        }
+                    }
+                }
+            }
+        }
+        return messages;
+    }
+
+    private String npcLabel(NPCAnimal npc) {
+        return npc.getName() + " (" + npc.getId() + ")";
+    }
+
     private void applyBleedAndRegen(DinosaurStats dino, double regen,
                                      boolean moved, boolean allowRegen) {
         if (dino.getBleeding() > 0) {
@@ -803,6 +838,7 @@ public class Game {
         }
 
         updateNpcs();
+        spoilCarcasses();
         generateEncounters();
         aggressiveAttackCheck();
     }
