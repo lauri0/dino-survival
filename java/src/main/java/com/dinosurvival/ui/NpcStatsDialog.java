@@ -27,7 +27,7 @@ public class NpcStatsDialog extends JDialog {
 
         JLabel heading = new JLabel(npc.getName());
         heading.setFont(heading.getFont().deriveFont(Font.BOLD, 18f));
-        heading.setAlignmentX(Component.CENTER_ALIGNMENT);
+        heading.setAlignmentX(Component.LEFT_ALIGNMENT);
         panel.add(heading);
 
         label(panel, "Age: " + npc.getAge() + " turns");
