@@ -665,8 +665,10 @@ public class Game {
                         if (statsDietHasPlant(stats) && !plants.isEmpty()) {
                             Plant chosen = null;
                             for (Plant p : plants) {
-                                if (chosen == null || p.getWeight() > chosen.getWeight()) {
-                                    chosen = p;
+                                if (statsDietHas(stats, p.getName())) {
+                                    if (chosen == null || p.getWeight() > chosen.getWeight()) {
+                                        chosen = p;
+                                    }
                                 }
                             }
                             if (chosen != null) {

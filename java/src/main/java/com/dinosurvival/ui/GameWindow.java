@@ -26,6 +26,7 @@ public class GameWindow extends JFrame {
     private final JTextArea logArea = new JTextArea();
     private final JPanel mapPanel = new JPanel();
     private final JLabel biomeLabel = new JLabel();
+    private final JLabel biomeNameLabel = new JLabel();
     private final JLabel dinoImageLabel = new JLabel();
     private final Game game;
     private JLabel[][] mapCells;
@@ -254,7 +255,11 @@ public class GameWindow extends JFrame {
         JPanel biomePanel = new JPanel(new BorderLayout());
         biomePanel.setPreferredSize(new Dimension(400, 250));
         biomeLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        biomeLabel.setVerticalTextPosition(SwingConstants.BOTTOM);
+        biomeLabel.setHorizontalTextPosition(SwingConstants.CENTER);
         biomePanel.add(biomeLabel, BorderLayout.CENTER);
+        biomeNameLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        biomePanel.add(biomeNameLabel, BorderLayout.SOUTH);
         c.gridx = 1;
         c.gridy = 0;
         c.weightx = 0;
@@ -448,9 +453,15 @@ public class GameWindow extends JFrame {
         mapPanel.setMinimumSize(new Dimension(prefW, prefH));
     }
 
+    // Map terrain colors mirrored from the Python version
     private Color colorForTerrain(Terrain t) {
         return switch (t) {
             case FOREST -> new Color(0, 100, 0);
+            case FOREST_FLOODED,
+                 PLAINS_FLOODED,
+                 SWAMP_FLOODED,
+                 WOODLANDS_FLOODED,
+                 DESERT_FLOODED -> new Color(95, 158, 160); // cadet blue
             case PLAINS -> new Color(173, 255, 47);
             case SWAMP -> new Color(107, 142, 35);
             case WOODLANDS -> new Color(50, 205, 50);
@@ -460,6 +471,8 @@ public class GameWindow extends JFrame {
             case MOUNTAIN -> new Color(210, 180, 140);
             case VOLCANO, VOLCANO_ERUPTING -> Color.BLACK;
             case HIGHLAND_FOREST -> new Color(46, 139, 87);
+            case HIGHLAND_FOREST_FIRE, FOREST_FIRE -> Color.ORANGE;
+            case HIGHLAND_FOREST_BURNT, FOREST_BURNT -> new Color(85, 107, 47);
             case LAVA -> Color.RED;
             case SOLIDIFIED_LAVA_FIELD -> Color.DARK_GRAY;
             default -> Color.GRAY;
@@ -506,11 +519,7 @@ public class GameWindow extends JFrame {
         }
         biomeLabel.setIcon(icon);
         String label = formatBiomeName(t.getName());
-        if (game.getMap().hasNest(px, py)) {
-            label += " (Nest)";
-        }
-        label += " (" + px + "," + py + ")";
-        biomeLabel.setText(label);
+        biomeNameLabel.setText(label);
     }
 
     private void updateDinoImage() {
