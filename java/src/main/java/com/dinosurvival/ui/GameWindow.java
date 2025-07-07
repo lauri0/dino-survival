@@ -421,7 +421,8 @@ public class GameWindow extends JFrame {
     }
 
     public void log(String msg) {
-        logArea.append(msg + "\n");
+        logArea.append(game.getTurn() + ": " + msg + "\n");
+        logArea.setCaretPosition(logArea.getDocument().getLength());
     }
 
     private void buildMap() {
