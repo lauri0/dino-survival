@@ -821,7 +821,7 @@ public class Game {
         }
 
         map.updateVolcanicActivity(x, y, player);
-        map.updateFlood(weather.getFloodChance());
+        map.updateFlood(x, y, player, weather.getFloodChance());
         map.updateForestFire();
         updateEggs();
         map.growPlants(StatsLoader.getPlantStats());

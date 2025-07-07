@@ -620,15 +620,35 @@ public class Map {
     }
 
     private void floodTile(int x, int y) {
-        if (x < 0 || x >= width || y < 0 || y >= height) return;
-        if (floodInfo[y][x] != null) return;
+        floodTile(x, y, null, Integer.MIN_VALUE, Integer.MIN_VALUE, null);
+    }
+
+    private void floodTile(int x, int y, DinosaurStats player, int playerX,
+                           int playerY, List<String> msgs) {
+        if (x < 0 || x >= width || y < 0 || y >= height) {
+            return;
+        }
+        if (floodInfo[y][x] != null) {
+            return;
+        }
+        String name = grid[y][x].getName();
+        if (name.equals("lake") || name.equals("lava") ||
+                name.equals("solidified_lava_field") || name.equals("volcano") ||
+                name.equals("volcano_erupting") || name.equals("mountain") ||
+                name.equals("highland_forest") || name.equals("toxic_badlands") ||
+                name.endsWith("_flooded")) {
+            return;
+        }
+
         Terrain orig = grid[y][x];
         Terrain flooded = floodedTerrain(orig);
-        if (flooded == null) return;
+        if (flooded == null) {
+            return;
+        }
         floodInfo[y][x] = orig;
         grid[y][x] = flooded;
         plants[y][x].clear();
-        for (NPCAnimal npc : animals[y][x]) {
+        for (NPCAnimal npc : new ArrayList<>(animals[y][x])) {
             if (npc.isAlive()) {
                 double dmg = npc.getMaxHp() * 0.5;
                 npc.setHp(Math.max(0.0, npc.getHp() - dmg));
@@ -637,6 +657,13 @@ public class Map {
                     npc.setAge(-1);
                     npc.setSpeed(0.0);
                 }
+            }
+        }
+        if (player != null && x == playerX && y == playerY) {
+            player.setHp(Math.max(0.0,
+                    player.getHp() - player.getMaxHp() * 0.5));
+            if (msgs != null) {
+                msgs.add("Flood waters sweep over you!");
             }
         }
     }
@@ -653,42 +680,78 @@ public class Map {
         }
     }
 
+    public List<String> initiateFlood(DinosaurStats player, int playerX,
+                                      int playerY) {
+        List<String> msgs = new ArrayList<>();
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                if (grid[y][x] != Terrain.LAKE) {
+                    continue;
+                }
+                floodTile(x + 1, y, player, playerX, playerY, msgs);
+                floodTile(x - 1, y, player, playerX, playerY, msgs);
+                floodTile(x, y + 1, player, playerX, playerY, msgs);
+                floodTile(x, y - 1, player, playerX, playerY, msgs);
+            }
+        }
+        return msgs;
+    }
+
+    public List<String> spreadFlood(DinosaurStats player, int playerX,
+                                    int playerY) {
+        List<String> msgs = new ArrayList<>();
+        List<int[]> current = new ArrayList<>();
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                if (floodInfo[y][x] != null) {
+                    current.add(new int[]{x, y});
+                }
+            }
+        }
+        List<int[]> toFlood = new ArrayList<>();
+        for (int[] pos : current) {
+            int cx = pos[0];
+            int cy = pos[1];
+            int[][] dirs = { {1,0}, {-1,0}, {0,1}, {0,-1} };
+            for (int[] d : dirs) {
+                int nx = cx + d[0];
+                int ny = cy + d[1];
+                if (nx < 0 || nx >= width || ny < 0 || ny >= height) {
+                    continue;
+                }
+                if (floodInfo[ny][nx] != null) {
+                    continue;
+                }
+                toFlood.add(new int[]{nx, ny});
+            }
+        }
+        for (int[] t : toFlood) {
+            floodTile(t[0], t[1], player, playerX, playerY, msgs);
+        }
+        return msgs;
+    }
+
     public List<String> updateFlood(double chance) {
+        return updateFlood(Integer.MIN_VALUE, Integer.MIN_VALUE, null, chance);
+    }
+
+    public List<String> updateFlood(int playerX, int playerY,
+                                    DinosaurStats player, double chance) {
         List<String> msgs = new ArrayList<>();
         if (!activeFlood) {
             if (chance > 0 && floodRng.nextDouble() < chance) {
                 activeFlood = true;
                 floodTurn = 0;
-                for (int y = 0; y < height; y++) {
-                    for (int x = 0; x < width; x++) {
-                        if (grid[y][x] == Terrain.LAKE) {
-                            floodTile(x + 1, y);
-                            floodTile(x - 1, y);
-                            floodTile(x, y + 1);
-                            floodTile(x, y - 1);
-                        }
-                    }
-                }
+                msgs.add(
+                    "Recent heavy rains might be causing lakes and riverbanks to start overflowing.");
+                msgs.addAll(initiateFlood(player, playerX, playerY));
             }
             return msgs;
         }
 
         floodTurn++;
         if (floodTurn == 1) {
-            List<int[]> current = new ArrayList<>();
-            for (int y = 0; y < height; y++) {
-                for (int x = 0; x < width; x++) {
-                    if (floodInfo[y][x] != null) {
-                        current.add(new int[]{x, y});
-                    }
-                }
-            }
-            for (int[] pos : current) {
-                floodTile(pos[0] + 1, pos[1]);
-                floodTile(pos[0] - 1, pos[1]);
-                floodTile(pos[0], pos[1] + 1);
-                floodTile(pos[0], pos[1] - 1);
-            }
+            msgs.addAll(spreadFlood(player, playerX, playerY));
         } else if (floodTurn >= 3) {
             clearFlood();
             activeFlood = false;
