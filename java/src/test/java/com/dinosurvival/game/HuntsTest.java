@@ -12,7 +12,7 @@ public class HuntsTest {
     public void testLiveHuntCountsKill() throws Exception {
         StatsLoader.load(Path.of("..", "dinosurvival"), "Morrison");
         Game game = new Game();
-        game.start("Morrison", "Allosaurus");
+        game.start("Morrison", "Allosaurus", 0L);
         Map map = game.getMap();
         for (int ty = 0; ty < map.getHeight(); ty++) {
             for (int tx = 0; tx < map.getWidth(); tx++) {
@@ -32,7 +32,7 @@ public class HuntsTest {
     public void testCarcassEatNotCountedAsHunt() throws Exception {
         StatsLoader.load(Path.of("..", "dinosurvival"), "Morrison");
         Game game = new Game();
-        game.start("Morrison", "Allosaurus");
+        game.start("Morrison", "Allosaurus", 0L);
         Map map = game.getMap();
         for (int ty = 0; ty < map.getHeight(); ty++) {
             for (int tx = 0; tx < map.getWidth(); tx++) {
@@ -53,7 +53,7 @@ public class HuntsTest {
     public void testPlayerTakesDamageWhenHuntingCritter() throws Exception {
         StatsLoader.load(Path.of("..", "dinosurvival"), "Hell Creek");
         Game game = new Game();
-        game.start("Hell Creek", "Tyrannosaurus");
+        game.start("Hell Creek", "Tyrannosaurus", 0L);
         Map map = game.getMap();
         for (int ty = 0; ty < map.getHeight(); ty++) {
             for (int tx = 0; tx < map.getWidth(); tx++) {
@@ -74,7 +74,7 @@ public class HuntsTest {
     public void testNpcTakesDamageWhenHuntingCritter() throws Exception {
         StatsLoader.load(Path.of("..", "dinosurvival"), "Hell Creek");
         Game game = new Game();
-        game.start("Hell Creek", "Tyrannosaurus");
+        game.start("Hell Creek", "Tyrannosaurus", 0L);
         Map map = game.getMap();
         for (int ty = 0; ty < map.getHeight(); ty++) {
             for (int tx = 0; tx < map.getWidth(); tx++) {
