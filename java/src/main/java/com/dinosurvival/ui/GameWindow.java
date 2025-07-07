@@ -55,6 +55,8 @@ public class GameWindow extends JFrame {
     private final JLabel speedLabel = new JLabel();
     private final JLabel descendantLabel = new JLabel();
     private final JLabel turnLabel = new JLabel();
+    private final ImageIcon bleedIcon;
+    private final ImageIcon brokenBoneIcon;
 
     private static final int TILE_SIZE = 22;
 
@@ -159,6 +161,8 @@ public class GameWindow extends JFrame {
         statsPanel.setLayout(new BoxLayout(statsPanel, BoxLayout.Y_AXIS));
         Font baseFont = nameLabel.getFont();
         Font largeFont = scaleFont(baseFont, 1.3);
+        bleedIcon = loadScaledIcon("/assets/icons/bleed.png", 20, 20);
+        brokenBoneIcon = loadScaledIcon("/assets/icons/broken_bone.png", 20, 20);
         nameLabel.setFont(largeFont.deriveFont(Font.BOLD));
         nameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         statsPanel.add(nameLabel);
@@ -648,7 +652,20 @@ public class GameWindow extends JFrame {
                     }
                     img.setIcon(icon);
                 }
-                info.add(new JLabel(name + " (" + npc.getId() + ")"));
+                JLabel npcNameLabel = new JLabel();
+                String disp = name + " (" + npc.getId() + ")";
+                if (npc.getBleeding() > 0) {
+                    npcNameLabel.setIcon(bleedIcon);
+                    npcNameLabel.setHorizontalTextPosition(SwingConstants.LEFT);
+                    npcNameLabel.setText(disp + " " + npc.getBleeding());
+                } else if (npc.getBrokenBone() > 0) {
+                    npcNameLabel.setIcon(brokenBoneIcon);
+                    npcNameLabel.setHorizontalTextPosition(SwingConstants.LEFT);
+                    npcNameLabel.setText(disp + " " + npc.getBrokenBone());
+                } else {
+                    npcNameLabel.setText(disp);
+                }
+                info.add(npcNameLabel);
                 info.add(new JLabel(String.format("A: %.1f  HP: %.1f/%.1f", game.npcEffectiveAttack(npc), npc.getHp(), game.npcMaxHp(npc))));
                 double rel = game.npcEffectiveSpeed(npc) / Math.max(0.1, game.playerEffectiveSpeed());
                 double chance = game.calculateCatchChance(rel) * 100.0;
@@ -667,7 +684,19 @@ public class GameWindow extends JFrame {
     private void updateStatsPanel() {
         var p = game.getPlayer();
         String stage = game.playerGrowthStage();
-        nameLabel.setText(p.getName() + " (" + stage + ")");
+        String baseName = p.getName() + " (" + stage + ")";
+        if (p.getBleeding() > 0) {
+            nameLabel.setIcon(bleedIcon);
+            nameLabel.setHorizontalTextPosition(SwingConstants.LEFT);
+            nameLabel.setText(baseName + " " + p.getBleeding());
+        } else if (p.getBrokenBone() > 0) {
+            nameLabel.setIcon(brokenBoneIcon);
+            nameLabel.setHorizontalTextPosition(SwingConstants.LEFT);
+            nameLabel.setText(baseName + " " + p.getBrokenBone());
+        } else {
+            nameLabel.setIcon(null);
+            nameLabel.setText(baseName);
+        }
         attackLabel.setText(String.format("%.1f", game.playerEffectiveAttack()));
 
         double maxHp = p.getMaxHp();
