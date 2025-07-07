@@ -754,15 +754,15 @@ public class GameWindow extends JFrame {
         populationList.removeAll();
         java.util.Map<String, Integer> counts = game.populationStats();
         int total = 0;
-        for (int c : counts.values()) {
-            total += c;
+        for (int count : counts.values()) {
+            total += count;
         }
         java.util.List<java.util.Map.Entry<String, Integer>> list =
                 new java.util.ArrayList<>(counts.entrySet());
         list.sort((a, b) -> Integer.compare(b.getValue(), a.getValue()));
-        for (java.util.Map.Entry<String, Integer> e : list) {
-            String name = e.getKey();
-            int count = e.getValue();
+        for (java.util.Map.Entry<String, Integer> entry : list) {
+            String name = entry.getKey();
+            int count = entry.getValue();
             double pct = total > 0 ? count * 100.0 / total : 0.0;
             JPanel row = new JPanel(new BorderLayout());
             row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
@@ -771,7 +771,7 @@ public class GameWindow extends JFrame {
             ImageIcon icon = populationImages.get(name);
             if (icon == null) {
                 String path = "/assets/dinosaurs/" + name.toLowerCase().replace(" ", "_") + ".png";
-                icon = loadScaledIcon(path, 40, 25);
+                icon = loadScaledIcon(path, 40, 30);
                 if (icon != null) {
                     populationImages.put(name, icon);
                 }
