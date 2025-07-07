@@ -30,6 +30,10 @@ public class GameWindow extends JFrame {
     private final Map<String, ImageIcon> npcImages = new HashMap<>();
     private final JPanel populationList = new JPanel();
     private final Map<String, ImageIcon> populationImages = new HashMap<>();
+    private final JLabel weatherIconLabel = new JLabel();
+    private final JLabel weatherNameLabel = new JLabel();
+    private final JLabel weatherEffectLabel = new JLabel();
+    private final Map<String, ImageIcon> weatherIcons = new HashMap<>();
     private boolean encounterSortAsc = true;
 
     private static final int TILE_SIZE = 22;
@@ -68,6 +72,18 @@ public class GameWindow extends JFrame {
         } catch (IOException ex) {
             return null;
         }
+    }
+
+    private String formatBiomeName(String name) {
+        String[] parts = name.split("_");
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < parts.length; i++) {
+            if (parts[i].isEmpty()) continue;
+            sb.append(Character.toUpperCase(parts[i].charAt(0)))
+              .append(parts[i].substring(1));
+            if (i < parts.length - 1) sb.append(' ');
+        }
+        return sb.toString();
     }
 
     public GameWindow(Game game) {
@@ -186,12 +202,14 @@ public class GameWindow extends JFrame {
         // Weather info (row 0, column 3)
         JPanel weatherPanel = new JPanel();
         weatherPanel.setPreferredSize(new Dimension(200, 250));
-        JLabel weatherLabel = new JLabel();
-        JLabel weatherInfo = new JLabel();
-        weatherLabel.setHorizontalAlignment(SwingConstants.CENTER);
         weatherPanel.setLayout(new BoxLayout(weatherPanel, BoxLayout.Y_AXIS));
-        weatherPanel.add(weatherLabel);
-        weatherPanel.add(weatherInfo);
+        weatherIconLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        weatherNameLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        weatherNameLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        weatherEffectLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        weatherPanel.add(weatherIconLabel);
+        weatherPanel.add(weatherNameLabel);
+        weatherPanel.add(weatherEffectLabel);
         c.gridx = 3;
         c.gridy = 0;
         c.weightx = 0;
@@ -295,6 +313,7 @@ public class GameWindow extends JFrame {
         updateActionButtons();
         updatePlantList();
         updateEncounterList();
+        updateWeatherPanel();
         updatePopulationList();
     }
 
@@ -314,7 +333,9 @@ public class GameWindow extends JFrame {
     }
 
     private void updateBiomeImage() {
-        Terrain t = game.getMap().terrainAt(game.getPlayerX(), game.getPlayerY());
+        int px = game.getPlayerX();
+        int py = game.getPlayerY();
+        Terrain t = game.getMap().terrainAt(px, py);
         ImageIcon icon = biomeImages.get(t.getName());
         if (icon == null) {
             icon = loadScaledIcon("/assets/biomes/" + t.getName() + ".png", 400, 250);
@@ -323,7 +344,12 @@ public class GameWindow extends JFrame {
             }
         }
         biomeLabel.setIcon(icon);
-        biomeLabel.setText(t.getName());
+        String label = formatBiomeName(t.getName());
+        if (game.getMap().hasNest(px, py)) {
+            label += " (Nest)";
+        }
+        label += " (" + px + "," + py + ")";
+        biomeLabel.setText(label);
     }
 
     private void updateDinoImage() {
@@ -444,6 +470,34 @@ public class GameWindow extends JFrame {
         }
         encounterList.revalidate();
         encounterList.repaint();
+    }
+
+    private void updateWeatherPanel() {
+        var w = game.getWeather();
+        weatherNameLabel.setText(w.getName());
+        ImageIcon icon = weatherIcons.get(w.getName());
+        if (icon == null && w.getIcon() != null && !w.getIcon().isEmpty()) {
+            icon = loadScaledIcon("/" + w.getIcon(), 128, 128);
+            if (icon != null) {
+                weatherIcons.put(w.getName(), icon);
+            }
+        }
+        weatherIconLabel.setIcon(icon);
+        java.util.List<String> effects = new java.util.ArrayList<>();
+        if (Math.abs(w.getPlayerHydrationMult() - 1.0) > 0.01) {
+            effects.add(String.format("Hydration loss x%.2g", w.getPlayerHydrationMult()));
+        }
+        if (Math.abs(w.getPlayerEnergyMult() - 1.0) > 0.01) {
+            effects.add(String.format("Energy loss x%.2g", w.getPlayerEnergyMult()));
+        }
+        if (w.getFloodChance() > 0) {
+            effects.add(String.format("Flood chance %d%%", (int) (w.getFloodChance() * 100)));
+        }
+        if (effects.isEmpty()) {
+            weatherEffectLabel.setText("");
+        } else {
+            weatherEffectLabel.setText("<html>" + String.join("<br>", effects) + "</html>");
+        }
     }
 
     private void updatePopulationList() {
