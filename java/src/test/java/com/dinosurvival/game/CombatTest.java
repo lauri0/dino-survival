@@ -10,9 +10,9 @@ public class CombatTest {
 
     @Test
     public void test_player_attack_damage() throws Exception {
-        StatsLoader.load(Path.of("..", "dinosurvival"), "Morrison");
+        StatsLoader.load(Path.of("..", "dinosurvival"), "Hell Creek");
         Game game = new Game();
-        game.start("Morrison", "Allosaurus");
+        game.start("Hell Creek", "Tyrannosaurus");
         Map map = game.getMap();
         for (int ty = 0; ty < map.getHeight(); ty++) {
             for (int tx = 0; tx < map.getWidth(); tx++) {
@@ -21,7 +21,7 @@ public class CombatTest {
         }
         NPCAnimal npc = new NPCAnimal();
         npc.setId(1);
-        npc.setName("Stegosaurus");
+        npc.setName("Centipede");
         npc.setWeight(1.0);
         map.addAnimal(game.getPlayerX(), game.getPlayerY(), npc);
         game.huntNpc(npc.getId());
