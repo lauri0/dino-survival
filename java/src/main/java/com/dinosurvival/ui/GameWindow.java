@@ -19,6 +19,7 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 import java.util.HashMap;
 import java.util.Map;
+import java.awt.event.WindowEvent;
 
 /** Main game window showing the map, controls and log output. */
 public class GameWindow extends JFrame {
@@ -124,8 +125,9 @@ public class GameWindow extends JFrame {
 
         // Dinosaur image (row 0, column 0)
         dinoImageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        dinoImageLabel.setPreferredSize(new Dimension(400, 250));
         JPanel dinoPanel = new JPanel(new BorderLayout());
-        dinoPanel.setPreferredSize(new Dimension(400, 250));
+        dinoPanel.setPreferredSize(new Dimension(400, 300));
         dinoPanel.add(dinoImageLabel, BorderLayout.CENTER);
         String dName = game.getPlayer().getName();
         String imgPath = "/assets/dinosaurs/" + dName.toLowerCase().replace(" ", "_") + ".png";
@@ -217,7 +219,10 @@ public class GameWindow extends JFrame {
         statsPanel.add(turnRow);
 
         JButton quit = new JButton("Quit");
-        quit.addActionListener(e -> dispose());
+        quit.addActionListener(e ->
+                dispatchEvent(new java.awt.event.WindowEvent(
+                        this,
+                        java.awt.event.WindowEvent.WINDOW_CLOSING)));
         quit.setAlignmentX(Component.LEFT_ALIGNMENT);
         statsPanel.add(Box.createVerticalStrut(5));
         statsPanel.add(quit);
@@ -322,7 +327,7 @@ public class GameWindow extends JFrame {
         popPanel.add(popScroll, BorderLayout.CENTER);
         c.gridx = 3;
         c.gridy = 1;
-        c.weightx = 0;
+        c.weightx = 1;
         c.weighty = 1;
         main.add(popPanel, c);
 

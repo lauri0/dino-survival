@@ -183,11 +183,11 @@ public class Game {
     }
 
     private static final List<WeatherEntry> WEATHER_TABLE = List.of(
-        new WeatherEntry(new Weather("Cloudy", "", 0.0), 0.30),
-        new WeatherEntry(new Weather("Sunny", "", 0.0, 1.2, 1.0, 1.0), 0.25),
-        new WeatherEntry(new Weather("Heatwave", "", 0.0, 1.5, 1.0, 1.0), 0.10),
-        new WeatherEntry(new Weather("Light Rain", "", 0.01, 0.9, 1.1, 1.1), 0.20),
-        new WeatherEntry(new Weather("Heavy Rain", "", 0.10, 0.8, 1.2, 1.2), 0.15)
+        new WeatherEntry(new Weather("Cloudy", "assets/weather/clouds.png", 0.0), 0.30),
+        new WeatherEntry(new Weather("Sunny", "assets/weather/sun.png", 0.0, 1.2, 1.0, 1.0), 0.25),
+        new WeatherEntry(new Weather("Heatwave", "assets/weather/heatwave.png", 0.0, 1.5, 1.0, 1.0), 0.10),
+        new WeatherEntry(new Weather("Light Rain", "assets/weather/light_rain.png", 0.01, 0.9, 1.1, 1.1), 0.20),
+        new WeatherEntry(new Weather("Heavy Rain", "assets/weather/heavy_rain.png", 0.10, 0.8, 1.2, 1.2), 0.15)
     );
 
     private Weather chooseWeather() {
