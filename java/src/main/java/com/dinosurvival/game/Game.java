@@ -140,11 +140,11 @@ public class Game {
         player.setAttack(player.getAdultAttack() * pct);
         player.setMaxHp(player.getAdultHp() * pct);
         player.setHp(player.getMaxHp());
-        player.setSpeed(statFromWeight(
-                player.getWeight(),
-                player.getAdultWeight(),
-                player.getHatchlingSpeed(),
-                player.getAdultSpeed()));
+        // When starting the game the player's weight equals the hatchling
+        // weight so the speed should exactly match the hatchling value.
+        // Using statFromWeight here resulted in a slightly lower value due to
+        // floating point rounding so set it explicitly instead.
+        player.setSpeed(player.getHatchlingSpeed());
     }
 
     /** Linear interpolation between hatchling and adult values based on weight. */
@@ -518,7 +518,7 @@ public class Game {
                                 }
                             }
                             if (carcass != null) {
-                                npcConsumeMeat(npc, carcass, stats);
+                                npcConsumeMeat(tx, ty, npc, carcass, stats);
                                 if (carcass.getWeight() <= 0) {
                                     map.removeAnimal(tx, ty, carcass);
                                 }
@@ -556,7 +556,7 @@ public class Game {
                                 }
                             }
                             if (chosen != null) {
-                                npcConsumePlant(npc, chosen, stats);
+                                npcConsumePlant(tx, ty, npc, chosen, stats);
                                 if (chosen.getWeight() <= 0) {
                                     plants.remove(chosen);
                                 }
@@ -783,6 +783,10 @@ public class Game {
         return npc.getName() + " (" + npc.getId() + ")";
     }
 
+    private String playerLabel() {
+        return player.getName() + " (0)";
+    }
+
     private void applyBleedAndRegen(DinosaurStats dino, double regen,
                                      boolean moved, boolean allowRegen) {
         if (dino.getBleeding() > 0) {
@@ -941,9 +945,9 @@ public class Game {
             boolean died = applyDamage(dmg, player, playerBase);
             double playerDamage = beforePlayer - player.getHp();
             if (playerDamage > 0) {
-                turnMessages.add("The " + npcLabel(target) + " deals " +
+                turnMessages.add(npcLabel(target) + " deals " +
                         String.format(java.util.Locale.US, "%.0f", playerDamage) +
-                        " damage to you.");
+                        " damage to " + playerLabel() + ".");
             }
             if (dmg > 0 && target.getAbilities().contains("bleed") && player.getHp() > 0) {
                 int bleed = (player.getAbilities().contains("light_armor") || player.getAbilities().contains("heavy_armor")) ? 2 : 5;
@@ -965,9 +969,9 @@ public class Game {
         boolean targetDied = applyDamage(dmgToTarget, target, stats);
         double dealt = beforeTarget - target.getHp();
         if (dealt > 0) {
-            turnMessages.add("You deal " +
+            turnMessages.add(playerLabel() + " deals " +
                     String.format(java.util.Locale.US, "%.0f", dealt) +
-                    " damage to the " + npcLabel(target) + ".");
+                    " damage to " + npcLabel(target) + ".");
         }
         if (dmgToTarget > 0 && player.getAbilities().contains("bleed") && target.getHp() > 0 && target.isAlive()) {
             int bleed = (target.getAbilities().contains("light_armor") || target.getAbilities().contains("heavy_armor")) ? 2 : 5;
@@ -1239,7 +1243,7 @@ public class Game {
         npc.setHp(newMax * ratio);
     }
 
-    private void npcConsumePlant(NPCAnimal npc, Plant plant, Object stats) {
+    private void npcConsumePlant(int tx, int ty, NPCAnimal npc, Plant plant, Object stats) {
         double energyNeeded = 100.0 - npc.getEnergy();
         double weightForEnergy = energyNeeded * npc.getWeight() / 1000.0;
         double growthTarget = npcMaxGrowthGain(npc.getWeight(), stats);
@@ -1251,9 +1255,15 @@ public class Game {
         double remaining = eatAmount - used;
         npcApplyGrowth(npc, remaining, stats);
         plant.setWeight(plant.getWeight() - eatAmount);
+        if (tx == x && ty == y && eatAmount > 0) {
+            String msg = npcLabel(npc) + " eats "
+                    + String.format(java.util.Locale.US, "%.1f", eatAmount)
+                    + "kg of " + plant.getName() + ".";
+            turnMessages.add(msg);
+        }
     }
 
-    private void npcConsumeMeat(NPCAnimal npc, NPCAnimal carcass, Object stats) {
+    private void npcConsumeMeat(int tx, int ty, NPCAnimal npc, NPCAnimal carcass, Object stats) {
         double energyNeeded = 100.0 - npc.getEnergy();
         double weightForEnergy = energyNeeded * npc.getWeight() / 1000.0;
         double growthTarget = npcMaxGrowthGain(npc.getWeight(), stats);
@@ -1265,6 +1275,12 @@ public class Game {
         double remaining = eatAmount - used;
         npcApplyGrowth(npc, remaining, stats);
         carcass.setWeight(carcass.getWeight() - eatAmount);
+        if (tx == x && ty == y && eatAmount > 0) {
+            String msg = npcLabel(npc) + " eats "
+                    + String.format(java.util.Locale.US, "%.1f", eatAmount)
+                    + "kg from the " + npcLabel(carcass) + " carcass.";
+            turnMessages.add(msg);
+        }
     }
 
     private void npcConsumeEggs(NPCAnimal npc, EggCluster egg, Object stats) {
@@ -1406,8 +1422,24 @@ public class Game {
         if (prey == null) return;
 
         double preyAtk = npcEffectiveAttack(prey, preyStats, x, y);
+        double beforePred = predator.getHp();
+        double beforePrey = prey.getHp();
         applyDamage(preyAtk, predator, predStats);
         applyDamage(predatorAtk, prey, preyStats);
+        double dmgToPred = beforePred - predator.getHp();
+        double dmgToPrey = beforePrey - prey.getHp();
+        if (x == this.x && y == this.y) {
+            if (dmgToPred > 0) {
+                turnMessages.add(npcLabel(prey) + " deals " +
+                        String.format(java.util.Locale.US, "%.0f", dmgToPred) +
+                        " damage to " + npcLabel(predator) + ".");
+            }
+            if (dmgToPrey > 0) {
+                turnMessages.add(npcLabel(predator) + " deals " +
+                        String.format(java.util.Locale.US, "%.0f", dmgToPrey) +
+                        " damage to " + npcLabel(prey) + ".");
+            }
+        }
     }
 
     private void moveNpcs() {
