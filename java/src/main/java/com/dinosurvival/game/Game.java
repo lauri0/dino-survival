@@ -44,6 +44,9 @@ public class Game {
     /** Number of descendants required to win the game. */
     public static final int DESCENDANTS_TO_WIN = 5;
 
+    /** Energy multiplier applied when an NPC walks. */
+    public static final double WALKING_ENERGY_DRAIN_MULTIPLIER = 1.3;
+
     /**
      * Initialise the game world. Statistics are loaded from the YAML files and
      * a new map is generated. This mirrors the behaviour of the Python
@@ -484,8 +487,8 @@ public class Game {
                         npc.setTurnsUntilLayEggs(npc.getTurnsUntilLayEggs() - 1);
                     }
 
-                    double drain = getStat(stats, "adult_energy_drain") * 0.5 * weather.getNpcEnergyMult();
-                    npc.setEnergy(Math.max(0.0, npc.getEnergy() - drain));
+                    double baseDrain = getStat(stats, "adult_energy_drain") * 0.5 * weather.getNpcEnergyMult();
+                    npc.setEnergy(Math.max(0.0, npc.getEnergy() - baseDrain));
                     if (npc.getEnergy() <= 0) {
                         npc.setAlive(false);
                         npc.setAge(-1);
@@ -505,6 +508,11 @@ public class Game {
                             && npc.getTurnsUntilLayEggs() == 0) {
                         if (animals.size() >= 4) {
                             npcChooseMoveForced(tx, ty, npc, stats);
+                            if (!"None".equals(npc.getNextMove())) {
+                                if (npcApplyWalkingDrain(npc, baseDrain)) {
+                                    continue;
+                                }
+                            }
                             npc.setLastAction("move");
                             continue;
                         } else {
@@ -584,6 +592,9 @@ public class Game {
 
                     npcChooseMove(tx, ty, npc, stats);
                     if (!"None".equals(npc.getNextMove())) {
+                        if (npcApplyWalkingDrain(npc, baseDrain)) {
+                            continue;
+                        }
                         npc.setLastAction("move");
                     }
                 }
@@ -822,7 +833,7 @@ public class Game {
     void applyTurnCosts(boolean moved, double multiplier) {
         double drain = player.getHatchlingEnergyDrain();
         if (moved) {
-            drain *= player.getWalkingEnergyDrainMultiplier();
+            drain *= WALKING_ENERGY_DRAIN_MULTIPLIER;
             if (player.getBrokenBone() > 0) {
                 drain *= 2;
             }
@@ -1270,6 +1281,30 @@ public class Game {
         }
         if (npc.getBrokenBone() > 0) {
             npc.setBrokenBone(npc.getBrokenBone() - 1);
+        }
+        return false;
+    }
+
+    /**
+     * Apply additional energy drain when an NPC walks.
+     *
+     * @param npc       the NPC animal
+     * @param baseDrain the base drain for this turn
+     * @return true if the NPC dies from energy loss
+     */
+    private boolean npcApplyWalkingDrain(NPCAnimal npc, double baseDrain) {
+        double extra = baseDrain * (WALKING_ENERGY_DRAIN_MULTIPLIER - 1.0);
+        if (npc.getBrokenBone() > 0) {
+            extra *= 2;
+        }
+        if (extra > 0) {
+            npc.setEnergy(Math.max(0.0, npc.getEnergy() - extra));
+            if (npc.getEnergy() <= 0) {
+                npc.setAlive(false);
+                npc.setAge(-1);
+                npc.setSpeed(0.0);
+                return true;
+            }
         }
         return false;
     }
