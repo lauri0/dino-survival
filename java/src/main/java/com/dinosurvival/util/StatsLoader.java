@@ -109,6 +109,15 @@ public class StatsLoader {
     }
 
     private static void applyDinoDefaults(Map<String, Object> stats) {
+        Object atk = stats.remove("attack");
+        if (atk != null && !stats.containsKey("adult_attack")) {
+            stats.put("adult_attack", getDouble(atk));
+        }
+        Object hp = stats.remove("hp");
+        if (hp != null && !stats.containsKey("adult_hp")) {
+            stats.put("adult_hp", getDouble(hp));
+        }
+
         Object diet = stats.get("diet");
         if (diet instanceof List<?> list) {
             List<Diet> diets = new ArrayList<>();
