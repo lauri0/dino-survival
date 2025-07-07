@@ -9,6 +9,7 @@ import com.dinosurvival.game.Burrow;
 import com.dinosurvival.game.MapUtils;
 import com.dinosurvival.game.Setting;
 import com.dinosurvival.game.Terrain;
+import com.dinosurvival.game.Settings;
 import java.util.Iterator;
 import com.dinosurvival.util.StatsLoader;
 import java.io.IOException;
@@ -57,9 +58,7 @@ public class Game {
      * world without depending on the Python code.
      */
     public void start() {
-        Setting s = defaultSetting();
-        s.setFormation("Morrison");
-        start(s, null, new Random().nextLong());
+        start(Settings.MORRISON, null, new Random().nextLong());
     }
 
     /**
@@ -67,9 +66,7 @@ public class Game {
      * If {@code dinoName} is null the first available dinosaur is used.
      */
     public void start(String formation, String dinoName) {
-        Setting s = defaultSetting();
-        s.setFormation(formation);
-        start(s, dinoName, new Random().nextLong());
+        start(Settings.forFormation(formation), dinoName, new Random().nextLong());
     }
 
     /**
@@ -77,9 +74,7 @@ public class Game {
      * the provided random seed for map generation.
      */
     public void start(String formation, String dinoName, long seed) {
-        Setting s = defaultSetting();
-        s.setFormation(formation);
-        start(s, dinoName, seed);
+        start(Settings.forFormation(formation), dinoName, seed);
     }
 
     /**
@@ -206,36 +201,7 @@ public class Game {
      * {@link Map} when no configuration is provided.
      */
     private static Setting defaultSetting() {
-        Setting s = new Setting();
-        java.util.Map<String, Terrain> terrains = new java.util.HashMap<>();
-        terrains.put("desert", Terrain.DESERT);
-        terrains.put("plains", Terrain.PLAINS);
-        terrains.put("woodlands", Terrain.WOODLANDS);
-        terrains.put("forest", Terrain.FOREST);
-        terrains.put("highland_forest", Terrain.HIGHLAND_FOREST);
-        terrains.put("swamp", Terrain.SWAMP);
-        terrains.put("lake", Terrain.LAKE);
-        terrains.put("mountain", Terrain.MOUNTAIN);
-        terrains.put("volcano", Terrain.VOLCANO);
-        terrains.put("volcano_erupting", Terrain.VOLCANO_ERUPTING);
-        terrains.put("lava", Terrain.LAVA);
-        terrains.put("solidified_lava_field", Terrain.SOLIDIFIED_LAVA_FIELD);
-        s.setTerrains(terrains);
-
-        java.util.Map<String, Double> heights = new java.util.HashMap<>();
-        heights.put("low", 0.3);
-        heights.put("normal", 0.4);
-        heights.put("hilly", 0.2);
-        heights.put("mountain", 0.1);
-        s.setHeightLevels(heights);
-
-        java.util.Map<String, Double> humidity = new java.util.HashMap<>();
-        humidity.put("arid", 0.35);
-        humidity.put("normal", 0.4);
-        humidity.put("humid", 0.25);
-        s.setHumidityLevels(humidity);
-        s.setNumBurrows(5);
-        return s;
+        return Settings.MORRISON;
     }
 
     /**
