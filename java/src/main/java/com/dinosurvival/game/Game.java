@@ -1371,25 +1371,37 @@ public class Game {
     private void npcSimpleHunt(int x, int y, List<NPCAnimal> animals) {
         if (animals.size() < 2) return;
         NPCAnimal predator = null;
-        NPCAnimal prey = null;
+        Object predStats = null;
         for (NPCAnimal npc : animals) {
             if (!npc.isAlive()) continue;
             Object stats = StatsLoader.getDinoStats().get(npc.getName());
             if (stats == null) stats = StatsLoader.getCritterStats().get(npc.getName());
             if (stats == null) continue;
-            if (statsDietHas(stats, "meat")) { predator = npc; break; }
+            if (statsDietHas(stats, "meat")) { predator = npc; predStats = stats; break; }
         }
         if (predator == null) return;
+
+        double predatorAtk = npcEffectiveAttack(predator, predStats, x, y);
+        double predatorHp = npcMaxHp(predator);
+
+        NPCAnimal prey = null;
+        Object preyStats = null;
         for (NPCAnimal npc : animals) {
-            if (npc != predator && npc.isAlive()) { prey = npc; break; }
+            if (npc == predator || !npc.isAlive()) continue;
+            Object stats = StatsLoader.getDinoStats().get(npc.getName());
+            if (stats == null) stats = StatsLoader.getCritterStats().get(npc.getName());
+            if (stats == null) continue;
+            double preyAtkTmp = npcEffectiveAttack(npc, stats, x, y);
+            double preyHpTmp = npcMaxHp(npc);
+            if (npcDamageAdvantage(predatorAtk, predatorHp, predStats, preyAtkTmp, preyHpTmp, stats)) {
+                prey = npc;
+                preyStats = stats;
+                predatorAtk = predatorAtk; // unchanged, but keep for clarity
+                break;
+            }
         }
         if (prey == null) return;
 
-        Object predStats = StatsLoader.getDinoStats().get(predator.getName());
-        if (predStats == null) predStats = StatsLoader.getCritterStats().get(predator.getName());
-        Object preyStats = StatsLoader.getDinoStats().get(prey.getName());
-        if (preyStats == null) preyStats = StatsLoader.getCritterStats().get(prey.getName());
-        double predatorAtk = npcEffectiveAttack(predator, predStats, x, y);
         double preyAtk = npcEffectiveAttack(prey, preyStats, x, y);
         applyDamage(preyAtk, predator, predStats);
         applyDamage(predatorAtk, prey, preyStats);
