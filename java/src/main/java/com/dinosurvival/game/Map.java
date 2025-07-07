@@ -351,6 +351,13 @@ public class Map {
     }
 
     /**
+     * Return {@code true} if any egg clusters are present in the cell.
+     */
+    public boolean hasNest(int x, int y) {
+        return !eggs[y][x].isEmpty();
+    }
+
+    /**
      * Remove and return the first egg cluster from the cell, if any.
      */
     public EggCluster takeEggs(int x, int y) {
