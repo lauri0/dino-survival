@@ -36,6 +36,7 @@ public class GameWindow extends JFrame {
     private final Map<String, ImageIcon> npcImages = new HashMap<>();
     private final JPanel populationList = new JPanel();
     private final Map<String, ImageIcon> populationImages = new HashMap<>();
+    private final Map<String, ImageIcon> playerImages = new HashMap<>();
     private final JLabel weatherIconLabel = new JLabel();
     private final JLabel weatherNameLabel = new JLabel();
     private final JLabel weatherEffectLabel = new JLabel();
@@ -109,6 +110,10 @@ public class GameWindow extends JFrame {
         return sb.toString();
     }
 
+    private Font scaleFont(Font base, double factor) {
+        return base.deriveFont((float) (base.getSize2D() * factor));
+    }
+
     public GameWindow(Game game) {
         super("Dino Survival");
         this.game = game;
@@ -129,12 +134,7 @@ public class GameWindow extends JFrame {
         JPanel dinoPanel = new JPanel(new BorderLayout());
         dinoPanel.setPreferredSize(new Dimension(400, 300));
         dinoPanel.add(dinoImageLabel, BorderLayout.CENTER);
-        String dName = game.getPlayer().getName();
-        String imgPath = "/assets/dinosaurs/" + dName.toLowerCase().replace(" ", "_") + ".png";
-        ImageIcon dIcon = loadScaledIcon(imgPath, 400, 250);
-        if (dIcon != null) {
-            dinoImageLabel.setIcon(dIcon);
-        }
+        updateDinoImage();
         JPanel infoRow = new JPanel(new FlowLayout(FlowLayout.CENTER));
         infoRow.add(infoButton);
         infoRow.add(dinoStatsButton);
@@ -145,19 +145,23 @@ public class GameWindow extends JFrame {
         c.gridy = 0;
         c.weightx = 0;
         c.weighty = 0;
+        c.anchor = GridBagConstraints.NORTH;
         main.add(dinoPanel, c);
 
         // Stats sidebar (row 1, column 0)
         JPanel statsPanel = new JPanel();
         statsPanel.setPreferredSize(new Dimension(200, 200));
         statsPanel.setLayout(new BoxLayout(statsPanel, BoxLayout.Y_AXIS));
-        nameLabel.setFont(nameLabel.getFont().deriveFont(Font.BOLD, 16f));
+        Font baseFont = nameLabel.getFont();
+        Font largeFont = scaleFont(baseFont, 1.3);
+        nameLabel.setFont(largeFont.deriveFont(Font.BOLD));
         nameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         statsPanel.add(nameLabel);
 
         JPanel attackRow = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JLabel attackIcon = new JLabel(loadScaledIcon("/assets/icons/attack.png", 20, 20));
         attackRow.add(attackIcon);
+        attackLabel.setFont(largeFont);
         attackRow.add(attackLabel);
         attackRow.setAlignmentX(Component.LEFT_ALIGNMENT);
         statsPanel.add(attackRow);
@@ -165,6 +169,7 @@ public class GameWindow extends JFrame {
         JPanel hpRow = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JLabel hpIcon = new JLabel(loadScaledIcon("/assets/icons/health.png", 20, 20));
         hpRow.add(hpIcon);
+        hpValueLabel.setFont(largeFont);
         hpRow.add(hpValueLabel);
         hpBar.setPreferredSize(new Dimension(100, 15));
         hpBar.setStringPainted(true);
@@ -193,6 +198,7 @@ public class GameWindow extends JFrame {
         JPanel weightRow = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JLabel weightIcon = new JLabel(loadScaledIcon("/assets/icons/weight.png", 20, 20));
         weightRow.add(weightIcon);
+        weightLabel.setFont(largeFont);
         weightRow.add(weightLabel);
         weightRow.setAlignmentX(Component.LEFT_ALIGNMENT);
         statsPanel.add(weightRow);
@@ -200,6 +206,7 @@ public class GameWindow extends JFrame {
         JPanel speedRow = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JLabel speedIcon = new JLabel(loadScaledIcon("/assets/icons/speed.png", 20, 20));
         speedRow.add(speedIcon);
+        speedLabel.setFont(largeFont);
         speedRow.add(speedLabel);
         speedRow.setAlignmentX(Component.LEFT_ALIGNMENT);
         statsPanel.add(speedRow);
@@ -207,6 +214,7 @@ public class GameWindow extends JFrame {
         JPanel descRow = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JLabel descIcon = new JLabel(loadScaledIcon("/assets/icons/descendant.png", 20, 20));
         descRow.add(descIcon);
+        descendantLabel.setFont(largeFont);
         descRow.add(descendantLabel);
         descRow.setAlignmentX(Component.LEFT_ALIGNMENT);
         statsPanel.add(descRow);
@@ -214,6 +222,7 @@ public class GameWindow extends JFrame {
         JPanel turnRow = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JLabel turnIcon = new JLabel(loadScaledIcon("/assets/icons/turn.png", 20, 20));
         turnRow.add(turnIcon);
+        turnLabel.setFont(largeFont);
         turnRow.add(turnLabel);
         turnRow.setAlignmentX(Component.LEFT_ALIGNMENT);
         statsPanel.add(turnRow);
@@ -241,6 +250,7 @@ public class GameWindow extends JFrame {
         c.gridy = 0;
         c.weightx = 0;
         c.weighty = 0;
+        c.anchor = GridBagConstraints.NORTH;
         main.add(biomePanel, c);
 
         // Movement buttons and plant list (row 1, column 1)
@@ -270,6 +280,7 @@ public class GameWindow extends JFrame {
         c.gridy = 0;
         c.weightx = 0;
         c.weighty = 0;
+        c.anchor = GridBagConstraints.NORTH;
         c.fill = GridBagConstraints.NONE;
         main.add(mapPanel, c);
         c.fill = GridBagConstraints.BOTH;
@@ -490,11 +501,19 @@ public class GameWindow extends JFrame {
 
     private void updateDinoImage() {
         String dName = game.getPlayer().getName();
-        String path = "/assets/dinosaurs/" + dName.toLowerCase().replace(" ", "_") + ".png";
-        ImageIcon icon = loadScaledIcon(path, 400, 250);
-        if (icon != null) {
-            dinoImageLabel.setIcon(icon);
+        String stage = game.playerGrowthStage().toLowerCase();
+        boolean hatch = stage.equals("hatchling") || stage.equals("juvenile");
+        String base = "/assets/dinosaurs/" + dName.toLowerCase().replace(" ", "_");
+        String key = dName + (hatch ? "_hatch" : "_adult");
+        ImageIcon icon = playerImages.get(key);
+        if (icon == null) {
+            String path = base + (hatch ? "_hatchling.png" : ".png");
+            icon = loadScaledIcon(path, 400, 250);
+            if (icon != null) {
+                playerImages.put(key, icon);
+            }
         }
+        dinoImageLabel.setIcon(icon);
         dinoImageLabel.setText(dName);
     }
 
@@ -587,12 +606,30 @@ public class GameWindow extends JFrame {
             } else if (e.getNpc() != null) {
                 NPCAnimal npc = e.getNpc();
                 String name = npc.getName();
-                ImageIcon icon = npcImages.get(name);
+                double adultW = 0.0;
+                var ds = StatsLoader.getDinoStats().get(name);
+                if (ds != null) {
+                    adultW = ds.getAdultWeight();
+                } else {
+                    var cs = StatsLoader.getCritterStats().get(name);
+                    if (cs != null) {
+                        Object w = cs.get("adult_weight");
+                        if (w instanceof Number n) adultW = n.doubleValue();
+                    }
+                }
+                boolean showHatch = adultW > 0 && npc.getWeight() <= adultW / 3.0;
+                String base = "/assets/dinosaurs/" + name.toLowerCase().replace(" ", "_");
+                String key = name + (showHatch ? "_h" : "_a");
+                ImageIcon icon = npcImages.get(key);
                 if (icon == null) {
-                    String path = "/assets/dinosaurs/" + name.toLowerCase().replace(" ", "_") + ".png";
+                    String path = base + (showHatch ? "_hatchling.png" : ".png");
                     icon = loadScaledIcon(path, 100, 70);
+                    if (icon == null && showHatch) {
+                        path = base + ".png";
+                        icon = loadScaledIcon(path, 100, 70);
+                    }
                     if (icon != null) {
-                        npcImages.put(name, icon);
+                        npcImages.put(key, icon);
                     }
                 }
                 if (icon != null) img.setIcon(icon);
@@ -612,7 +649,8 @@ public class GameWindow extends JFrame {
 
     private void updateStatsPanel() {
         var p = game.getPlayer();
-        nameLabel.setText(p.getName());
+        String stage = game.playerGrowthStage();
+        nameLabel.setText(p.getName() + " (" + stage + ")");
         attackLabel.setText(String.format("%.1f", game.playerEffectiveAttack()));
 
         double maxHp = p.getMaxHp();
@@ -681,6 +719,8 @@ public class GameWindow extends JFrame {
             int count = e.getValue();
             double pct = total > 0 ? count * 100.0 / total : 0.0;
             JPanel row = new JPanel(new BorderLayout());
+            row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+            row.setPreferredSize(new Dimension(0, 30));
             JLabel img = new JLabel();
             ImageIcon icon = populationImages.get(name);
             if (icon == null) {

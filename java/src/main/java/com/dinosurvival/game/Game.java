@@ -1734,6 +1734,27 @@ public class Game {
     }
 
     /**
+     * Determine the growth stage description for the player dinosaur.
+     */
+    public String playerGrowthStage() {
+        double adult = player.getAdultWeight();
+        if (adult <= 0) {
+            return "Adult";
+        }
+        double pct = player.getWeight() / adult;
+        if (pct <= 0.10) {
+            return "Hatchling";
+        }
+        if (pct <= 1.0 / 3.0) {
+            return "Juvenile";
+        }
+        if (pct <= 2.0 / 3.0) {
+            return "Sub-Adult";
+        }
+        return "Adult";
+    }
+
+    /**
      * Get the list of encounters on the player's current tile.
      */
     public java.util.List<EncounterEntry> getCurrentEncounters() {
