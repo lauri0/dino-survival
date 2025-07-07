@@ -531,6 +531,26 @@ public class Game {
                         }
                     }
 
+                    if (npc.getAbilities().contains("bleed") && npc.getBleedWaitTurns() > 0) {
+                        NPCAnimal target = null;
+                        for (NPCAnimal a : animals) {
+                            if (a.getId() == npc.getBleedWaitTarget()) {
+                                target = a;
+                                break;
+                            }
+                        }
+                        if (target != null && target.isAlive() && target.getBleeding() > 0
+                                && npc.getEnergy() >= 30) {
+                            npc.setBleedWaitTurns(npc.getBleedWaitTurns() - 1);
+                            npc.setNextMove("None");
+                            npc.setLastAction("stay");
+                            continue;
+                        } else {
+                            npc.setBleedWaitTurns(0);
+                            npc.setBleedWaitTarget(-1);
+                        }
+                    }
+
                     if (npc.getEnergy() <= 90) {
                         if (statsDietHas(stats, "meat")) {
                             NPCAnimal carcass = null;
