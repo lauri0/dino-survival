@@ -35,6 +35,7 @@ public class Map {
     private final Terrain[][] floodInfo;
     private final Random floodRng = new Random();
     private final Random fireRng = new Random();
+    private final Random rng;
     private boolean activeFlood = false;
     private int floodTurn = 0;
 
@@ -42,6 +43,14 @@ public class Map {
      * Construct a map using the provided setting configuration.
      */
     public Map(int width, int height, Setting setting) {
+        this(width, height, setting, new Random());
+    }
+
+    public Map(int width, int height, Setting setting, long seed) {
+        this(width, height, setting, new Random(seed));
+    }
+
+    public Map(int width, int height, Setting setting, Random rng) {
         this.width = width;
         this.height = height;
         this.grid = new Terrain[height][width];
@@ -57,6 +66,7 @@ public class Map {
         this.fireTurns = new int[height][width];
         this.burntTurns = new int[height][width];
         this.floodInfo = new Terrain[height][width];
+        this.rng = rng;
         generate(setting.getTerrains(), setting.getHeightLevels(), setting.getHumidityLevels());
     }
 
@@ -64,7 +74,11 @@ public class Map {
      * Legacy constructor used by older tests. Uses a basic default setting.
      */
     public Map(int width, int height) {
-        this(width, height, defaultSetting());
+        this(width, height, defaultSetting(), new Random());
+    }
+
+    public Map(int width, int height, long seed) {
+        this(width, height, defaultSetting(), new Random(seed));
     }
 
     private static Setting defaultSetting() {
@@ -102,8 +116,8 @@ public class Map {
     private void generate(java.util.Map<String, Terrain> terrains,
                           java.util.Map<String, Double> heightLevels,
                           java.util.Map<String, Double> humidityLevels) {
-        double[][] hNoise = generateNoise(width, height, 3);
-        double[][] mNoise = generateNoise(width, height, 3);
+        double[][] hNoise = generateNoise(width, height, 3, rng);
+        double[][] mNoise = generateNoise(width, height, 3, rng);
 
         double[] heightThresh = buildThresholds(heightLevels, new String[]{"low", "normal", "hilly", "mountain"});
         double[] humidityThresh = buildThresholds(humidityLevels, new String[]{"arid", "normal", "humid"});
@@ -122,7 +136,7 @@ public class Map {
         biomeMap.put("humid:hilly", "highland_forest");
         biomeMap.put("humid:mountain", "mountain");
 
-        Random r = new Random();
+        Random r = rng;
         while (true) {
             int lakeCount = 0;
             int edgeLake = 0;
@@ -156,8 +170,8 @@ public class Map {
                 }
             }
             // regenerate noise and try again
-            hNoise = generateNoise(width, height, 3);
-            mNoise = generateNoise(width, height, 3);
+            hNoise = generateNoise(width, height, 3, rng);
+            mNoise = generateNoise(width, height, 3, rng);
         }
 
         for (int y = 0; y < height; y++) {
@@ -210,10 +224,9 @@ public class Map {
         return names[names.length - 1];
     }
 
-    private static double[][] generateNoise(int width, int height, int scale) {
+    private static double[][] generateNoise(int width, int height, int scale, Random r) {
         int coarseW = width / scale + 3;
         int coarseH = height / scale + 3;
-        Random r = new Random();
         double[][] coarse = new double[coarseH][coarseW];
         for (int y = 0; y < coarseH; y++) {
             for (int x = 0; x < coarseW; x++) {
