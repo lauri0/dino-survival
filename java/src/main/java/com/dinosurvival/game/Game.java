@@ -852,6 +852,7 @@ public class Game {
         }
 
         updateNpcs();
+        _apply_terrain_effects();
         spoilCarcasses();
         generateEncounters();
         aggressiveAttackCheck();
@@ -1533,6 +1534,49 @@ public class Game {
         double pctHunter = totalHunter / Math.max(hunterHp, 0.1);
 
         return pctHunter < pctTarget;
+    }
+
+    /** Apply end-of-turn terrain effects similar to the Python version. */
+    void _apply_terrain_effects() {
+        String terrain = map.terrainAt(x, y).getName();
+        if (terrain.equals("lava") || terrain.equals("volcano_erupting") ||
+                terrain.equals("forest_fire") ||
+                terrain.equals("highland_forest_fire")) {
+            player.setHp(0.0);
+        }
+        if (terrain.equals("toxic_badlands")) {
+            double dmg = player.getMaxHp() * 0.2;
+            player.setHp(Math.max(0.0, player.getHp() - dmg));
+        }
+
+        for (int ty = 0; ty < map.getHeight(); ty++) {
+            for (int tx = 0; tx < map.getWidth(); tx++) {
+                String tname = map.terrainAt(tx, ty).getName();
+                if (tname.equals("lava") || tname.equals("volcano_erupting") ||
+                        tname.equals("forest_fire") ||
+                        tname.equals("highland_forest_fire")) {
+                    for (NPCAnimal npc : map.getAnimals(tx, ty)) {
+                        npc.setAlive(false);
+                        npc.setAge(-1);
+                        npc.setSpeed(0.0);
+                    }
+                    map.getEggs(tx, ty).clear();
+                    map.removeBurrow(tx, ty);
+                    map.getPlants(tx, ty).clear();
+                } else if (tname.equals("toxic_badlands")) {
+                    for (NPCAnimal npc : map.getAnimals(tx, ty)) {
+                        if (!npc.isAlive()) continue;
+                        double dmg = npc.getMaxHp() * 0.2;
+                        npc.setHp(Math.max(0.0, npc.getHp() - dmg));
+                        if (npc.getHp() <= 0) {
+                            npc.setAlive(false);
+                            npc.setAge(-1);
+                            npc.setSpeed(0.0);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private void checkVictory() {
