@@ -5,8 +5,7 @@ import com.dinosurvival.game.Map;
 import com.dinosurvival.game.Burrow;
 import com.dinosurvival.model.NPCAnimal;
 import com.dinosurvival.util.StatsLoader;
-import com.dinosurvival.ui.SetupDialog;
-import java.lang.reflect.Field;
+import com.dinosurvival.game.Settings;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
@@ -77,13 +76,9 @@ public class DiggerTest {
     }
 
     @Test
-    public void testHellCreekPlayableList() throws Exception {
-        Field f = SetupDialog.class.getDeclaredField("PLAYABLE_DINOS");
-        f.setAccessible(true);
-        @SuppressWarnings("unchecked")
-        java.util.Map<String, String[]> map =
-                (java.util.Map<String, String[]>) f.get(null);
-        String[] list = map.get("Hell Creek");
+    public void testHellCreekPlayableList() {
+        String[] list = Settings.HELL_CREEK.getPlayableDinos()
+                .keySet().toArray(new String[0]);
         Assertions.assertNotNull(list);
         Assertions.assertTrue(Arrays.asList(list).contains("Pectinodon"));
         Assertions.assertTrue(Arrays.asList(list).contains("Acheroraptor"));

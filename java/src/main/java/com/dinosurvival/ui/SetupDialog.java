@@ -1,7 +1,7 @@
 package com.dinosurvival.ui;
 
 import com.dinosurvival.util.StatsLoader;
-import java.util.Map;
+import com.dinosurvival.game.Settings;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.io.IOException;
@@ -14,12 +14,6 @@ public class SetupDialog extends JDialog {
     private String dinosaur;
     private final JComboBox<String> formationBox = new JComboBox<>(new String[]{"Morrison", "Hell Creek"});
     private final JComboBox<String> dinoBox = new JComboBox<>();
-    private static final Map<String, String[]> PLAYABLE_DINOS = Map.of(
-            "Morrison",
-            new String[]{"Allosaurus", "Ceratosaurus", "Torvosaurus", "Ornitholestes"},
-            "Hell Creek",
-            new String[]{"Tyrannosaurus", "Acheroraptor", "Pectinodon"}
-    );
 
     public SetupDialog(JFrame parent) {
         super(parent, "New Game", true);
@@ -50,7 +44,8 @@ public class SetupDialog extends JDialog {
         } catch (IOException ex) {
             // ignore
         }
-        String[] dinos = PLAYABLE_DINOS.getOrDefault(sel, new String[0]);
+        String[] dinos = Settings.forFormation(sel)
+                .getPlayableDinos().keySet().toArray(new String[0]);
         DefaultComboBoxModel<String> model = new DefaultComboBoxModel<>(dinos);
         dinoBox.setModel(model);
         if (model.getSize() > 0) {

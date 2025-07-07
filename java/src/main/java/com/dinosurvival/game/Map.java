@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
+import com.dinosurvival.game.Settings;
 
 /**
  * Rough Java port of the Python {@code Map} class. The implementation focuses
@@ -82,35 +83,7 @@ public class Map {
     }
 
     private static Setting defaultSetting() {
-        Setting s = new Setting();
-        java.util.Map<String, Terrain> terrains = new HashMap<>();
-        terrains.put("desert", Terrain.DESERT);
-        terrains.put("plains", Terrain.PLAINS);
-        terrains.put("woodlands", Terrain.WOODLANDS);
-        terrains.put("forest", Terrain.FOREST);
-        terrains.put("highland_forest", Terrain.HIGHLAND_FOREST);
-        terrains.put("swamp", Terrain.SWAMP);
-        terrains.put("lake", Terrain.LAKE);
-        terrains.put("mountain", Terrain.MOUNTAIN);
-        terrains.put("volcano", Terrain.VOLCANO);
-        terrains.put("volcano_erupting", Terrain.VOLCANO_ERUPTING);
-        terrains.put("lava", Terrain.LAVA);
-        terrains.put("solidified_lava_field", Terrain.SOLIDIFIED_LAVA_FIELD);
-        s.setTerrains(terrains);
-
-        java.util.Map<String, Double> heights = new HashMap<>();
-        heights.put("low", 0.3);
-        heights.put("normal", 0.4);
-        heights.put("hilly", 0.2);
-        heights.put("mountain", 0.1);
-        s.setHeightLevels(heights);
-
-        java.util.Map<String, Double> humidity = new HashMap<>();
-        humidity.put("arid", 0.35);
-        humidity.put("normal", 0.4);
-        humidity.put("humid", 0.25);
-        s.setHumidityLevels(humidity);
-        return s;
+        return Settings.MORRISON;
     }
 
     private void generate(java.util.Map<String, Terrain> terrains,
