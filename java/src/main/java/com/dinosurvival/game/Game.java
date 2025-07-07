@@ -6,6 +6,7 @@ import com.dinosurvival.model.Plant;
 import com.dinosurvival.game.EncounterEntry;
 import com.dinosurvival.game.EggCluster;
 import com.dinosurvival.game.Burrow;
+import com.dinosurvival.game.MapUtils;
 import java.util.Iterator;
 import com.dinosurvival.util.StatsLoader;
 import java.io.IOException;
@@ -103,6 +104,8 @@ public class Game {
 
         chooseStartingLocation();
         map.reveal(x, y);
+        MapUtils.revealCardinals(map, x, y);
+        MapUtils.revealAdjacentMountains(map, x, y);
         weather = chooseWeather();
         weatherTurns = 0;
         populateAnimals();
@@ -934,10 +937,17 @@ public class Game {
         x = Math.max(0, Math.min(map.getWidth() - 1, x + dx));
         y = Math.max(0, Math.min(map.getHeight() - 1, y + dy));
         map.reveal(x, y);
+        MapUtils.revealCardinals(map, x, y);
+        Terrain t = map.terrainAt(x, y);
+        if (t == Terrain.MOUNTAIN || t == Terrain.VOLCANO ||
+                t == Terrain.VOLCANO_ERUPTING) {
+            MapUtils.revealSurrounding(map, x, y);
+        }
         generateEncounters();
         aggressiveAttackCheck();
         applyTurnCosts(true, 1.0);
         checkVictory();
+        MapUtils.revealAdjacentMountains(map, x, y);
         lastAction = "move";
     }
 
@@ -948,6 +958,7 @@ public class Game {
         aggressiveAttackCheck();
         applyTurnCosts(false, 1.0);
         checkVictory();
+        MapUtils.revealAdjacentMountains(map, x, y);
         lastAction = "stay";
     }
 
@@ -961,6 +972,7 @@ public class Game {
         aggressiveAttackCheck();
         applyTurnCosts(false, 1.0);
         checkVictory();
+        MapUtils.revealAdjacentMountains(map, x, y);
         lastAction = "drink";
     }
 
@@ -981,6 +993,8 @@ public class Game {
             generateEncounters();
             aggressiveAttackCheck();
             applyTurnCosts(false, 1.0);
+        
+            MapUtils.revealAdjacentMountains(map, x, y);
             lastAction = "hunt";
             return;
         }
@@ -1009,6 +1023,7 @@ public class Game {
                 aggressiveAttackCheck();
                 applyTurnCosts(false, 5.0);
                 checkVictory();
+                MapUtils.revealAdjacentMountains(map, x, y);
                 lastAction = "hunt";
                 return;
             }
@@ -1035,6 +1050,7 @@ public class Game {
             }
             if (died) {
                 generateEncounters();
+                MapUtils.revealAdjacentMountains(map, x, y);
                 lastAction = "hunt";
                 return;
             }
@@ -1080,6 +1096,7 @@ public class Game {
         aggressiveAttackCheck();
         applyTurnCosts(false, 1.0);
         checkVictory();
+        MapUtils.revealAdjacentMountains(map, x, y);
         lastAction = "hunt";
     }
 
@@ -1091,6 +1108,7 @@ public class Game {
             generateEncounters();
             aggressiveAttackCheck();
             applyTurnCosts(false, 1.0);
+            MapUtils.revealAdjacentMountains(map, x, y);
             lastAction = "eggs";
             return;
         }
@@ -1107,6 +1125,7 @@ public class Game {
         aggressiveAttackCheck();
         applyTurnCosts(false, 1.0);
         checkVictory();
+        MapUtils.revealAdjacentMountains(map, x, y);
         lastAction = "eggs";
     }
 
@@ -1152,6 +1171,7 @@ public class Game {
         aggressiveAttackCheck();
         applyTurnCosts(false, 1.0);
         checkVictory();
+        MapUtils.revealAdjacentMountains(map, x, y);
         lastAction = "dig";
     }
 
@@ -1162,6 +1182,7 @@ public class Game {
             generateEncounters();
             aggressiveAttackCheck();
             applyTurnCosts(false, 1.0);
+            MapUtils.revealAdjacentMountains(map, x, y);
             lastAction = "lay_eggs";
             return;
         }
@@ -1174,6 +1195,7 @@ public class Game {
         aggressiveAttackCheck();
         applyTurnCosts(false, 1.0);
         checkVictory();
+        MapUtils.revealAdjacentMountains(map, x, y);
         lastAction = "lay_eggs";
     }
 
@@ -1193,6 +1215,7 @@ public class Game {
         aggressiveAttackCheck();
         applyTurnCosts(false, 1.0);
         checkVictory();
+        MapUtils.revealAdjacentMountains(map, x, y);
         lastAction = "mate";
     }
 
@@ -1242,6 +1265,7 @@ public class Game {
             player.setHp(0.0);
         }
         checkVictory();
+        MapUtils.revealAdjacentMountains(map, x, y);
         lastAction = "threaten";
     }
 
