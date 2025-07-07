@@ -37,6 +37,7 @@ public class Game {
     private final java.util.Map<String, List<Integer>> populationHistory = new java.util.HashMap<>();
     private final java.util.Map<String, int[]> huntStats = new java.util.HashMap<>();
     private final List<Integer> turnHistory = new ArrayList<>();
+    private List<String> turnMessages = new ArrayList<>();
     private String formation;
 
     /** Number of descendants required to win the game. */
@@ -96,6 +97,8 @@ public class Game {
             populationHistory.putIfAbsent(name, new ArrayList<>());
         }
         recordPopulation();
+        turn = 0;
+        turnMessages.clear();
     }
 
     private DinosaurStats cloneStats(DinosaurStats src) {
@@ -818,11 +821,13 @@ public class Game {
     }
 
     private void startTurn() {
+        turnMessages.clear();
         turn++;
         recordPopulation();
         if (weatherTurns >= 10) {
             weather = chooseWeather();
             weatherTurns = 0;
+            turnMessages.add("The weather changes to " + weather.getName() + ".");
         }
         weatherTurns++;
 
@@ -932,7 +937,14 @@ public class Game {
             DinosaurStats playerBase = StatsLoader.getDinoStats().get(player.getName());
             if (playerBase == null) playerBase = new DinosaurStats();
             double dmg = damageAfterArmor(targetAtk, stats, playerBase);
+            double beforePlayer = player.getHp();
             boolean died = applyDamage(dmg, player, playerBase);
+            double playerDamage = beforePlayer - player.getHp();
+            if (playerDamage > 0) {
+                turnMessages.add("The " + npcLabel(target) + " deals " +
+                        String.format(java.util.Locale.US, "%.0f", playerDamage) +
+                        " damage to you.");
+            }
             if (dmg > 0 && target.getAbilities().contains("bleed") && player.getHp() > 0) {
                 int bleed = (player.getAbilities().contains("light_armor") || player.getAbilities().contains("heavy_armor")) ? 2 : 5;
                 player.setBleeding(bleed);
@@ -949,7 +961,14 @@ public class Game {
 
         double dmgToTarget = damageAfterArmor(playerAtk,
                 StatsLoader.getDinoStats().get(player.getName()), stats);
+        double beforeTarget = target.getHp();
         boolean targetDied = applyDamage(dmgToTarget, target, stats);
+        double dealt = beforeTarget - target.getHp();
+        if (dealt > 0) {
+            turnMessages.add("You deal " +
+                    String.format(java.util.Locale.US, "%.0f", dealt) +
+                    " damage to the " + npcLabel(target) + ".");
+        }
         if (dmgToTarget > 0 && player.getAbilities().contains("bleed") && target.getHp() > 0 && target.isAlive()) {
             int bleed = (target.getAbilities().contains("light_armor") || target.getAbilities().contains("heavy_armor")) ? 2 : 5;
             target.setBleeding(bleed);
@@ -1640,6 +1659,10 @@ public class Game {
 
     public java.util.List<Integer> getTurnHistory() {
         return java.util.Collections.unmodifiableList(turnHistory);
+    }
+
+    public java.util.List<String> getTurnMessages() {
+        return java.util.Collections.unmodifiableList(turnMessages);
     }
 
     public java.util.Map<String, int[]> getHuntStats() {
