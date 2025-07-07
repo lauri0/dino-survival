@@ -86,6 +86,10 @@ public class Game {
                 mammalSpecies.add(entry.getKey());
             }
         }
+        if (mammalSpecies.isEmpty() && "Hell Creek".equals(formation)
+                && StatsLoader.getCritterStats().containsKey("Didelphodon")) {
+            mammalSpecies.add("Didelphodon");
+        }
 
         // choose player dinosaur
         if (!StatsLoader.getDinoStats().isEmpty()) {
