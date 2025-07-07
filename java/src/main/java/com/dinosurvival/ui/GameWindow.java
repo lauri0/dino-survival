@@ -388,6 +388,9 @@ public class GameWindow extends JFrame {
     private void doAction(Runnable r, String msg) {
         r.run();
         log(msg);
+        for (String m : game.getTurnMessages()) {
+            log(m);
+        }
         refreshMap();
         updateBiomeImage();
         updateDinoImage();
@@ -451,6 +454,7 @@ public class GameWindow extends JFrame {
             case LAKE -> Color.BLUE;
             case MOUNTAIN -> new Color(210, 180, 140);
             case VOLCANO, VOLCANO_ERUPTING -> Color.BLACK;
+            case HIGHLAND_FOREST -> new Color(46, 139, 87);
             case LAVA -> Color.RED;
             case SOLIDIFIED_LAVA_FIELD -> Color.DARK_GRAY;
             default -> Color.GRAY;
@@ -645,7 +649,9 @@ public class GameWindow extends JFrame {
                 }
                 info.add(new JLabel(name + " (" + npc.getId() + ")"));
                 info.add(new JLabel(String.format("A: %.1f  HP: %.1f/%.1f", game.npcEffectiveAttack(npc), npc.getHp(), game.npcMaxHp(npc))));
-                info.add(new JLabel(String.format("S: %.1f  W: %.1fkg", game.npcEffectiveSpeed(npc), npc.getWeight())));
+                double rel = game.npcEffectiveSpeed(npc) / Math.max(0.1, game.playerEffectiveSpeed());
+                double chance = game.calculateCatchChance(rel) * 100.0;
+                info.add(new JLabel(String.format("S: %.2f (%.0f%%)  W: %.1fkg", rel, chance, npc.getWeight())));
                 actBtn.setText(npc.isAlive() ? "Attack" : "Eat");
                 actBtn.addActionListener(ev -> doAction(() -> game.huntNpc(npc.getId()), "Hunt"));
                 statsBtn.addActionListener(ev -> new NpcStatsDialog(this, game, npc).setVisible(true));
