@@ -1166,10 +1166,18 @@ public class Game {
             return;
         }
         player.setEnergy(player.getEnergy() * 0.7);
-        double hatchW = player.getHatchlingWeight();
-        EggCluster ec = new EggCluster(player.getName(), 1, hatchW, 5, true);
+        Object stats = StatsLoader.getDinoStats().get(player.getName());
+        int numEggs = (int) getStat(stats, "num_eggs");
+        double hatchW = getStat(stats, "hatchling_weight");
+        if (hatchW <= 0) {
+            double adultW = getStat(stats, "adult_weight");
+            hatchW = Math.max(1.0, adultW * 0.001);
+        }
+        EggCluster ec = new EggCluster(player.getName(), numEggs,
+                hatchW * numEggs, 5, true);
         map.getEggs(x, y).add(ec);
-        player.setTurnsUntilLayEggs(10);
+        int interval = (int) getStat(stats, "egg_laying_interval");
+        player.setTurnsUntilLayEggs(interval);
         generateEncounters();
         aggressiveAttackCheck();
         applyTurnCosts(false, 1.0);
@@ -1259,6 +1267,8 @@ public class Game {
                 case "adult_speed" -> ds.getAdultSpeed();
                 case "attack" -> ds.getAttack();
                 case "hatchling_weight" -> ds.getHatchlingWeight();
+                case "num_eggs" -> ds.getNumEggs();
+                case "egg_laying_interval" -> ds.getEggLayingInterval();
                 case "hp" -> ds.getAdultHp();
                 default -> 0.0;
             };

@@ -40,6 +40,8 @@ public class DinosaurStats {
     private double aquaticBoost = 0.0;
     private boolean mated = false;
     private int turnsUntilLayEggs = 0;
+    private int numEggs = 0;
+    private int eggLayingInterval = 0;
     private List<Diet> diet = new ArrayList<>();
     private List<String> abilities = new ArrayList<>();
     private List<String> preferredBiomes = new ArrayList<>();
@@ -291,6 +293,22 @@ public class DinosaurStats {
 
     public void setTurnsUntilLayEggs(int turnsUntilLayEggs) {
         this.turnsUntilLayEggs = turnsUntilLayEggs;
+    }
+
+    public int getNumEggs() {
+        return numEggs;
+    }
+
+    public void setNumEggs(int numEggs) {
+        this.numEggs = numEggs;
+    }
+
+    public int getEggLayingInterval() {
+        return eggLayingInterval;
+    }
+
+    public void setEggLayingInterval(int eggLayingInterval) {
+        this.eggLayingInterval = eggLayingInterval;
     }
 
     public List<Diet> getDiet() {
