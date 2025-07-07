@@ -23,9 +23,25 @@ public class ThreatenTest {
     public void testThreatenScatter() {
         Game g = new Game();
         g.start("Morrison", "Allosaurus");
-        Map map = g.getMap();
-        int x = g.getPlayerX();
-        int y = g.getPlayerY();
+        java.util.Map<String, java.util.Map<String, Object>> saved =
+                new java.util.HashMap<>(StatsLoader.getCritterStats());
+        StatsLoader.getCritterStats().clear();
+        Map map = new Map(6, 6);
+        try {
+            java.lang.reflect.Field mapField = Game.class.getDeclaredField("map");
+            mapField.setAccessible(true);
+            mapField.set(g, map);
+            java.lang.reflect.Field xf = Game.class.getDeclaredField("x");
+            java.lang.reflect.Field yf = Game.class.getDeclaredField("y");
+            xf.setAccessible(true);
+            yf.setAccessible(true);
+            xf.setInt(g, 3);
+            yf.setInt(g, 3);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        int x = 3;
+        int y = 3;
         map.getAnimals(x, y).clear();
         NPCAnimal npc1 = new NPCAnimal();
         npc1.setId(1);
@@ -42,6 +58,7 @@ public class ThreatenTest {
         double base = g.getPlayer().getHatchlingEnergyDrain();
         g.getPlayer().setEnergy(100.0);
         g.threaten();
+        StatsLoader.getCritterStats().putAll(saved);
         double expected = 100.0 - base * 2 * g.getWeather().getPlayerEnergyMult();
         Assertions.assertEquals(expected, g.getPlayer().getEnergy(), 0.0001);
         Assertions.assertNotEquals("None", npc1.getNextMove());
