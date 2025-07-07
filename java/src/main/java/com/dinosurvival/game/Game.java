@@ -547,7 +547,7 @@ public class Game {
         return false;
     }
 
-    private double playerEffectiveAttack() {
+    public double playerEffectiveAttack() {
         double atk = player.getAttack();
         if (playerPackHunterActive()) {
             atk *= 3;
@@ -1397,6 +1397,28 @@ public class Game {
 
     public int getTurn() {
         return turn;
+    }
+
+    /**
+     * Effective speed value for the player dinosaur.
+     */
+    public double playerEffectiveSpeed() {
+        double speed = player.getSpeed();
+        Terrain terrain = map.terrainAt(x, y);
+        double boost = 0.0;
+        if (terrain == Terrain.LAKE) {
+            boost = player.getAquaticBoost();
+        } else if (terrain == Terrain.SWAMP) {
+            boost = player.getAquaticBoost() / 2.0;
+        }
+        speed *= 1 + boost / 100.0;
+        if (player.getAbilities().contains("ambush")) {
+            speed *= 1 + Math.min(player.getAmbushStreak(), 3) * 0.05;
+        }
+        if (player.getBrokenBone() > 0) {
+            speed *= 0.5;
+        }
+        return Math.max(speed, 0.1);
     }
 
     /**

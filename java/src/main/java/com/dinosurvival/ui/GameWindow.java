@@ -36,6 +36,19 @@ public class GameWindow extends JFrame {
     private final Map<String, ImageIcon> weatherIcons = new HashMap<>();
     private boolean encounterSortAsc = true;
 
+    // Stats sidebar components
+    private final Map<String, ImageIcon> statIcons = new HashMap<>();
+    private final JLabel nameLabel = new JLabel();
+    private final JLabel attackLabel = new JLabel();
+    private final JLabel hpValueLabel = new JLabel();
+    private final JProgressBar hpBar = new JProgressBar(0, 100);
+    private final JProgressBar energyBar = new JProgressBar(0, 100);
+    private final JProgressBar hydrationBar = new JProgressBar(0, 100);
+    private final JLabel weightLabel = new JLabel();
+    private final JLabel speedLabel = new JLabel();
+    private final JLabel descendantLabel = new JLabel();
+    private final JLabel turnLabel = new JLabel();
+
     private static final int TILE_SIZE = 22;
 
     private final JButton northButton = new JButton("North");
@@ -117,18 +130,81 @@ public class GameWindow extends JFrame {
         c.weighty = 0;
         main.add(dinoPanel, c);
 
-        // Stats and misc buttons under the dinosaur image (row 1, column 0)
+        // Stats sidebar (row 1, column 0)
         JPanel statsPanel = new JPanel();
         statsPanel.setPreferredSize(new Dimension(200, 200));
         statsPanel.setLayout(new BoxLayout(statsPanel, BoxLayout.Y_AXIS));
-        JButton stats = new JButton("Stats");
-        stats.addActionListener(e -> new StatsDialog(this, game).setVisible(true));
-        JButton legacy = new JButton("Legacy Stats");
-        legacy.addActionListener(e -> new LegacyStatsDialog(this, "Morrison", game.getPlayer().getName()).setVisible(true));
+        nameLabel.setFont(nameLabel.getFont().deriveFont(Font.BOLD, 16f));
+        nameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        statsPanel.add(nameLabel);
+
+        JPanel attackRow = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JLabel attackIcon = new JLabel(loadScaledIcon("/assets/icons/attack.png", 20, 20));
+        attackRow.add(attackIcon);
+        attackRow.add(attackLabel);
+        attackRow.setAlignmentX(Component.LEFT_ALIGNMENT);
+        statsPanel.add(attackRow);
+
+        JPanel hpRow = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JLabel hpIcon = new JLabel(loadScaledIcon("/assets/icons/health.png", 20, 20));
+        hpRow.add(hpIcon);
+        hpRow.add(hpValueLabel);
+        hpBar.setPreferredSize(new Dimension(100, 15));
+        hpBar.setStringPainted(true);
+        hpRow.add(hpBar);
+        hpRow.setAlignmentX(Component.LEFT_ALIGNMENT);
+        statsPanel.add(hpRow);
+
+        JPanel energyRow = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JLabel energyIcon = new JLabel(loadScaledIcon("/assets/icons/energy.png", 20, 20));
+        energyRow.add(energyIcon);
+        energyBar.setPreferredSize(new Dimension(100, 15));
+        energyBar.setStringPainted(true);
+        energyRow.add(energyBar);
+        energyRow.setAlignmentX(Component.LEFT_ALIGNMENT);
+        statsPanel.add(energyRow);
+
+        JPanel hydrationRow = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JLabel hydIcon = new JLabel(loadScaledIcon("/assets/icons/hydration.png", 20, 20));
+        hydrationRow.add(hydIcon);
+        hydrationBar.setPreferredSize(new Dimension(100, 15));
+        hydrationBar.setStringPainted(true);
+        hydrationRow.add(hydrationBar);
+        hydrationRow.setAlignmentX(Component.LEFT_ALIGNMENT);
+        statsPanel.add(hydrationRow);
+
+        JPanel weightRow = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JLabel weightIcon = new JLabel(loadScaledIcon("/assets/icons/weight.png", 20, 20));
+        weightRow.add(weightIcon);
+        weightRow.add(weightLabel);
+        weightRow.setAlignmentX(Component.LEFT_ALIGNMENT);
+        statsPanel.add(weightRow);
+
+        JPanel speedRow = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JLabel speedIcon = new JLabel(loadScaledIcon("/assets/icons/speed.png", 20, 20));
+        speedRow.add(speedIcon);
+        speedRow.add(speedLabel);
+        speedRow.setAlignmentX(Component.LEFT_ALIGNMENT);
+        statsPanel.add(speedRow);
+
+        JPanel descRow = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JLabel descIcon = new JLabel(loadScaledIcon("/assets/icons/descendant.png", 20, 20));
+        descRow.add(descIcon);
+        descRow.add(descendantLabel);
+        descRow.setAlignmentX(Component.LEFT_ALIGNMENT);
+        statsPanel.add(descRow);
+
+        JPanel turnRow = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JLabel turnIcon = new JLabel(loadScaledIcon("/assets/icons/turn.png", 20, 20));
+        turnRow.add(turnIcon);
+        turnRow.add(turnLabel);
+        turnRow.setAlignmentX(Component.LEFT_ALIGNMENT);
+        statsPanel.add(turnRow);
+
         JButton quit = new JButton("Quit");
         quit.addActionListener(e -> dispose());
-        statsPanel.add(stats);
-        statsPanel.add(legacy);
+        quit.setAlignmentX(Component.LEFT_ALIGNMENT);
+        statsPanel.add(Box.createVerticalStrut(5));
         statsPanel.add(quit);
         c.gridx = 0;
         c.gridy = 1;
@@ -310,6 +386,7 @@ public class GameWindow extends JFrame {
         refreshMap();
         updateBiomeImage();
         updateDinoImage();
+        updateStatsPanel();
         updateActionButtons();
         updatePlantList();
         updateEncounterList();
@@ -470,6 +547,34 @@ public class GameWindow extends JFrame {
         }
         encounterList.revalidate();
         encounterList.repaint();
+    }
+
+    private void updateStatsPanel() {
+        var p = game.getPlayer();
+        nameLabel.setText(p.getName());
+        attackLabel.setText(String.format("%.1f", game.playerEffectiveAttack()));
+
+        double maxHp = p.getMaxHp();
+        double hpPct = maxHp > 0 ? p.getHp() / maxHp * 100.0 : 0.0;
+        hpValueLabel.setText(String.format("%.1f/%.1f", p.getHp(), maxHp));
+        hpBar.setValue((int) Math.round(hpPct));
+        hpBar.setString(String.format("%.0f%%", hpPct));
+
+        energyBar.setValue((int) Math.round(p.getEnergy()));
+        energyBar.setString(String.format("%.0f%%", p.getEnergy()));
+
+        hydrationBar.setValue((int) Math.round(p.getHydration()));
+        hydrationBar.setString(String.format("%.0f%%", p.getHydration()));
+
+        double hatch = p.getHatchlingWeight();
+        double adult = p.getAdultWeight();
+        double pct = adult - hatch > 0 ? (p.getWeight() - hatch) / (adult - hatch) * 100.0 : 100.0;
+        weightLabel.setText(String.format("%.1fkg/%.0fkg (%.1f%%)", p.getWeight(), adult, pct));
+
+        speedLabel.setText(String.format("%.1f", game.playerEffectiveSpeed()));
+
+        descendantLabel.setText(String.valueOf(game.descendantCount()));
+        turnLabel.setText(String.valueOf(game.getTurn()));
     }
 
     private void updateWeatherPanel() {
