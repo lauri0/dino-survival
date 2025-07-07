@@ -690,7 +690,7 @@ public class GameWindow extends JFrame {
             row.add(img, BorderLayout.WEST);
             row.add(new JLabel(name + " " + count + String.format(" (%.1f%%)", pct)), BorderLayout.CENTER);
             JButton infoBtn = new JButton("Info");
-            infoBtn.addActionListener(ev -> new NpcStatsDialog(this, game, sampleNpc(name)).setVisible(true));
+            infoBtn.addActionListener(ev -> new DinoFactsDialog(this, game, name).setVisible(true));
             row.add(infoBtn, BorderLayout.EAST);
             populationList.add(row);
         }

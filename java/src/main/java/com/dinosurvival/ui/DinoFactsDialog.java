@@ -20,10 +20,21 @@ public class DinoFactsDialog extends JDialog {
         add(new JScrollPane(panel), BorderLayout.CENTER);
 
         ImageIcon img = loadScaledIcon(imagePath(name), 400, 250);
+        java.util.List<Integer> counts = game.getPopulationHistory(name);
+        JPanel header = new JPanel();
+        header.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
+        boolean haveHeader = false;
         if (img != null) {
             JLabel imgLbl = new JLabel(img);
-            imgLbl.setAlignmentX(Component.CENTER_ALIGNMENT);
-            panel.add(imgLbl);
+            header.add(imgLbl);
+            haveHeader = true;
+        }
+        if (counts != null && !counts.isEmpty()) {
+            header.add(new PopGraphPanel(counts, game.getTurnHistory()));
+            haveHeader = true;
+        }
+        if (haveHeader) {
+            panel.add(header);
         }
         JLabel heading = new JLabel(name);
         heading.setFont(heading.getFont().deriveFont(Font.BOLD, 18f));
@@ -134,6 +145,54 @@ public class DinoFactsDialog extends JDialog {
             return new ImageIcon(cropped);
         } catch (IOException ex) {
             return null;
+        }
+    }
+
+    private static class PopGraphPanel extends JPanel {
+        private final java.util.List<Integer> counts;
+        private final java.util.List<Integer> turns;
+        PopGraphPanel(java.util.List<Integer> counts, java.util.List<Integer> turns) {
+            this.counts = counts;
+            this.turns = turns;
+            setPreferredSize(new Dimension(354, 234));
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            Graphics2D g2 = (Graphics2D) g;
+            int width = 320;
+            int height = 200;
+            int margin = 24;
+            int topPad = 10;
+            int maxC = 1;
+            for (int c : counts) {
+                if (c > maxC) maxC = c;
+            }
+            double step = counts.size() > 1 ? (double) width / (counts.size() - 1) : width;
+            g2.setColor(Color.BLACK);
+            g2.drawLine(margin, topPad, margin, topPad + height);
+            g2.drawLine(margin, topPad + height, margin + width, topPad + height);
+            g2.setColor(Color.BLUE);
+            for (int i = 1; i < counts.size(); i++) {
+                int x1 = (int) Math.round(margin + (i - 1) * step);
+                int y1 = (int) Math.round(topPad + height - counts.get(i - 1) * height / (double) maxC);
+                int x2 = (int) Math.round(margin + i * step);
+                int y2 = (int) Math.round(topPad + height - counts.get(i) * height / (double) maxC);
+                g2.drawLine(x1, y1, x2, y2);
+            }
+            g2.setColor(Color.BLACK);
+            g2.drawString("0", margin - 5, topPad + height);
+            g2.drawString(String.valueOf(maxC), margin - 5, topPad + 5);
+            if (!turns.isEmpty()) {
+                g2.drawString(String.valueOf(turns.get(0)), margin, topPad + height + 15);
+                g2.drawString(String.valueOf(turns.get(turns.size() - 1)), margin + width - 20, topPad + height + 15);
+            }
+            g2.drawString("Turn", margin + width / 2 - 15, topPad + height + 30);
+            Graphics2D g3 = (Graphics2D) g2.create();
+            g3.rotate(-Math.PI / 2);
+            g3.drawString("Population", -(topPad + height / 2 + 20), margin - 10);
+            g3.dispose();
         }
     }
 }
