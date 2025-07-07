@@ -920,7 +920,9 @@ public class Game {
             player.setHp(0.0);
             turnMessages.add("You have perished from dehydration! Game Over.");
         }
+    }
 
+    private void endTurn() {
         updateNpcs();
         _apply_terrain_effects();
         spoilCarcasses();
@@ -934,21 +936,19 @@ public class Game {
         x = Math.max(0, Math.min(map.getWidth() - 1, x + dx));
         y = Math.max(0, Math.min(map.getHeight() - 1, y + dy));
         map.reveal(x, y);
-        generateEncounters();
-        aggressiveAttackCheck();
         applyTurnCosts(true, 1.0);
         checkVictory();
         lastAction = "move";
+        endTurn();
     }
 
     /** Skip a turn without moving. */
     public void rest() {
         startTurn();
-        generateEncounters();
-        aggressiveAttackCheck();
         applyTurnCosts(false, 1.0);
         checkVictory();
         lastAction = "stay";
+        endTurn();
     }
 
     /** Drink if the player is on a lake tile. */
@@ -957,11 +957,10 @@ public class Game {
         if (map.terrainAt(x, y) == Terrain.LAKE) {
             player.setHydration(100.0);
         }
-        generateEncounters();
-        aggressiveAttackCheck();
         applyTurnCosts(false, 1.0);
         checkVictory();
         lastAction = "drink";
+        endTurn();
     }
 
     /** Convenience movement helpers matching the Python API. */
@@ -978,10 +977,10 @@ public class Game {
         }
         startTurn();
         if (target == null) {
-            generateEncounters();
-            aggressiveAttackCheck();
             applyTurnCosts(false, 1.0);
+            checkVictory();
             lastAction = "hunt";
+            endTurn();
             return;
         }
 
@@ -1005,11 +1004,10 @@ public class Game {
             double catchChance = calculateCatchChance(relSpeed);
             if (Math.random() > catchChance) {
                 turnMessages.add("The " + npcLabel(target) + " escaped before you could catch it.");
-                generateEncounters();
-                aggressiveAttackCheck();
                 applyTurnCosts(false, 5.0);
                 checkVictory();
                 lastAction = "hunt";
+                endTurn();
                 return;
             }
         }
@@ -1034,8 +1032,8 @@ public class Game {
                 player.setBrokenBone(10);
             }
             if (died) {
-                generateEncounters();
                 lastAction = "hunt";
+                endTurn();
                 return;
             }
         }
@@ -1076,11 +1074,10 @@ public class Game {
             }
         }
 
-        generateEncounters();
-        aggressiveAttackCheck();
         applyTurnCosts(false, 1.0);
         checkVictory();
         lastAction = "hunt";
+        endTurn();
     }
 
     /** Eat eggs present on the current tile. */
@@ -1088,10 +1085,10 @@ public class Game {
         startTurn();
         List<EggCluster> eggs = map.getEggs(x, y);
         if (eggs.isEmpty()) {
-            generateEncounters();
-            aggressiveAttackCheck();
             applyTurnCosts(false, 1.0);
+            checkVictory();
             lastAction = "eggs";
+            endTurn();
             return;
         }
         EggCluster egg = map.takeEggs(x, y);
@@ -1103,11 +1100,10 @@ public class Game {
         double used = actual * player.getWeight() / 1000.0;
         double leftover = Math.max(0.0, weight - used);
         applyGrowth(leftover);
-        generateEncounters();
-        aggressiveAttackCheck();
         applyTurnCosts(false, 1.0);
         checkVictory();
         lastAction = "eggs";
+        endTurn();
     }
 
     /** Dig into a burrow on the current tile if present. */
@@ -1148,21 +1144,20 @@ public class Game {
                 }
             }
         }
-        generateEncounters();
-        aggressiveAttackCheck();
         applyTurnCosts(false, 1.0);
         checkVictory();
         lastAction = "dig";
+        endTurn();
     }
 
     /** Lay eggs if conditions allow. */
     public void layEggs() {
         startTurn();
         if (!canPlayerLayEggs()) {
-            generateEncounters();
-            aggressiveAttackCheck();
             applyTurnCosts(false, 1.0);
+            checkVictory();
             lastAction = "lay_eggs";
+            endTurn();
             return;
         }
         player.setEnergy(player.getEnergy() * 0.7);
@@ -1170,11 +1165,10 @@ public class Game {
         EggCluster ec = new EggCluster(player.getName(), 1, hatchW, 5, true);
         map.getEggs(x, y).add(ec);
         player.setTurnsUntilLayEggs(10);
-        generateEncounters();
-        aggressiveAttackCheck();
         applyTurnCosts(false, 1.0);
         checkVictory();
         lastAction = "lay_eggs";
+        endTurn();
     }
 
     /** Mate with an NPC on the current tile. */
@@ -1189,11 +1183,10 @@ public class Game {
             cell.remove(partner);
             player.setMated(true);
         }
-        generateEncounters();
-        aggressiveAttackCheck();
         applyTurnCosts(false, 1.0);
         checkVictory();
         lastAction = "mate";
+        endTurn();
     }
 
     /** Attempt to frighten nearby animals. */
@@ -1235,14 +1228,13 @@ public class Game {
                 npc.setNextMove(opts.isEmpty()?"None":opts.get(r.nextInt(opts.size())));
             }
         }
-        generateEncounters();
-        aggressiveAttackCheck();
         applyTurnCosts(false, 2.0);
         if (killed) {
             player.setHp(0.0);
         }
         checkVictory();
         lastAction = "threaten";
+        endTurn();
     }
 
     // ------------------------------------------------------------------

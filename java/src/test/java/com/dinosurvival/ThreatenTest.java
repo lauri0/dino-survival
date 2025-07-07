@@ -61,8 +61,7 @@ public class ThreatenTest {
         StatsLoader.getCritterStats().putAll(saved);
         double expected = 100.0 - base * 2 * g.getWeather().getPlayerEnergyMult();
         Assertions.assertEquals(expected, g.getPlayer().getEnergy(), 0.0001);
-        Assertions.assertNotEquals("None", npc1.getNextMove());
-        Assertions.assertNotEquals("None", npc2.getNextMove());
+        Assertions.assertTrue(map.getAnimals(x, y).isEmpty());
     }
 
     @Test
