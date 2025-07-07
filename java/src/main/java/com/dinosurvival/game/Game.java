@@ -405,7 +405,7 @@ public class Game {
         });
     }
 
-    private void updateNpcs() {
+    void updateNpcs() {
         Random r = new Random();
         for (int ty = 0; ty < map.getHeight(); ty++) {
             for (int tx = 0; tx < map.getWidth(); tx++) {
@@ -745,7 +745,7 @@ public class Game {
         }
     }
 
-    private void applyTurnCosts(boolean moved, double multiplier) {
+    void applyTurnCosts(boolean moved, double multiplier) {
         double drain = player.getHatchlingEnergyDrain();
         if (moved) {
             drain *= player.getWalkingEnergyDrainMultiplier();
@@ -1066,6 +1066,7 @@ public class Game {
                 case "adult_speed" -> ds.getAdultSpeed();
                 case "attack" -> ds.getAttack();
                 case "hatchling_weight" -> ds.getHatchlingWeight();
+                case "hp" -> ds.getAdultHp();
                 default -> 0.0;
             };
         } else if (stats instanceof java.util.Map<?,?> map) {
