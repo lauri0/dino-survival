@@ -907,11 +907,11 @@ public class Game {
 
     /** Hunt the NPC with the given identifier on the current tile. */
     public void huntNpc(int id) {
-        startTurn();
         NPCAnimal target = null;
         for (NPCAnimal npc : map.getAnimals(x, y)) {
             if (npc.getId() == id) { target = npc; break; }
         }
+        startTurn();
         if (target == null) {
             generateEncounters();
             aggressiveAttackCheck();
