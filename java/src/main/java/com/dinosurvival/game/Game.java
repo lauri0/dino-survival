@@ -865,9 +865,10 @@ public class Game {
         double targetAtk = target.isAlive() ? npcEffectiveAttack(target, stats, x, y) : 0.0;
 
         if (target.isAlive()) {
-            double dmg = damageAfterArmor(targetAtk, stats,
-                    StatsLoader.getDinoStats().getOrDefault(player.getName(), new DinosaurStats()));
-            boolean died = applyDamage(dmg, player, StatsLoader.getDinoStats().get(player.getName()));
+            DinosaurStats playerBase = StatsLoader.getDinoStats().get(player.getName());
+            if (playerBase == null) playerBase = new DinosaurStats();
+            double dmg = damageAfterArmor(targetAtk, stats, playerBase);
+            boolean died = applyDamage(dmg, player, playerBase);
             if (dmg > 0 && target.getAbilities().contains("bleed") && player.getHp() > 0) {
                 int bleed = (player.getAbilities().contains("light_armor") || player.getAbilities().contains("heavy_armor")) ? 2 : 5;
                 player.setBleeding(bleed);

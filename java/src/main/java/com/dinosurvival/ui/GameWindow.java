@@ -296,9 +296,11 @@ public class GameWindow extends JFrame {
         encounterPanel.add(encounterScroll, BorderLayout.CENTER);
         c.gridx = 2;
         c.gridy = 1;
+        c.gridheight = 2;
         c.weightx = 1;
         c.weighty = 1;
         main.add(encounterPanel, c);
+        c.gridheight = 1;
 
         // Weather info (row 0, column 3)
         JPanel weatherPanel = new JPanel();
@@ -327,9 +329,11 @@ public class GameWindow extends JFrame {
         popPanel.add(popScroll, BorderLayout.CENTER);
         c.gridx = 3;
         c.gridy = 1;
+        c.gridheight = 2;
         c.weightx = 1;
         c.weighty = 1;
         main.add(popPanel, c);
+        c.gridheight = 1;
 
         // Log area at the bottom spanning two columns
         JScrollPane scroll = new JScrollPane(logArea);
@@ -551,15 +555,17 @@ public class GameWindow extends JFrame {
         }
         for (EncounterEntry e : entries) {
             JPanel row = new JPanel(new BorderLayout());
+            row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 70));
+            row.setPreferredSize(new Dimension(0, 70));
             JLabel img = new JLabel();
+            img.setPreferredSize(new Dimension(100, 70));
             JPanel info = new JPanel();
             info.setLayout(new BoxLayout(info, BoxLayout.Y_AXIS));
             row.add(img, BorderLayout.WEST);
             row.add(info, BorderLayout.CENTER);
             JButton actBtn = new JButton();
             JButton statsBtn = new JButton("Stats");
-            JPanel btns = new JPanel();
-            btns.setLayout(new GridLayout(2,1));
+            JPanel btns = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 0));
             btns.add(statsBtn);
             btns.add(actBtn);
             row.add(btns, BorderLayout.EAST);

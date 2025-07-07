@@ -38,7 +38,7 @@ public class DinoFactsDialog extends JDialog {
         }
         JLabel heading = new JLabel(name);
         heading.setFont(heading.getFont().deriveFont(Font.BOLD, 18f));
-        heading.setAlignmentX(Component.CENTER_ALIGNMENT);
+        heading.setAlignmentX(Component.LEFT_ALIGNMENT);
         panel.add(heading);
 
         Object info = StatsLoader.getDinoStats().get(name);
