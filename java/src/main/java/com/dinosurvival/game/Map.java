@@ -305,6 +305,11 @@ public class Map {
         return burrows[y][x];
     }
 
+    /** Remove any burrow present on the specified tile. */
+    public void removeBurrow(int x, int y) {
+        burrows[y][x] = null;
+    }
+
     /**
      * Randomly place {@code count} burrows on land tiles. Mirrors the Python
      * {@code populate_burrows} helper so the Java {@link Game} class can
@@ -528,8 +533,28 @@ public class Map {
             }
         }
 
+        updateSolidifiedLava();
         return msgs;
     }
+
+    /** Countdown solidified lava tiles and restore the original terrain. */
+    public void updateSolidifiedLava() {
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int turns = solidifiedTurns[y][x];
+                if (turns <= 0) {
+                    continue;
+                }
+                solidifiedTurns[y][x]--;
+                if (solidifiedTurns[y][x] <= 0) {
+                    Terrain prev = lavaOrig[y][x];
+                    if (prev != null) {
+                        grid[y][x] = prev;
+                    }
+                    lavaOrig[y][x] = null;
+                }
+            }
+        }
 
     /**
      * Ignite a forest fire at the specified location.
