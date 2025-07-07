@@ -6,6 +6,7 @@ import com.dinosurvival.model.Plant;
 import com.dinosurvival.game.EncounterEntry;
 import com.dinosurvival.game.EggCluster;
 import com.dinosurvival.game.Burrow;
+import com.dinosurvival.game.MapUtils;
 import com.dinosurvival.game.Setting;
 import com.dinosurvival.game.Terrain;
 import java.util.Iterator;
@@ -134,6 +135,8 @@ public class Game {
 
         chooseStartingLocation();
         map.reveal(x, y);
+        MapUtils.revealCardinals(map, x, y);
+        MapUtils.revealAdjacentMountains(map, x, y);
         weather = chooseWeather();
         weatherTurns = 0;
         populateAnimals();
@@ -1036,8 +1039,15 @@ public class Game {
         x = Math.max(0, Math.min(map.getWidth() - 1, x + dx));
         y = Math.max(0, Math.min(map.getHeight() - 1, y + dy));
         map.reveal(x, y);
+        MapUtils.revealCardinals(map, x, y);
+        Terrain t = map.terrainAt(x, y);
+        if (t == Terrain.MOUNTAIN || t == Terrain.VOLCANO ||
+                t == Terrain.VOLCANO_ERUPTING) {
+            MapUtils.revealSurrounding(map, x, y);
+        }
         applyTurnCosts(true, 1.0);
         checkVictory();
+        MapUtils.revealAdjacentMountains(map, x, y);
         lastAction = "move";
         endTurn();
     }
@@ -1047,6 +1057,7 @@ public class Game {
         startTurn();
         applyTurnCosts(false, 1.0);
         checkVictory();
+        MapUtils.revealAdjacentMountains(map, x, y);
         lastAction = "stay";
         endTurn();
     }
@@ -1059,6 +1070,7 @@ public class Game {
         }
         applyTurnCosts(false, 1.0);
         checkVictory();
+        MapUtils.revealAdjacentMountains(map, x, y);
         lastAction = "drink";
         endTurn();
     }
@@ -1078,6 +1090,7 @@ public class Game {
         startTurn();
         if (target == null) {
             applyTurnCosts(false, 1.0);
+            MapUtils.revealAdjacentMountains(map, x, y);
             checkVictory();
             lastAction = "hunt";
             endTurn();
@@ -1106,6 +1119,7 @@ public class Game {
                 turnMessages.add("The " + npcLabel(target) + " escaped before you could catch it.");
                 applyTurnCosts(false, 5.0);
                 checkVictory();
+                MapUtils.revealAdjacentMountains(map, x, y);
                 lastAction = "hunt";
                 endTurn();
                 return;
@@ -1132,6 +1146,7 @@ public class Game {
                 player.setBrokenBone(10);
             }
             if (died) {
+                MapUtils.revealAdjacentMountains(map, x, y);
                 lastAction = "hunt";
                 endTurn();
                 return;
@@ -1176,6 +1191,7 @@ public class Game {
 
         applyTurnCosts(false, 1.0);
         checkVictory();
+        MapUtils.revealAdjacentMountains(map, x, y);
         lastAction = "hunt";
         endTurn();
     }
@@ -1186,6 +1202,7 @@ public class Game {
         List<EggCluster> eggs = map.getEggs(x, y);
         if (eggs.isEmpty()) {
             applyTurnCosts(false, 1.0);
+            MapUtils.revealAdjacentMountains(map, x, y);
             checkVictory();
             lastAction = "eggs";
             endTurn();
@@ -1202,6 +1219,7 @@ public class Game {
         applyGrowth(leftover);
         applyTurnCosts(false, 1.0);
         checkVictory();
+        MapUtils.revealAdjacentMountains(map, x, y);
         lastAction = "eggs";
         endTurn();
     }
@@ -1246,6 +1264,7 @@ public class Game {
         }
         applyTurnCosts(false, 1.0);
         checkVictory();
+        MapUtils.revealAdjacentMountains(map, x, y);
         lastAction = "dig";
         endTurn();
     }
@@ -1255,6 +1274,7 @@ public class Game {
         startTurn();
         if (!canPlayerLayEggs()) {
             applyTurnCosts(false, 1.0);
+            MapUtils.revealAdjacentMountains(map, x, y);
             checkVictory();
             lastAction = "lay_eggs";
             endTurn();
@@ -1276,6 +1296,7 @@ public class Game {
         player.setTurnsUntilLayEggs(interval);
         applyTurnCosts(false, 1.0);
         checkVictory();
+        MapUtils.revealAdjacentMountains(map, x, y);
         lastAction = "lay_eggs";
         endTurn();
     }
@@ -1294,6 +1315,7 @@ public class Game {
         }
         applyTurnCosts(false, 1.0);
         checkVictory();
+        MapUtils.revealAdjacentMountains(map, x, y);
         lastAction = "mate";
         endTurn();
     }
@@ -1342,6 +1364,7 @@ public class Game {
             player.setHp(0.0);
         }
         checkVictory();
+        MapUtils.revealAdjacentMountains(map, x, y);
         lastAction = "threaten";
         endTurn();
     }
