@@ -447,9 +447,16 @@ public class Game {
 
                     Object stats = StatsLoader.getDinoStats().get(npc.getName());
                     if (stats == null) {
-                        stats = StatsLoader.getCritterStats().get(npc.getName());
-                    }
-                    if (stats == null) {
+                        java.util.Map<String, Object> cstats =
+                                StatsLoader.getCritterStats().get(npc.getName());
+                        npc.setNextMove("None");
+                        if (cstats != null) {
+                            npcChooseMove(tx, ty, npc, cstats);
+                            double regen = getStat(cstats, "health_regen");
+                            if (applyBleedAndRegen(npc, regen)) {
+                                continue;
+                            }
+                        }
                         continue;
                     }
 
