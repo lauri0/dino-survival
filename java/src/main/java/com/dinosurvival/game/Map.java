@@ -531,6 +531,31 @@ public class Map {
         return msgs;
     }
 
+    /**
+     * Ignite a forest fire at the specified location.
+     *
+     * <p>This mirrors the Python helper used by the tests and resets the
+     * associated counters so {@link #updateForestFire()} can progress the
+     * burning and eventual regrowth.</p>
+     */
+    public void startForestFire(int x, int y) {
+        Terrain t = terrainAt(x, y);
+        if (t == Terrain.FOREST) {
+            grid[y][x] = Terrain.FOREST_FIRE;
+        } else if (t == Terrain.HIGHLAND_FOREST) {
+            grid[y][x] = Terrain.HIGHLAND_FOREST_FIRE;
+        } else {
+            return;
+        }
+
+        fireTurns[y][x] = 5;
+        burntTurns[y][x] = 0;
+        animals[y][x].clear();
+        eggs[y][x].clear();
+        burrows[y][x] = null;
+        plants[y][x].clear();
+    }
+
     public List<String> updateForestFire() {
         List<String> msgs = new ArrayList<>();
         for (int y = 0; y < height; y++) {
