@@ -62,7 +62,12 @@ public class EggsTest {
         player.setTurnsUntilLayEggs(0);
         g.layEggs();
         EggCluster egg = map.getEggs(g.getPlayerX(), g.getPlayerY()).get(0);
-        double expected = player.getHatchlingWeight() * 1.0;
+        DinosaurStats base = StatsLoader.getDinoStats().get("Allosaurus");
+        double hatch = base.getHatchlingWeight();
+        if (hatch <= 0) {
+            hatch = Math.max(1.0, base.getAdultWeight() * 0.001);
+        }
+        double expected = hatch * base.getNumEggs();
         Assertions.assertEquals(expected, egg.getWeight(), 1e-9);
     }
 }
