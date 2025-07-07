@@ -555,6 +555,7 @@ public class Map {
                 }
             }
         }
+    }
 
     /**
      * Ignite a forest fire at the specified location.
