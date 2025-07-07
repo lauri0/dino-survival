@@ -877,7 +877,6 @@ public class Game {
             }
             if (died) {
                 generateEncounters();
-                applyTurnCosts(false, 1.0);
                 lastAction = "hunt";
                 return;
             }
@@ -1458,6 +1457,16 @@ public class Game {
 
     public DinosaurStats getPlayer() {
         return player;
+    }
+
+    public java.util.List<Integer> getPopulationHistory(String name) {
+        java.util.List<Integer> list = populationHistory.get(name);
+        return list != null ? java.util.Collections.unmodifiableList(list)
+                : java.util.List.of();
+    }
+
+    public java.util.List<Integer> getTurnHistory() {
+        return java.util.Collections.unmodifiableList(turnHistory);
     }
 
     public int getPlayerX() {
