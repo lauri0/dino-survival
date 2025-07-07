@@ -50,7 +50,7 @@ public class Game {
      * world without depending on the Python code.
      */
     public void start() {
-        start("Morrison", null);
+        start("Morrison", null, new Random().nextLong());
     }
 
     /**
@@ -58,6 +58,14 @@ public class Game {
      * If {@code dinoName} is null the first available dinosaur is used.
      */
     public void start(String formation, String dinoName) {
+        start(formation, dinoName, new Random().nextLong());
+    }
+
+    /**
+     * Start a new game using the given formation and player dinosaur name with
+     * the provided random seed for map generation.
+     */
+    public void start(String formation, String dinoName, long seed) {
         try {
             StatsLoader.load(Path.of("dinosurvival"), formation);
             this.formation = formation;
@@ -65,7 +73,7 @@ public class Game {
             throw new RuntimeException(e);
         }
 
-        map = new Map(18, 10);
+        map = new Map(18, 10, seed);
         map.populateBurrows(5);
 
         // choose player dinosaur
