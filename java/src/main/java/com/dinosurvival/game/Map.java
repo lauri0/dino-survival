@@ -6,6 +6,7 @@ import com.dinosurvival.model.PlantStats;
 import com.dinosurvival.game.EggCluster;
 import com.dinosurvival.game.Burrow;
 import com.dinosurvival.game.LavaInfo;
+import com.dinosurvival.model.DinosaurStats;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -389,23 +390,69 @@ public class Map {
     // ---------------------------------------------------------------------
 
     public List<String> startVolcanoEruption(int x, int y, String size) {
+        return startVolcanoEruption(x, y, size, Integer.MIN_VALUE, Integer.MIN_VALUE);
+    }
+
+    public List<String> startVolcanoEruption(int x, int y, String size,
+                                             int playerX, int playerY) {
         List<String> msgs = new ArrayList<>();
         if (terrainAt(x, y) != Terrain.VOLCANO) {
             return msgs;
         }
+
+        if (playerX != Integer.MIN_VALUE) {
+            msgs.add("You feel an earthquake.");
+        }
+
         int steps = switch (size) {
             case "large" -> 4;
             case "medium" -> 2;
             default -> 0;
         };
+
         erupting[y][x] = true;
-        grid[y][x] = Terrain.VOLCANO_ERUPTING;
-        lavaInfo[y][x] = new LavaInfo(steps, 1);
+
+        int[][] dirs = { {0,0}, {1,0}, {-1,0}, {0,1}, {0,-1} };
+        for (int[] d : dirs) {
+            int ax = x + d[0];
+            int ay = y + d[1];
+            if (ax < 0 || ax >= width || ay < 0 || ay >= height) {
+                continue;
+            }
+
+            animals[ay][ax].clear();
+            eggs[ay][ax].clear();
+            burrows[ay][ax] = null;
+
+            int spreadSteps;
+            if (ax == x && ay == y) {
+                grid[ay][ax] = Terrain.VOLCANO_ERUPTING;
+                spreadSteps = steps;
+            } else {
+                if (lavaOrig[ay][ax] == null) {
+                    lavaOrig[ay][ax] = grid[ay][ax];
+                }
+                solidifiedTurns[ay][ax] = 0;
+                grid[ay][ax] = Terrain.LAVA;
+                spreadSteps = Math.max(steps - 1, 0);
+            }
+
+            lavaInfo[ay][ax] = new LavaInfo(spreadSteps, 1);
+            if (ax == playerX && ay == playerY) {
+                msgs.add("A volcano erupts beneath you!");
+            }
+        }
         return msgs;
     }
 
     public List<String> updateVolcanicActivity() {
+        return updateVolcanicActivity(Integer.MIN_VALUE, Integer.MIN_VALUE, null);
+    }
+
+    public List<String> updateVolcanicActivity(int playerX, int playerY,
+                                               DinosaurStats player) {
         List<String> msgs = new ArrayList<>();
+        List<int[]> spread = new ArrayList<>();
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 LavaInfo info = lavaInfo[y][x];
@@ -413,17 +460,61 @@ public class Map {
                     continue;
                 }
                 if (info.getSteps() > 0) {
+                    int[][] dirs = { {1,0}, {-1,0}, {0,1}, {0,-1} };
+                    for (int[] d : dirs) {
+                        int nx = x + d[0];
+                        int ny = y + d[1];
+                        if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                            if (lavaInfo[ny][nx] == null
+                                    && grid[ny][nx] != Terrain.VOLCANO
+                                    && grid[ny][nx] != Terrain.VOLCANO_ERUPTING) {
+                                spread.add(new int[]{nx, ny, info.getSteps() - 1});
+                            }
+                        }
+                    }
                     info.setSteps(info.getSteps() - 1);
                 } else {
                     info.setCooldown(info.getCooldown() - 1);
                     if (info.getCooldown() <= 0) {
-                        grid[y][x] = Terrain.SOLIDIFIED_LAVA_FIELD;
+                        if (grid[y][x] == Terrain.VOLCANO_ERUPTING) {
+                            grid[y][x] = Terrain.VOLCANO;
+                        } else {
+                            grid[y][x] = Terrain.SOLIDIFIED_LAVA_FIELD;
+                            solidifiedTurns[y][x] = 100;
+                        }
                         lavaInfo[y][x] = null;
                         erupting[y][x] = false;
                     }
                 }
             }
         }
+
+        for (int[] p : spread) {
+            int nx = p[0];
+            int ny = p[1];
+            int steps = p[2];
+            animals[ny][nx].clear();
+            eggs[ny][nx].clear();
+            burrows[ny][nx] = null;
+            if (lavaOrig[ny][nx] == null) {
+                lavaOrig[ny][nx] = grid[ny][nx];
+            }
+            solidifiedTurns[ny][nx] = 0;
+            grid[ny][nx] = Terrain.LAVA;
+            lavaInfo[ny][nx] = new LavaInfo(steps, 1);
+            if (nx == playerX && ny == playerY) {
+                msgs.add("Lava flows over you!");
+            }
+        }
+
+        if (player != null && playerX != Integer.MIN_VALUE) {
+            Terrain t = terrainAt(playerX, playerY);
+            if (t == Terrain.LAVA || t == Terrain.VOLCANO_ERUPTING) {
+                player.setHp(0.0);
+                msgs.add("Game Over.");
+            }
+        }
+
         return msgs;
     }
 

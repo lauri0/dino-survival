@@ -785,7 +785,7 @@ public class Game {
             }
         }
 
-        map.updateVolcanicActivity();
+        map.updateVolcanicActivity(x, y, player);
         map.updateFlood(weather.getFloodChance());
         map.updateForestFire();
         updateEggs();
