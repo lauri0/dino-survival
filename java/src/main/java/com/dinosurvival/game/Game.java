@@ -36,6 +36,7 @@ public class Game {
     private String lastAction = "";
     private final java.util.Map<String, List<Integer>> populationHistory = new java.util.HashMap<>();
     private final List<Integer> turnHistory = new ArrayList<>();
+    private String formation;
 
     /** Number of descendants required to win the game. */
     public static final int DESCENDANTS_TO_WIN = 5;
@@ -57,6 +58,7 @@ public class Game {
     public void start(String formation, String dinoName) {
         try {
             StatsLoader.load(Path.of("dinosurvival"), formation);
+            this.formation = formation;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -1397,6 +1399,10 @@ public class Game {
 
     public int getTurn() {
         return turn;
+    }
+
+    public String getFormation() {
+        return formation;
     }
 
     /**

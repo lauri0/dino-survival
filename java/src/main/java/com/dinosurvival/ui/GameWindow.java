@@ -7,6 +7,11 @@ import com.dinosurvival.model.PlantStats;
 import com.dinosurvival.game.EncounterEntry;
 import com.dinosurvival.model.NPCAnimal;
 import com.dinosurvival.util.StatsLoader;
+import com.dinosurvival.ui.DinoFactsDialog;
+import com.dinosurvival.ui.GameHelpDialog;
+import com.dinosurvival.ui.EncounterHelpDialog;
+import com.dinosurvival.ui.LegacyStatsDialog;
+import com.dinosurvival.ui.StatsDialog;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -59,6 +64,10 @@ public class GameWindow extends JFrame {
     private final JButton drinkButton = new JButton("Drink");
     private final JButton threatenButton = new JButton("Threaten");
     private final JButton layButton = new JButton("Lay Eggs");
+    private final JButton infoButton = new JButton("Info");
+    private final JButton playerStatsButton = new JButton("Player Stats");
+    private final JButton dinoStatsButton = new JButton("Dinosaur Stats");
+    private final JButton helpButton = new JButton("Help");
 
     private ImageIcon loadScaledIcon(String path, int width, int height) {
         java.net.URL url = getClass().getResource(path);
@@ -124,6 +133,12 @@ public class GameWindow extends JFrame {
         if (dIcon != null) {
             dinoImageLabel.setIcon(dIcon);
         }
+        JPanel infoRow = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        infoRow.add(infoButton);
+        infoRow.add(dinoStatsButton);
+        infoRow.add(playerStatsButton);
+        infoRow.add(helpButton);
+        dinoPanel.add(infoRow, BorderLayout.SOUTH);
         c.gridx = 0;
         c.gridy = 0;
         c.weightx = 0;
@@ -262,9 +277,14 @@ public class GameWindow extends JFrame {
             encounterSortAsc = !encounterSortAsc;
             updateEncounterList();
         });
+        JButton encHelp = new JButton("Help");
+        encHelp.addActionListener(e -> new EncounterHelpDialog(this).setVisible(true));
         JPanel encHeader = new JPanel(new BorderLayout());
         encHeader.add(encLabel, BorderLayout.WEST);
-        encHeader.add(sortBtn, BorderLayout.EAST);
+        JPanel encBtns = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 0));
+        encBtns.add(encHelp);
+        encBtns.add(sortBtn);
+        encHeader.add(encBtns, BorderLayout.EAST);
         encounterPanel.add(encHeader, BorderLayout.NORTH);
         encounterList.setLayout(new BoxLayout(encounterList, BoxLayout.Y_AXIS));
         JScrollPane encounterScroll = new JScrollPane(encounterList);
@@ -327,6 +347,10 @@ public class GameWindow extends JFrame {
         drinkButton.addActionListener(e -> doAction(() -> game.drink(), "Drink"));
         threatenButton.addActionListener(e -> doAction(() -> game.threaten(), "Threaten"));
         layButton.addActionListener(e -> doAction(() -> game.layEggs(), "Lay eggs"));
+        infoButton.addActionListener(e -> new DinoFactsDialog(this, game, game.getPlayer().getName()).setVisible(true));
+        playerStatsButton.addActionListener(e -> new StatsDialog(this, game).setVisible(true));
+        dinoStatsButton.addActionListener(e -> new LegacyStatsDialog(this, game.getFormation(), game.getPlayer().getName()).setVisible(true));
+        helpButton.addActionListener(e -> new GameHelpDialog(this).setVisible(true));
 
         buildMap();
         refreshAll();
