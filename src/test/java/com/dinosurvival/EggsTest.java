@@ -43,9 +43,7 @@ public class EggsTest {
         map.addAnimal(0, 0, npc);
         EggCluster ec = new EggCluster("Allosaurus", 1, 1.0, 5);
         map.addEggs(0, 0, ec);
-        Method m = Game.class.getDeclaredMethod("updateNpcs");
-        m.setAccessible(true);
-        m.invoke(g);
+        g.getNpcController().updateNpcs();
         Assertions.assertEquals(1.0, map.getEggs(0, 0).get(0).getWeight(), 1e-9);
     }
 
