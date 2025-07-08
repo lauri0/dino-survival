@@ -17,7 +17,7 @@ The game requires maven and Java 17+.
 ## Building the Game
 
 ```bash
-mvn -f java/pom.xml package
+mvn -f pom.xml package
 ```
 
 ## Running the Game
@@ -26,7 +26,7 @@ The jar produced by the build does not bundle its dependencies. Run the
 application with Maven so that they are included on the classpath:
 
 ```bash
-mvn -f java/pom.xml exec:java -Dexec.mainClass=com.dinosurvival.ui.Main
+mvn -f pom.xml exec:java -Dexec.mainClass=com.dinosurvival.ui.Main
 ```
 
 Running the game opens a menu with buttons for the available
