@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 public class BleedTest {
     @Test
     public void testPlayerBleedsTarget() throws Exception {
-        StatsLoader.load(Path.of("..", "conf"), "Hell Creek");
+        StatsLoader.load(Path.of("conf"), "Hell Creek");
         Game g = new Game();
         g.start("Hell Creek", "Acheroraptor");
         Map map = g.getMap();
@@ -40,7 +40,7 @@ public class BleedTest {
 
     @Test
     public void testNpcBleedsPlayer() throws Exception {
-        StatsLoader.load(Path.of("..", "conf"), "Morrison");
+        StatsLoader.load(Path.of("conf"), "Morrison");
         Game g = new Game();
         g.start("Morrison", "Ceratosaurus");
         Map map = g.getMap();

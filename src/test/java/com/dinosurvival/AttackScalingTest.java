@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
 public class AttackScalingTest {
     @BeforeAll
     public static void setup() throws Exception {
-        Path base = Path.of("..", "conf");
+        Path base = Path.of("conf");
         StatsLoader.load(base, "Morrison");
     }
 

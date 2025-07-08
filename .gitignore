@@ -3,5 +3,6 @@ __pycache__/
 *.pyc
 
 # Java
-/java/target/
+/target/
 game_log.txt
+hunter_stats.yaml

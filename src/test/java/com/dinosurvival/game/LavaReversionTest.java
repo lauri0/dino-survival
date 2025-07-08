@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
 public class LavaReversionTest {
     @BeforeAll
     public static void loadStats() throws Exception {
-        StatsLoader.load(Path.of("..", "conf"), "Morrison");
+        StatsLoader.load(Path.of("conf"), "Morrison");
     }
 
     @Test

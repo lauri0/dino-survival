@@ -10,7 +10,7 @@ public class CombatTest {
 
     @Test
     public void test_player_attack_damage() throws Exception {
-        StatsLoader.load(Path.of("..", "conf"), "Hell Creek");
+        StatsLoader.load(Path.of("conf"), "Hell Creek");
         Game game = new Game();
         game.start("Hell Creek", "Tyrannosaurus");
         Map map = game.getMap();
@@ -30,7 +30,7 @@ public class CombatTest {
 
     @Test
     public void test_npc_target_selection() throws Exception {
-        StatsLoader.load(Path.of("..", "conf"), "Morrison");
+        StatsLoader.load(Path.of("conf"), "Morrison");
         Game game = new Game();
         game.start("Morrison", "Allosaurus");
         Map map = game.getMap();

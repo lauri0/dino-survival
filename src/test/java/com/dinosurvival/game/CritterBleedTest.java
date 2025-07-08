@@ -31,7 +31,7 @@ public class CritterBleedTest {
 
     @Test
     public void testCritterBleedDamageAndExpires() throws Exception {
-        StatsLoader.load(Path.of("..", "conf"), "Hell Creek");
+        StatsLoader.load(Path.of("conf"), "Hell Creek");
         Game game = new Game();
         game.start("Hell Creek", "Acheroraptor");
         Map map = game.getMap();
@@ -52,7 +52,7 @@ public class CritterBleedTest {
 
     @Test
     public void testCritterHealthRegen() throws Exception {
-        StatsLoader.load(Path.of("..", "conf"), "Hell Creek");
+        StatsLoader.load(Path.of("conf"), "Hell Creek");
         Game game = new Game();
         game.start("Hell Creek", "Acheroraptor");
         Map map = game.getMap();

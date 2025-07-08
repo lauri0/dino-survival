@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
 public class DiggerTest {
     @Test
     public void testPectinodonDigBurrowOneTurn() throws Exception {
-        StatsLoader.load(Path.of("..", "conf"), "Hell Creek");
+        StatsLoader.load(Path.of("conf"), "Hell Creek");
         Game g = new Game();
         g.start("Hell Creek", "Pectinodon");
         Map map = g.getMap();
@@ -41,7 +41,7 @@ public class DiggerTest {
 
     @Test
     public void testNpcDiggerDigsBurrow() throws Exception {
-        StatsLoader.load(Path.of("..", "conf"), "Hell Creek");
+        StatsLoader.load(Path.of("conf"), "Hell Creek");
         Game g = new Game();
         g.start("Hell Creek", "Tyrannosaurus");
         Map map = g.getMap();

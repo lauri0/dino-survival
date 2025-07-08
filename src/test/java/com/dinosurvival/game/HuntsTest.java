@@ -10,7 +10,7 @@ public class HuntsTest {
 
     @Test
     public void testLiveHuntCountsKill() throws Exception {
-        StatsLoader.load(Path.of("..", "conf"), "Hell Creek");
+        StatsLoader.load(Path.of("conf"), "Hell Creek");
         Game game = new Game();
         game.start("Hell Creek", "Tyrannosaurus", 0L);
         Map map = game.getMap();
@@ -30,7 +30,7 @@ public class HuntsTest {
 
     @Test
     public void testCarcassEatNotCountedAsHunt() throws Exception {
-        StatsLoader.load(Path.of("..", "conf"), "Morrison");
+        StatsLoader.load(Path.of("conf"), "Morrison");
         Game game = new Game();
         game.start("Morrison", "Allosaurus", 0L);
         Map map = game.getMap();
@@ -51,7 +51,7 @@ public class HuntsTest {
 
     @Test
     public void testPlayerTakesDamageWhenHuntingCritter() throws Exception {
-        StatsLoader.load(Path.of("..", "conf"), "Hell Creek");
+        StatsLoader.load(Path.of("conf"), "Hell Creek");
         Game game = new Game();
         game.start("Hell Creek", "Tyrannosaurus", 0L);
         Map map = game.getMap();
@@ -72,7 +72,7 @@ public class HuntsTest {
 
     @Test
     public void testNpcTakesDamageWhenHuntingCritter() throws Exception {
-        StatsLoader.load(Path.of("..", "conf"), "Hell Creek");
+        StatsLoader.load(Path.of("conf"), "Hell Creek");
         Game game = new Game();
         game.start("Hell Creek", "Tyrannosaurus", 0L);
         Map map = game.getMap();

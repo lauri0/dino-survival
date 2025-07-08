@@ -41,7 +41,7 @@ public class VolcanoEruptionTest {
 
     @Test
     public void testPlayerDiesOnVolcanoEruption() throws Exception {
-        StatsLoader.load(Path.of("..", "conf"), "Morrison");
+        StatsLoader.load(Path.of("conf"), "Morrison");
         Game g = new Game();
         g.start("Morrison", "Allosaurus");
         Map map = prepareMap(g, 3, 3);
@@ -53,7 +53,7 @@ public class VolcanoEruptionTest {
 
     @Test
     public void testPlayerDiesAdjacentVolcanoEruption() throws Exception {
-        StatsLoader.load(Path.of("..", "conf"), "Morrison");
+        StatsLoader.load(Path.of("conf"), "Morrison");
         Game g = new Game();
         g.start("Morrison", "Allosaurus");
         Map map = prepareMap(g, 3, 2);

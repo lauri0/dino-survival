@@ -12,7 +12,7 @@ public class DeadMovementTest {
 
     @Test
     public void testDeadNpcDoesNotMove() throws Exception {
-        StatsLoader.load(Path.of("..", "conf"), "Morrison");
+        StatsLoader.load(Path.of("conf"), "Morrison");
         Game game = new Game();
         game.start("Morrison", "Allosaurus");
 
