@@ -17,6 +17,7 @@ public class NpcController {
     private Weather weather;
     private int nextNpcId = 1;
     private final List<NPCAnimal> spawned = new ArrayList<>();
+    private final List<String> mammalSpecies = new ArrayList<>();
 
     public NpcController(Map map, Weather weather) {
         this.map = map;
@@ -37,6 +38,24 @@ public class NpcController {
 
     public void trackSpawn(NPCAnimal npc) {
         spawned.add(npc);
+    }
+
+    public void initMammalSpecies(String formation) {
+        mammalSpecies.clear();
+        for (var entry : StatsLoader.getCritterStats().entrySet()) {
+            Object cls = entry.getValue().get("class");
+            if (cls != null && cls.toString().equals("mammal")) {
+                mammalSpecies.add(entry.getKey());
+            }
+        }
+        if (mammalSpecies.isEmpty() && "Hell Creek".equals(formation)
+                && StatsLoader.getCritterStats().containsKey("Didelphodon")) {
+            mammalSpecies.add("Didelphodon");
+        }
+    }
+
+    public List<String> getMammalSpecies() {
+        return mammalSpecies;
     }
 
     public List<NPCAnimal> getSpawned() {
@@ -414,16 +433,9 @@ public class NpcController {
         b.setFull(false);
         b.setProgress(0.0);
 
-        List<String> mammals = new ArrayList<>();
-        for (var entry : StatsLoader.getCritterStats().entrySet()) {
-            Object cls = entry.getValue().get("class");
-            if (cls != null && cls.toString().equals("mammal")) {
-                mammals.add(entry.getKey());
-            }
-        }
-        if (!mammals.isEmpty()) {
+        if (!mammalSpecies.isEmpty()) {
             Random r = new Random();
-            String name = mammals.get(r.nextInt(mammals.size()));
+            String name = mammalSpecies.get(r.nextInt(mammalSpecies.size()));
             java.util.Map<String, Object> stats = StatsLoader.getCritterStats().get(name);
             double weight = 0.0;
             Object wObj = stats.get("adult_weight");

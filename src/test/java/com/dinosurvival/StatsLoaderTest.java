@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 public class StatsLoaderTest {
     @Test
     public void testLoadStats() throws Exception {
-        Path base = Path.of("..", "conf");
+        Path base = Path.of("conf");
         StatsLoader.load(base, "Morrison");
         DinosaurStats allo = StatsLoader.getDinoStats().get("Allosaurus");
         Assertions.assertNotNull(allo);

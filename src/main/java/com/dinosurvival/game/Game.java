@@ -35,7 +35,6 @@ public class Game {
     private final java.util.Map<String, int[]> huntStats = new java.util.HashMap<>();
     private final List<Integer> turnHistory = new ArrayList<>();
     private List<String> turnMessages = new ArrayList<>();
-    private final List<String> mammalSpecies = new ArrayList<>();
     private String formation;
 
     /** Number of descendants required to win the game. */
@@ -87,17 +86,6 @@ public class Game {
 
         map = new Map(18, 10, setting, seed);
         map.populateBurrows(setting.getNumBurrows());
-        mammalSpecies.clear();
-        for (var entry : StatsLoader.getCritterStats().entrySet()) {
-            Object cls = entry.getValue().get("class");
-            if (cls != null && cls.toString().equals("mammal")) {
-                mammalSpecies.add(entry.getKey());
-            }
-        }
-        if (mammalSpecies.isEmpty() && "Hell Creek".equals(formation)
-                && StatsLoader.getCritterStats().containsKey("Didelphodon")) {
-            mammalSpecies.add("Didelphodon");
-        }
 
         // choose player dinosaur
         if (!StatsLoader.getDinoStats().isEmpty()) {
@@ -128,6 +116,7 @@ public class Game {
         weather = chooseWeather();
         weatherTurns = 0;
         npcController = new NpcController(map, weather);
+        npcController.initMammalSpecies(setting.getFormation());
         npcController.populateAnimals();
         npcController.spawnCritters(true);
         huntStats.clear();
@@ -783,8 +772,9 @@ public class Game {
             if (b.getProgress() >= 100.0) {
                 b.setFull(false);
                 b.setProgress(0.0);
-                if (!mammalSpecies.isEmpty()) {
-                    String name = mammalSpecies.get(new Random().nextInt(mammalSpecies.size()));
+                List<String> mammals = npcController.getMammalSpecies();
+                if (!mammals.isEmpty()) {
+                    String name = mammals.get(new Random().nextInt(mammals.size()));
                     java.util.Map<String, Object> stats = StatsLoader.getCritterStats().get(name);
                     double weight = 0.0;
                     Object wObj = stats.get("adult_weight");
@@ -1016,125 +1006,6 @@ public class Game {
         return false;
     }
 
-    private double npcMaxGrowthGain(double weight, Object stats) {
-        double adult = getStat(stats, "adult_weight");
-        if (adult <= 0 || weight >= adult) {
-            return 0.0;
-        }
-        double maxWeight = adult * 1.05;
-        double r = getStat(stats, "growth_rate");
-        if (r == 0.0) r = 0.35;
-        double gain = r * weight * (1 - weight / maxWeight);
-        return Math.min(gain, adult - weight);
-    }
-
-    private void npcApplyGrowth(NPCAnimal npc, double available, Object stats) {
-        double maxGain = npcMaxGrowthGain(npc.getWeight(), stats);
-        double gain = Math.min(available, maxGain);
-        double oldWeight = npc.getWeight();
-        double adultW = getStat(stats, "adult_weight");
-        npc.setWeight(Math.min(npc.getWeight() + gain, adultW));
-        double pct = adultW > 0 ? npc.getWeight() / adultW : 1.0;
-        pct = Math.max(0.0, Math.min(pct, 1.0));
-        double baseAtk = getStat(stats, "attack");
-        npc.setAttack(baseAtk * pct);
-        double oldMax = scaleByWeight(oldWeight, adultW, getStat(stats, "hp"));
-        double newMax = scaleByWeight(npc.getWeight(), adultW, getStat(stats, "hp"));
-        double ratio = oldMax <= 0 ? 1.0 : npc.getHp() / oldMax;
-        npc.setMaxHp(newMax);
-        npc.setHp(newMax * ratio);
-    }
-
-    private void npcConsumePlant(int tx, int ty, NPCAnimal npc, Plant plant, Object stats) {
-        double energyNeeded = 100.0 - npc.getEnergy();
-        double weightForEnergy = energyNeeded * npc.getWeight() / 1000.0;
-        double growthTarget = npcMaxGrowthGain(npc.getWeight(), stats);
-        double eatAmount = Math.min(plant.getWeight(), weightForEnergy + growthTarget);
-        double energyGainPossible = 1000 * eatAmount / Math.max(npc.getWeight(), 0.1);
-        double actualGain = Math.min(energyNeeded, energyGainPossible);
-        npc.setEnergy(Math.min(100.0, npc.getEnergy() + actualGain));
-        double used = actualGain * npc.getWeight() / 1000.0;
-        double remaining = eatAmount - used;
-        npcApplyGrowth(npc, remaining, stats);
-        plant.setWeight(plant.getWeight() - eatAmount);
-        if (tx == x && ty == y && eatAmount > 0) {
-            String msg = npcLabel(npc) + " eats "
-                    + String.format(java.util.Locale.US, "%.1f", eatAmount)
-                    + "kg of " + plant.getName() + ".";
-            turnMessages.add(msg);
-        }
-    }
-
-    private void npcConsumeMeat(int tx, int ty, NPCAnimal npc, NPCAnimal carcass, Object stats) {
-        double energyNeeded = 100.0 - npc.getEnergy();
-        double weightForEnergy = energyNeeded * npc.getWeight() / 1000.0;
-        double growthTarget = npcMaxGrowthGain(npc.getWeight(), stats);
-        double eatAmount = Math.min(carcass.getWeight(), weightForEnergy + growthTarget);
-        double energyGainPossible = 1000 * eatAmount / Math.max(npc.getWeight(), 0.1);
-        double actualGain = Math.min(energyNeeded, energyGainPossible);
-        npc.setEnergy(Math.min(100.0, npc.getEnergy() + actualGain));
-        double used = actualGain * npc.getWeight() / 1000.0;
-        double remaining = eatAmount - used;
-        npcApplyGrowth(npc, remaining, stats);
-        carcass.setWeight(carcass.getWeight() - eatAmount);
-        if (tx == x && ty == y && eatAmount > 0) {
-            String msg = npcLabel(npc) + " eats "
-                    + String.format(java.util.Locale.US, "%.1f", eatAmount)
-                    + "kg from the " + npcLabel(carcass) + " carcass.";
-            turnMessages.add(msg);
-        }
-    }
-
-    private void npcConsumeEggs(NPCAnimal npc, EggCluster egg, Object stats) {
-        double energyNeeded = 100.0 - npc.getEnergy();
-        double growthTarget = npcMaxGrowthGain(npc.getWeight(), stats);
-        double eatAmount = egg.getWeight();
-        double energyGainPossible = 1000 * eatAmount / Math.max(npc.getWeight(), 0.1);
-        double actualGain = Math.min(energyNeeded, energyGainPossible);
-        npc.setEnergy(Math.min(100.0, npc.getEnergy() + actualGain));
-        double used = actualGain * npc.getWeight() / 1000.0;
-        double remaining = eatAmount - used;
-        npcApplyGrowth(npc, remaining, stats);
-        egg.setWeight(egg.getWeight() - eatAmount);
-        if (eatAmount > 0) {
-            npc.setEggClustersEaten(npc.getEggClustersEaten() + 1);
-        }
-    }
-
-    private boolean npcDigBurrow(int x, int y) {
-        Burrow b = map.getBurrow(x, y);
-        if (b == null || !b.isFull()) {
-            return false;
-        }
-        b.setFull(false);
-        b.setProgress(0.0);
-        if (!mammalSpecies.isEmpty()) {
-            String name = mammalSpecies.get(new Random().nextInt(mammalSpecies.size()));
-            java.util.Map<String, Object> stats = StatsLoader.getCritterStats().get(name);
-            double weight = 0.0;
-            Object wObj = stats.get("adult_weight");
-            if (wObj instanceof Number n) weight = n.doubleValue();
-            double hp = scaleByWeight(weight, getStat(stats, "adult_weight"), getStat(stats, "hp"));
-            NPCAnimal npc = new NPCAnimal();
-            npc.setId(npcController.allocateNpcId());
-            npc.setName(name);
-            npc.setWeight(weight);
-            npc.setMaxHp(hp);
-            npc.setHp(hp);
-            Object abil = stats.get("abilities");
-            if (abil instanceof java.util.List<?> list) {
-                java.util.List<String> abilList = new java.util.ArrayList<>();
-                for (Object a : list) {
-                    abilList.add(a.toString());
-                }
-                npc.setAbilities(abilList);
-            }
-            npc.setLastAction("spawned");
-            map.addAnimal(x, y, npc);
-            npcController.trackSpawn(npc);
-        }
-        return true;
-    }
 
     private double npcEffectiveSpeed(NPCAnimal npc, Object stats) {
         return npcController.npcEffectiveSpeed(npc);
