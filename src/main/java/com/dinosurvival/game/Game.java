@@ -8,6 +8,7 @@ import com.dinosurvival.game.PlayerManager;
 import java.util.Iterator;
 import com.dinosurvival.util.StatsLoader;
 import com.dinosurvival.game.CombatUtils;
+import com.dinosurvival.util.Constants;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -40,10 +41,11 @@ public class Game {
     private String formation;
 
     /** Number of descendants required to win the game. */
-    public static final int DESCENDANTS_TO_WIN = 5;
+    public static final int DESCENDANTS_TO_WIN = Constants.DESCENDANTS_TO_WIN;
 
     /** Energy multiplier applied when an NPC walks. */
-    public static final double WALKING_ENERGY_DRAIN_MULTIPLIER = 1.3;
+    public static final double WALKING_ENERGY_DRAIN_MULTIPLIER =
+            Constants.WALKING_ENERGY_DRAIN_MULTIPLIER;
 
     /**
      * Initialise the game world. Statistics are loaded from the YAML files and

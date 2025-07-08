@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import com.dinosurvival.util.Constants;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,10 +28,6 @@ public class StatsLoader {
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
 
-    private static final int HATCHLING_WEIGHT_DIVISOR = 1000;
-    private static final int HATCHLING_SPEED_MULTIPLIER = 3;
-    private static final int HATCHLING_ENERGY_DRAIN_DIVISOR = 2;
-    private static final double MIN_HATCHING_WEIGHT = 2.0;
 
     private static Map<String, DinosaurStats> dinoStats = new HashMap<>();
     private static Map<String, PlantStats> plantStats = new HashMap<>();
@@ -148,22 +145,22 @@ public class StatsLoader {
         double adultWeight = getDouble(stats.get("adult_weight"));
         double hatchWeight;
         if (stats.containsKey("hatchling_weight")) {
-            hatchWeight = Math.max(getDouble(stats.get("hatchling_weight")), MIN_HATCHING_WEIGHT);
+            hatchWeight = Math.max(getDouble(stats.get("hatchling_weight")), Constants.MIN_HATCHING_WEIGHT);
         } else {
-            hatchWeight = Math.max(adultWeight / HATCHLING_WEIGHT_DIVISOR, MIN_HATCHING_WEIGHT);
+            hatchWeight = Math.max(adultWeight / Constants.HATCHLING_WEIGHT_DIVISOR, Constants.MIN_HATCHING_WEIGHT);
         }
         stats.put("hatchling_weight", hatchWeight);
 
         double adultSpeed = getDouble(stats.get("adult_speed"));
         if (!stats.containsKey("hatchling_speed")) {
-            stats.put("hatchling_speed", adultSpeed * HATCHLING_SPEED_MULTIPLIER);
+            stats.put("hatchling_speed", adultSpeed * Constants.HATCHLING_SPEED_MULTIPLIER);
         }
 
         double adultDrain = getDouble(stats.get("adult_energy_drain"));
         if (!stats.containsKey("hatchling_energy_drain")) {
             stats.put(
                     "hatchling_energy_drain",
-                    adultDrain / HATCHLING_ENERGY_DRAIN_DIVISOR);
+                    adultDrain / Constants.HATCHLING_ENERGY_DRAIN_DIVISOR);
         }
     }
 
