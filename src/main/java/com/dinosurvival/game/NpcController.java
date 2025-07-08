@@ -376,47 +376,74 @@ public class NpcController {
         npc.setHp(newMax * ratio);
     }
 
-    private void npcConsumePlant(int tx, int ty, NPCAnimal npc, Plant plant, Object stats) {
+    private void npcConsumePlant(int tx, int ty, NPCAnimal npc, Plant plant, Object stats,
+                                 int playerX, int playerY, List<String> messages) {
         double energyNeeded = 100.0 - npc.getEnergy();
         double weightForEnergy = energyNeeded * npc.getWeight() / 1000.0;
         double growthTarget = npcMaxGrowthGain(npc.getWeight(), stats);
         double eatAmount = Math.min(plant.getWeight(), weightForEnergy + growthTarget);
         double energyGainPossible = 1000 * eatAmount / Math.max(npc.getWeight(), 0.1);
         double actualGain = Math.min(energyNeeded, energyGainPossible);
-        npc.setEnergy(Math.min(100.0, npc.getEnergy() + actualGain));
+        double beforeEnergy = npc.getEnergy();
+        npc.setEnergy(Math.min(100.0, beforeEnergy + actualGain));
         double used = actualGain * npc.getWeight() / 1000.0;
         double remaining = eatAmount - used;
+        double beforeWeight = npc.getWeight();
         npcApplyGrowth(npc, remaining, stats);
+        double weightGain = npc.getWeight() - beforeWeight;
         plant.setWeight(plant.getWeight() - eatAmount);
+        if (tx == playerX && ty == playerY) {
+            messages.add(npcLabel(npc) + " eats " + String.format(java.util.Locale.US, "%.1f", eatAmount)
+                    + "kg and regains " + String.format(java.util.Locale.US, "%.1f", npc.getEnergy() - beforeEnergy)
+                    + " energy gaining " + String.format(java.util.Locale.US, "%.1f", weightGain) + "kg.");
+        }
     }
 
-    private void npcConsumeMeat(int tx, int ty, NPCAnimal npc, NPCAnimal carcass, Object stats) {
+    private void npcConsumeMeat(int tx, int ty, NPCAnimal npc, NPCAnimal carcass, Object stats,
+                                int playerX, int playerY, List<String> messages) {
         double energyNeeded = 100.0 - npc.getEnergy();
         double weightForEnergy = energyNeeded * npc.getWeight() / 1000.0;
         double growthTarget = npcMaxGrowthGain(npc.getWeight(), stats);
         double eatAmount = Math.min(carcass.getWeight(), weightForEnergy + growthTarget);
         double energyGainPossible = 1000 * eatAmount / Math.max(npc.getWeight(), 0.1);
         double actualGain = Math.min(energyNeeded, energyGainPossible);
-        npc.setEnergy(Math.min(100.0, npc.getEnergy() + actualGain));
+        double beforeEnergy = npc.getEnergy();
+        npc.setEnergy(Math.min(100.0, beforeEnergy + actualGain));
         double used = actualGain * npc.getWeight() / 1000.0;
         double remaining = eatAmount - used;
+        double beforeWeight = npc.getWeight();
         npcApplyGrowth(npc, remaining, stats);
+        double weightGain = npc.getWeight() - beforeWeight;
         carcass.setWeight(carcass.getWeight() - eatAmount);
+        if (tx == playerX && ty == playerY) {
+            messages.add(npcLabel(npc) + " eats " + String.format(java.util.Locale.US, "%.1f", eatAmount)
+                    + "kg and regains " + String.format(java.util.Locale.US, "%.1f", npc.getEnergy() - beforeEnergy)
+                    + " energy gaining " + String.format(java.util.Locale.US, "%.1f", weightGain) + "kg.");
+        }
     }
 
-    private void npcConsumeEggs(NPCAnimal npc, EggCluster egg, Object stats) {
+    private void npcConsumeEggs(int tx, int ty, NPCAnimal npc, EggCluster egg, Object stats,
+                                int playerX, int playerY, List<String> messages) {
         double energyNeeded = 100.0 - npc.getEnergy();
         double growthTarget = npcMaxGrowthGain(npc.getWeight(), stats);
         double eatAmount = egg.getWeight();
         double energyGainPossible = 1000 * eatAmount / Math.max(npc.getWeight(), 0.1);
         double actualGain = Math.min(energyNeeded, energyGainPossible);
-        npc.setEnergy(Math.min(100.0, npc.getEnergy() + actualGain));
+        double beforeEnergy = npc.getEnergy();
+        npc.setEnergy(Math.min(100.0, beforeEnergy + actualGain));
         double used = actualGain * npc.getWeight() / 1000.0;
         double remaining = eatAmount - used;
+        double beforeWeight = npc.getWeight();
         npcApplyGrowth(npc, remaining, stats);
+        double weightGain = npc.getWeight() - beforeWeight;
         egg.setWeight(egg.getWeight() - eatAmount);
         if (eatAmount > 0) {
             npc.setEggClustersEaten(npc.getEggClustersEaten() + 1);
+        }
+        if (tx == playerX && ty == playerY) {
+            messages.add(npcLabel(npc) + " eats " + String.format(java.util.Locale.US, "%.1f", eatAmount)
+                    + "kg and regains " + String.format(java.util.Locale.US, "%.1f", npc.getEnergy() - beforeEnergy)
+                    + " energy gaining " + String.format(java.util.Locale.US, "%.1f", weightGain) + "kg.");
         }
     }
 
@@ -561,7 +588,17 @@ public class NpcController {
     // NPC turn processing
     // ------------------------------------------------------------------
 
+    public List<String> updateNpcs(int playerX, int playerY) {
+        List<String> messages = new ArrayList<>();
+        updateNpcsInternal(playerX, playerY, messages);
+        return messages;
+    }
+
     public void updateNpcs() {
+        updateNpcsInternal(-1, -1, new ArrayList<>());
+    }
+
+    private void updateNpcsInternal(int playerX, int playerY, List<String> messages) {
         Random r = new Random();
         for (int ty = 0; ty < map.getHeight(); ty++) {
             for (int tx = 0; tx < map.getWidth(); tx++) {
@@ -693,7 +730,7 @@ public class NpcController {
                                 }
                             }
                             if (carcass != null) {
-                                npcConsumeMeat(tx, ty, npc, carcass, stats);
+                                npcConsumeMeat(tx, ty, npc, carcass, stats, playerX, playerY, messages);
                                 if (carcass.getWeight() <= 0) {
                                     map.removeAnimal(tx, ty, carcass);
                                 }
@@ -709,7 +746,7 @@ public class NpcController {
                                 }
                             }
                             if (targetEgg != null) {
-                                npcConsumeEggs(npc, targetEgg, stats);
+                                npcConsumeEggs(tx, ty, npc, targetEgg, stats, playerX, playerY, messages);
                                 if (targetEgg.getWeight() <= 0) {
                                     eggs.remove(targetEgg);
                                 }
@@ -733,7 +770,7 @@ public class NpcController {
                                 }
                             }
                             if (chosen != null) {
-                                npcConsumePlant(tx, ty, npc, chosen, stats);
+                                npcConsumePlant(tx, ty, npc, chosen, stats, playerX, playerY, messages);
                                 if (chosen.getWeight() <= 0) {
                                     plants.remove(chosen);
                                 }
@@ -742,7 +779,7 @@ public class NpcController {
                             }
                         }
 
-                        if (npcTryHunt(tx, ty, npc, stats, animals, adultWeight)) {
+                        if (npcTryHunt(tx, ty, npc, stats, animals, adultWeight, playerX, playerY, messages)) {
                             continue;
                         }
                     }
@@ -826,7 +863,8 @@ public class NpcController {
     }
 
     public boolean npcTryHunt(int tx, int ty, NPCAnimal npc, Object stats,
-                               List<NPCAnimal> animals, double adultWeight) {
+                               List<NPCAnimal> animals, double adultWeight,
+                               int playerX, int playerY, List<String> messages) {
         if (!statsDietHas(stats, "meat")) {
             return false;
         }
@@ -902,7 +940,10 @@ public class NpcController {
         if (killed) {
             java.util.Map<String, Integer> hunts = npc.getHunts();
             hunts.put(pt.npc.getName(), hunts.getOrDefault(pt.npc.getName(), 0) + 1);
-            npcConsumeMeat(tx, ty, npc, pt.npc, stats);
+            if (tx == playerX && ty == playerY) {
+                messages.add(npcLabel(npc) + " kills " + npcLabel(pt.npc) + ".");
+            }
+            npcConsumeMeat(tx, ty, npc, pt.npc, stats, playerX, playerY, messages);
             if (pt.npc.getWeight() <= 0) {
                 map.removeAnimal(tx, ty, pt.npc);
             }
@@ -961,6 +1002,10 @@ public class NpcController {
             this.attack = attack;
             this.stats = stats;
         }
+    }
+
+    private String npcLabel(NPCAnimal npc) {
+        return npc.getName() + " (" + npc.getId() + ")";
     }
 
     /** Public helpers used by {@link Game}. */
