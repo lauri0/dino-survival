@@ -4,6 +4,7 @@ import com.dinosurvival.model.DinosaurStats;
 import com.dinosurvival.model.NPCAnimal;
 import com.dinosurvival.model.Plant;
 import com.dinosurvival.util.StatsLoader;
+import com.dinosurvival.game.CombatUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -145,7 +146,7 @@ public class NpcController {
                     weight = stats.getAdultWeight();
                 }
                 if (i < spawnCount) {
-                    double maxHp = scaleByWeight(weight, stats.getAdultWeight(), stats.getAdultHp());
+                    double maxHp = CombatUtils.scaleByWeight(weight, stats.getAdultWeight(), stats.getAdultHp());
                     NPCAnimal npc = new NPCAnimal();
                     npc.setId(allocateNpcId());
                     npc.setName(name);
@@ -253,12 +254,6 @@ public class NpcController {
                 trackSpawn(npc);
             }
         });
-    }
-
-    private double scaleByWeight(double weight, double adultWeight, double val) {
-        double pct = adultWeight > 0 ? weight / adultWeight : 1.0;
-        pct = Math.max(0.0, Math.min(pct, 1.0));
-        return val * pct;
     }
 
     // ------------------------------------------------------------------
@@ -374,8 +369,8 @@ public class NpcController {
         pct = Math.max(0.0, Math.min(pct, 1.0));
         double baseAtk = getStat(stats, "attack");
         npc.setAttack(baseAtk * pct);
-        double oldMax = scaleByWeight(oldWeight, adultW, getStat(stats, "hp"));
-        double newMax = scaleByWeight(npc.getWeight(), adultW, getStat(stats, "hp"));
+        double oldMax = CombatUtils.scaleByWeight(oldWeight, adultW, getStat(stats, "hp"));
+        double newMax = CombatUtils.scaleByWeight(npc.getWeight(), adultW, getStat(stats, "hp"));
         double ratio = oldMax <= 0 ? 1.0 : npc.getHp() / oldMax;
         npc.setMaxHp(newMax);
         npc.setHp(newMax * ratio);
@@ -440,7 +435,7 @@ public class NpcController {
             double weight = 0.0;
             Object wObj = stats.get("adult_weight");
             if (wObj instanceof Number n) weight = n.doubleValue();
-            double hp = scaleByWeight(weight, getStat(stats, "adult_weight"), getStat(stats, "hp"));
+            double hp = CombatUtils.scaleByWeight(weight, getStat(stats, "adult_weight"), getStat(stats, "hp"));
             NPCAnimal npc = new NPCAnimal();
             npc.setId(allocateNpcId());
             npc.setName(name);
@@ -501,12 +496,6 @@ public class NpcController {
         return false;
     }
 
-    private double statFromWeight(double weight, double adultWeight, double hatchVal, double adultVal) {
-        double pct = adultWeight > 0 ? weight / adultWeight : 1.0;
-        pct = Math.max(0.0, Math.min(1.0, pct));
-        return hatchVal + pct * (adultVal - hatchVal);
-    }
-
     private double npcEffectiveAttack(NPCAnimal npc, Object stats, int tx, int ty) {
         double adultWeight = 0.0;
         double baseAtk = 0.0;
@@ -528,7 +517,7 @@ public class NpcController {
                 }
             }
         }
-        double atk = scaleByWeight(npc.getWeight(), adultWeight, baseAtk);
+        double atk = CombatUtils.scaleByWeight(npc.getWeight(), adultWeight, baseAtk);
         if (abil != null && abil.contains("pack_hunter") && npcHasPackmate(npc, tx, ty)) {
             atk *= 3;
         }
@@ -545,7 +534,7 @@ public class NpcController {
         double hatchSpeed = getStat(stats, "hatchling_speed");
         double adultSpeed = getStat(stats, "adult_speed");
         if (hatchSpeed > 0 || adultSpeed > 0) {
-            speed = statFromWeight(npc.getWeight(), adultW, hatchSpeed, adultSpeed);
+            speed = CombatUtils.statFromWeight(npc.getWeight(), adultW, hatchSpeed, adultSpeed);
         } else {
             speed = adultSpeed;
         }
@@ -556,70 +545,6 @@ public class NpcController {
             speed *= 0.5;
         }
         return Math.max(speed, 0.1);
-    }
-
-    private double effectiveArmor(Object targetStats, Object attackerStats) {
-        List<String> abil = abilities(targetStats);
-        double base = 0.0;
-        if (abil.contains("heavy_armor")) base = 40.0;
-        else if (abil.contains("light_armor")) base = 20.0;
-        if (abilities(attackerStats).contains("bone_break")) base *= 0.5;
-        return Math.max(0.0, base);
-    }
-
-    private double damageAfterArmor(double dmg, Object attackerStats, Object targetStats) {
-        double eff = effectiveArmor(targetStats, attackerStats);
-        return dmg * Math.max(0.0, 1.0 - eff / 100.0);
-    }
-
-    private boolean applyDamage(double damage, NPCAnimal npc, Object stats) {
-        double maxHp = scaleByWeight(npc.getWeight(), getStat(stats, "adult_weight"), getStat(stats, "hp"));
-        npc.setMaxHp(maxHp);
-        if (npc.getHp() > maxHp) npc.setHp(maxHp);
-        npc.setHp(Math.max(0.0, npc.getHp() - damage));
-        boolean died = npc.getHp() <= 0;
-        if (died) { npc.setAlive(false); npc.setAge(-1); npc.setSpeed(0.0); }
-        return died;
-    }
-
-    private boolean npcDamageAdvantage(double hunterAtk, double hunterHp, Object hunterStats,
-                                         double targetAtk, double targetHp, Object targetStats) {
-        double dmgToTarget = damageAfterArmor(hunterAtk, hunterStats, targetStats);
-        double dmgToHunter = damageAfterArmor(targetAtk, targetStats, hunterStats);
-
-        int targetBleed = 0;
-        int hunterBleed = 0;
-        if (dmgToTarget > 0 && abilities(hunterStats).contains("bleed")) {
-            if (abilities(targetStats).contains("light_armor") || abilities(targetStats).contains("heavy_armor"))
-                targetBleed = 2; else targetBleed = 5;
-        }
-        if (dmgToHunter > 0 && abilities(targetStats).contains("bleed")) {
-            if (abilities(hunterStats).contains("light_armor") || abilities(hunterStats).contains("heavy_armor"))
-                hunterBleed = 2; else hunterBleed = 5;
-        }
-
-        boolean bleed = targetBleed > 0 || hunterBleed > 0;
-        double bleedDmgTarget = bleed ? targetBleed * 0.05 * targetHp : 0.0;
-        double bleedDmgHunter = bleed ? hunterBleed * 0.05 * hunterHp : 0.0;
-
-        double regenDmgTarget = 0.0;
-        double regenDmgHunter = 0.0;
-        if (bleed) {
-            double regenTarget = getStat(targetStats, "health_regen");
-            double regenHunter = getStat(hunterStats, "health_regen");
-            int regenTurnsTarget = Math.max(0, 5 - targetBleed);
-            int regenTurnsHunter = Math.max(0, 5 - hunterBleed);
-            regenDmgTarget = -regenTarget / 100.0 * targetHp * regenTurnsTarget;
-            regenDmgHunter = -regenHunter / 100.0 * hunterHp * regenTurnsHunter;
-        }
-
-        double totalTarget = Math.max(0.0, dmgToTarget + bleedDmgTarget + regenDmgTarget);
-        double totalHunter = Math.max(0.0, dmgToHunter + bleedDmgHunter + regenDmgHunter);
-
-        double pctTarget = totalTarget / Math.max(targetHp, 0.1);
-        double pctHunter = totalHunter / Math.max(hunterHp, 0.1);
-
-        return pctHunter < pctTarget;
     }
 
     private double calculateCatchChance(double relSpeed) {
@@ -908,7 +833,7 @@ public class NpcController {
         Random r = new Random();
         double npcSpeed = npcEffectiveSpeed(npc, stats);
         double npcAtk = npcEffectiveAttack(npc, stats, tx, ty);
-        double npcHp = scaleByWeight(npc.getWeight(), adultWeight, getStat(stats, "hp"));
+        double npcHp = CombatUtils.scaleByWeight(npc.getWeight(), adultWeight, getStat(stats, "hp"));
 
         List<PotentialTarget> options = new ArrayList<>();
         for (NPCAnimal other : animals) {
@@ -923,8 +848,8 @@ public class NpcController {
                 continue;
             }
             double oAtk = npcEffectiveAttack(other, oStats, tx, ty);
-            double oHp = scaleByWeight(other.getWeight(), getStat(oStats, "adult_weight"), getStat(oStats, "hp"));
-            if (!npcDamageAdvantage(npcAtk, npcHp, stats, oAtk, oHp, oStats)) {
+            double oHp = CombatUtils.scaleByWeight(other.getWeight(), getStat(oStats, "adult_weight"), getStat(oStats, "hp"));
+            if (!CombatUtils.npcDamageAdvantage(npcAtk, npcHp, stats, oAtk, oHp, oStats)) {
                 continue;
             }
             double oSpeed = npcEffectiveSpeed(other, oStats);
@@ -948,8 +873,8 @@ public class NpcController {
         }
 
         double beforeHunter = npc.getHp();
-        double dmgHunter = damageAfterArmor(pt.attack, pt.stats, stats);
-        applyDamage(dmgHunter, npc, stats);
+        double dmgHunter = CombatUtils.damageAfterArmor(pt.attack, pt.stats, stats);
+        CombatUtils.applyDamage(dmgHunter, npc, stats);
         double dealtHunter = beforeHunter - npc.getHp();
         if (dealtHunter > 0 && pt.npc.getAbilities().contains("bleed") && npc.isAlive()) {
             int bleedTurns = (npc.getAbilities().contains("light_armor") || npc.getAbilities().contains("heavy_armor")) ? 2 : 5;
@@ -960,8 +885,8 @@ public class NpcController {
         }
 
         double beforeTarget = pt.npc.getHp();
-        double dmgTarget = damageAfterArmor(npcAtk, stats, pt.stats);
-        boolean killed = applyDamage(dmgTarget, pt.npc, pt.stats);
+        double dmgTarget = CombatUtils.damageAfterArmor(npcAtk, stats, pt.stats);
+        boolean killed = CombatUtils.applyDamage(dmgTarget, pt.npc, pt.stats);
         double dealtTarget = beforeTarget - pt.npc.getHp();
         if (dealtTarget > 0 && npc.getAbilities().contains("bleed") && pt.npc.isAlive()) {
             int bleedTurns = (pt.npc.getAbilities().contains("light_armor") || pt.npc.getAbilities().contains("heavy_armor")) ? 2 : 5;
