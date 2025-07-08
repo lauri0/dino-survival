@@ -77,7 +77,7 @@ public final class Settings {
         Map<String, String> images = Map.ofEntries(
             Map.entry("desert", "desert.png"),
             Map.entry("desert_flooded", "desert_flooded.png"),
-            Map.entry("toxic_badlands", "badlands.png"),
+            Map.entry("toxic_badlands", "toxic_badlands.png"),
             Map.entry("plains", "plains.png"),
             Map.entry("plains_flooded", "plains_flooded.png"),
             Map.entry("woodlands", "woodlands.png"),
@@ -159,7 +159,7 @@ public final class Settings {
         Map<String, String> images = Map.ofEntries(
             Map.entry("desert", "desert.png"),
             Map.entry("desert_flooded", "desert_flooded.png"),
-            Map.entry("toxic_badlands", "badlands.png"),
+            Map.entry("toxic_badlands", "toxic_badlands.png"),
             Map.entry("plains", "plains.png"),
             Map.entry("plains_flooded", "plains_flooded.png"),
             Map.entry("woodlands", "woodlands.png"),
