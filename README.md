@@ -38,4 +38,4 @@ The stats panel also includes **Player Stats** alongside **Info** and
 **Dinosaur Stats**. Player Stats show your cumulative games played, win rate,
 successful hunts and total turns across every dinosaur you've played.
 
-Each dinosaur's base attributes are defined in `dinosurvival/dino_stats_morrison.yaml`.
+Each dinosaur's base attributes are defined in `conf/dino_stats_morrison.yaml` and `conf/dino_stats_hell_creek.yaml`.
