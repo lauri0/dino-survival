@@ -160,6 +160,7 @@ public class Game {
         dst.setInitialSpawnMultiplier(src.getInitialSpawnMultiplier());
         dst.setDiet(new ArrayList<>(src.getDiet()));
         dst.setAbilities(new ArrayList<>(src.getAbilities()));
+        dst.setPreferredBiomes(new ArrayList<>(src.getPreferredBiomes()));
         return dst;
     }
 
