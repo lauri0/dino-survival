@@ -12,17 +12,25 @@ A simple text-based dinosaur survival game inspired by the BBC "Big Al" game. Th
 
 ## Requirements
 
-The game requires Python 3.8+. If the image scaling doesn't work and the game opens with a huge dinosaur image covering the window then you will need to install pillow: pip install pillow.
+The game requires maven and Java 17+.
+
+## Building the Game
+
+```bash
+mvn -f java/pom.xml package
+```
 
 ## Running the Game
 
+The jar produced by the build does not bundle its dependencies. Run the
+application with Maven so that they are included on the classpath:
+
 ```bash
-python dino_game.py
+mvn -f java/pom.xml exec:java -Dexec.mainClass=com.dinosurvival.ui.Main
 ```
 
-Running the script opens a full-screen menu with buttons for the available
-geological settings. After selecting **Morrison** or **Hell Creek**, another
-menu appears allowing you to pick a dinosaur. Once a dinosaur is chosen the
+Running the game opens a menu with buttons for the available
+geological settings and another menu allowing you to pick a dinosaur. Once a dinosaur is chosen the
 window clears and a new interface appears. Use the direction buttons to move
 between squares or stay put and watch the text box at the bottom for game
 updates. The **Quit** button in the stats panel exits the program.
@@ -31,23 +39,3 @@ The stats panel also includes **Player Stats** alongside **Info** and
 successful hunts and total turns across every dinosaur you've played.
 
 Each dinosaur's base attributes are defined in `dinosurvival/dino_stats_morrison.yaml`.
-
-
-## Java Version
-
-A simple Java implementation is included under the `java` directory. It uses Maven for builds.
-
-### Building
-
-```bash
-mvn -f java/pom.xml package
-```
-
-### Running
-
-The jar produced by the build does not bundle its dependencies. Run the
-application with Maven so that they are included on the classpath:
-
-```bash
-mvn -f java/pom.xml exec:java -Dexec.mainClass=com.dinosurvival.ui.Main
-```
