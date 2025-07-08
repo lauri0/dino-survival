@@ -20,6 +20,7 @@ public class DeadMovementTest {
         Field mapField = Game.class.getDeclaredField("map");
         mapField.setAccessible(true);
         mapField.set(game, map);
+        game.getNpcController().setMap(map);
 
         Field xField = Game.class.getDeclaredField("x");
         Field yField = Game.class.getDeclaredField("y");
@@ -42,9 +43,7 @@ public class DeadMovementTest {
         npc.setAlive(false);
         map.addAnimal(0, 0, npc);
 
-        Method m = Game.class.getDeclaredMethod("moveNpcs");
-        m.setAccessible(true);
-        m.invoke(game);
+        game.getNpcController().moveNpcs();
 
         Assertions.assertTrue(map.getAnimals(0, 0).contains(npc));
         Assertions.assertEquals("None", npc.getNextMove());

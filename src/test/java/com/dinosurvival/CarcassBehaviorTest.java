@@ -60,9 +60,7 @@ public class CarcassBehaviorTest {
         npc.setEnergy(1.0);
         npc.setWeight(10.0);
         map.addAnimal(0, 0, npc);
-        Method update = Game.class.getDeclaredMethod("updateNpcs");
-        update.setAccessible(true);
-        update.invoke(g);
+        g.getNpcController().updateNpcs();
         Assertions.assertFalse(npc.isAlive());
         Assertions.assertEquals(0.0, npc.getEnergy(), 1e-9);
         double before = npc.getWeight();
@@ -131,9 +129,7 @@ public class CarcassBehaviorTest {
         carcass.setAlive(false);
         carcass.setWeight(1.0);
         map.addAnimal(g.getPlayerX(), g.getPlayerY(), carcass);
-        Method update = Game.class.getDeclaredMethod("updateNpcs");
-        update.setAccessible(true);
-        update.invoke(g);
+        g.getNpcController().updateNpcs();
         Assertions.assertEquals(1.0, carcass.getWeight(), 1e-9);
         g.rest();
         Assertions.assertFalse(map.getAnimals(g.getPlayerX(), g.getPlayerY()).contains(carcass));
