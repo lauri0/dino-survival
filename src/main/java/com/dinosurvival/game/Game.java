@@ -274,7 +274,8 @@ public class Game {
     void updateNpcs() {
         npcController.setMap(map);
         npcController.setWeather(weather);
-        npcController.updateNpcs();
+        java.util.List<String> msgs = npcController.updateNpcs(x, y);
+        turnMessages.addAll(msgs);
     }
 
     /**
@@ -692,17 +693,25 @@ public class Game {
             double energyGain = 1000 * meat / Math.max(playerManager.getPlayer().getWeight(), 0.1);
             double need = 100.0 - playerManager.getPlayer().getEnergy();
             double actual = Math.min(energyGain, need);
-            playerManager.getPlayer().setEnergy(Math.min(100.0, playerManager.getPlayer().getEnergy() + actual));
+            double beforeEnergy = playerManager.getPlayer().getEnergy();
+            playerManager.getPlayer().setEnergy(Math.min(100.0, beforeEnergy + actual));
             double used = actual * playerManager.getPlayer().getWeight() / 1000.0;
             double leftover = Math.max(0.0, meat - used);
             double[] growth = playerManager.applyGrowth(leftover);
-            target.setWeight(Math.max(0.0, target.getWeight() - (used + growth[0])));
+            double eaten = used + growth[0];
+            target.setWeight(Math.max(0.0, target.getWeight() - eaten));
             if (target.getWeight() <= 0) {
                 map.removeAnimal(x, y, target);
             }
             if (wasAlive && hunt != null) {
                 hunt[1]++;
             }
+            if (wasAlive) {
+                turnMessages.add("You kill the " + npcLabel(target) + ".");
+            }
+            turnMessages.add("You eat " + String.format(java.util.Locale.US, "%.1f", eaten)
+                    + "kg and regain " + String.format(java.util.Locale.US, "%.1f", playerManager.getPlayer().getEnergy() - beforeEnergy)
+                    + " energy gaining " + String.format(java.util.Locale.US, "%.1f", growth[0]) + "kg.");
         }
 
         applyTurnCosts(false, 1.0);
@@ -729,10 +738,14 @@ public class Game {
         double energyGain = 1000 * weight / Math.max(playerManager.getPlayer().getWeight(), 0.1);
         double need = 100.0 - playerManager.getPlayer().getEnergy();
         double actual = Math.min(energyGain, need);
-        playerManager.getPlayer().setEnergy(Math.min(100.0, playerManager.getPlayer().getEnergy() + actual));
+        double beforeEnergy = playerManager.getPlayer().getEnergy();
+        playerManager.getPlayer().setEnergy(Math.min(100.0, beforeEnergy + actual));
         double used = actual * playerManager.getPlayer().getWeight() / 1000.0;
         double leftover = Math.max(0.0, weight - used);
-        playerManager.applyGrowth(leftover);
+        double[] growth = playerManager.applyGrowth(leftover);
+        turnMessages.add("You eat " + String.format(java.util.Locale.US, "%.1f", weight)
+                + "kg of eggs and regain " + String.format(java.util.Locale.US, "%.1f", playerManager.getPlayer().getEnergy() - beforeEnergy)
+                + " energy gaining " + String.format(java.util.Locale.US, "%.1f", growth[0]) + "kg.");
         applyTurnCosts(false, 1.0);
         checkVictory();
         MapUtils.revealAdjacentMountains(map, x, y);
@@ -990,8 +1003,9 @@ public class Game {
     }
 
     private boolean npcTryHunt(int tx, int ty, NPCAnimal npc, Object stats,
-                               List<NPCAnimal> animals, double adultWeight) {
-        return npcController.npcTryHunt(tx, ty, npc, stats, animals, adultWeight);
+                               List<NPCAnimal> animals, double adultWeight,
+                               java.util.List<String> messages) {
+        return npcController.npcTryHunt(tx, ty, npc, stats, animals, adultWeight, x, y, messages);
     }
 
     private void npcChooseMove(int x, int y, NPCAnimal npc, Object stats) {
