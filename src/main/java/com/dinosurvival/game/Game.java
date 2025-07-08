@@ -3,6 +3,7 @@ package com.dinosurvival.game;
 import com.dinosurvival.model.DinosaurStats;
 import com.dinosurvival.model.NPCAnimal;
 import com.dinosurvival.model.Plant;
+import com.dinosurvival.game.PlayerManager;
 
 import java.util.Iterator;
 import com.dinosurvival.util.StatsLoader;
@@ -20,7 +21,7 @@ import java.util.Random;
  */
 public class Game {
     private Map map;
-    private DinosaurStats player;
+    private PlayerManager playerManager = new PlayerManager();
     private int x;
     private int y;
     private Weather weather;
@@ -105,9 +106,9 @@ public class Game {
                     applyDinoOverrides(combined, overrides);
                 }
             }
-            initialisePlayer(combined);
+            playerManager.initialisePlayer(combined);
         } else {
-            player = new DinosaurStats();
+            playerManager.setPlayer(new DinosaurStats());
         }
 
         chooseStartingLocation();
@@ -188,30 +189,7 @@ public class Game {
         return Settings.MORRISON;
     }
 
-    /**
-     * Initialise the player state using the provided base statistics.
-     */
-    private void initialisePlayer(DinosaurStats base) {
-        player = cloneStats(base);
-        player.setWeight(player.getHatchlingWeight());
-        double pct = player.getAdultWeight() > 0
-                ? player.getWeight() / player.getAdultWeight() : 1.0;
-        pct = Math.max(0.0, Math.min(1.0, pct));
-        player.setAttack(player.getAdultAttack() * pct);
-        player.setMaxHp(player.getAdultHp() * pct);
-        player.setHp(player.getMaxHp());
-        // When starting the game the player's weight equals the hatchling
-        // weight so the speed should exactly match the hatchling value.
-        // Using statFromWeight here resulted in a slightly lower value due to
-        // floating point rounding so set it explicitly instead.
-        player.setSpeed(player.getHatchlingSpeed());
-    }
-
-    /** Linear interpolation between hatchling and adult values based on weight. */
-    private double statFromWeight(double weight, double adultWeight,
-                                  double hatchVal, double adultVal) {
-        return CombatUtils.statFromWeight(weight, adultWeight, hatchVal, adultVal);
-    }
+    // Player management is handled by PlayerManager
 
     /** Choose a starting location within two tiles of a lake if possible. */
     private void chooseStartingLocation() {
@@ -340,18 +318,18 @@ public class Game {
                 return true;
             }
         }
-        if (this.x == tx && this.y == ty && player.getName() != null && player.getName().equals(npc.getName())) {
+        if (this.x == tx && this.y == ty && playerManager.getPlayer().getName() != null && playerManager.getPlayer().getName().equals(npc.getName())) {
             return true;
         }
         return false;
     }
 
     private boolean playerPackHunterActive() {
-        if (!player.getAbilities().contains("pack_hunter")) {
+        if (!playerManager.getPlayer().getAbilities().contains("pack_hunter")) {
             return false;
         }
         for (NPCAnimal npc : map.getAnimals(x, y)) {
-            if (npc.isAlive() && player.getName().equals(npc.getName())) {
+            if (npc.isAlive() && playerManager.getPlayer().getName().equals(npc.getName())) {
                 return true;
             }
         }
@@ -359,13 +337,13 @@ public class Game {
     }
 
     public double playerEffectiveAttack() {
-        double atk = player.getAttack();
+        double atk = playerManager.getPlayer().getAttack();
         if (playerPackHunterActive()) {
             atk *= 3;
         }
         double hpPct = 1.0;
-        if (player.getMaxHp() > 0) {
-            hpPct = Math.max(0.0, Math.min(player.getHp() / player.getMaxHp(), 1.0));
+        if (playerManager.getPlayer().getMaxHp() > 0) {
+            hpPct = Math.max(0.0, Math.min(playerManager.getPlayer().getHp() / playerManager.getPlayer().getMaxHp(), 1.0));
         }
         return atk * hpPct;
     }
@@ -379,7 +357,7 @@ public class Game {
     }
 
     /**
-     * Determine if an aggressive NPC immediately attacks the player.
+     * Determine if an aggressive NPC immediately attacks the playerManager.getPlayer().
      */
     private String aggressiveAttackCheck() {
         double playerA = Math.max(playerEffectiveAttack(), 0.1);
@@ -411,7 +389,7 @@ public class Game {
             double targetA = npcEffectiveAttack(npc, stats, x, y);
             double rel = targetA / playerA;
             if (rel > 2.0 && r.nextDouble() < 0.5) {
-                player.setHp(0);
+                playerManager.getPlayer().setHp(0);
                 return "A fierce " + npc.getName() + " (" + npc.getId() + ") attacks and kills you! Game Over.";
             }
         }
@@ -469,7 +447,7 @@ public class Game {
     }
 
     private String playerLabel() {
-        return player.getName() + " (0)";
+        return playerManager.getPlayer().getName() + " (0)";
     }
 
     private void applyBleedAndRegen(DinosaurStats dino, double regen,
@@ -494,28 +472,28 @@ public class Game {
      * adult weight.
      */
     private double baseEnergyDrain() {
-        double halfAdult = player.getAdultWeight() / 2.0;
-        return player.getWeight() <= halfAdult
-                ? player.getHatchlingEnergyDrain()
-                : player.getAdultEnergyDrain();
+        double halfAdult = playerManager.getPlayer().getAdultWeight() / 2.0;
+        return playerManager.getPlayer().getWeight() <= halfAdult
+                ? playerManager.getPlayer().getHatchlingEnergyDrain()
+                : playerManager.getPlayer().getAdultEnergyDrain();
     }
 
     void applyTurnCosts(boolean moved, double multiplier) {
         double drain = baseEnergyDrain();
         if (moved) {
             drain *= WALKING_ENERGY_DRAIN_MULTIPLIER;
-            if (player.getBrokenBone() > 0) {
+            if (playerManager.getPlayer().getBrokenBone() > 0) {
                 drain *= 2;
             }
         }
         drain *= multiplier;
         drain *= weather.getPlayerEnergyMult();
-        player.setEnergy(Math.max(0.0, player.getEnergy() - drain));
-        if (player.isExhausted()) {
-            player.setHp(0.0);
+        playerManager.getPlayer().setEnergy(Math.max(0.0, playerManager.getPlayer().getEnergy() - drain));
+        if (playerManager.getPlayer().isExhausted()) {
+            playerManager.getPlayer().setHp(0.0);
             turnMessages.add("You have collapsed from exhaustion! Game Over.");
         }
-        applyBleedAndRegen(player, player.getHealthRegen(), moved, !player.isExhausted());
+        applyBleedAndRegen(playerManager.getPlayer(), playerManager.getPlayer().getHealthRegen(), moved, !playerManager.getPlayer().isExhausted());
     }
 
     void applyTurnCosts(boolean moved) {
@@ -533,29 +511,29 @@ public class Game {
         }
         weatherTurns++;
 
-        if (player.getAbilities().contains("ambush")) {
+        if (playerManager.getPlayer().getAbilities().contains("ambush")) {
             if ("stay".equals(lastAction)) {
-                player.setAmbushStreak(Math.min(player.getAmbushStreak() + 1, 3));
+                playerManager.getPlayer().setAmbushStreak(Math.min(playerManager.getPlayer().getAmbushStreak() + 1, 3));
             } else {
-                player.setAmbushStreak(0);
+                playerManager.getPlayer().setAmbushStreak(0);
             }
         }
 
-        map.updateVolcanicActivity(x, y, player);
-        map.updateFlood(x, y, player, weather.getFloodChance());
+        map.updateVolcanicActivity(x, y, playerManager.getPlayer());
+        map.updateFlood(x, y, playerManager.getPlayer(), weather.getFloodChance());
         map.updateForestFire();
         updateEggs();
         map.growPlants(StatsLoader.getPlantStats());
         npcController.spawnCritters(false);
         map.refreshBurrows();
-        if (player.getTurnsUntilLayEggs() > 0) {
-            player.setTurnsUntilLayEggs(player.getTurnsUntilLayEggs() - 1);
+        if (playerManager.getPlayer().getTurnsUntilLayEggs() > 0) {
+            playerManager.getPlayer().setTurnsUntilLayEggs(playerManager.getPlayer().getTurnsUntilLayEggs() - 1);
         }
 
-        player.setHydration(Math.max(0.0,
-                player.getHydration() - player.getHydrationDrain() * weather.getPlayerHydrationMult()));
-        if (player.isDehydrated()) {
-            player.setHp(0.0);
+        playerManager.getPlayer().setHydration(Math.max(0.0,
+                playerManager.getPlayer().getHydration() - playerManager.getPlayer().getHydrationDrain() * weather.getPlayerHydrationMult()));
+        if (playerManager.getPlayer().isDehydrated()) {
+            playerManager.getPlayer().setHp(0.0);
             turnMessages.add("You have perished from dehydration! Game Over.");
         }
     }
@@ -601,7 +579,7 @@ public class Game {
     public void drink() {
         startTurn();
         if (map.terrainAt(x, y) == Terrain.LAKE) {
-            player.setHydration(100.0);
+            playerManager.getPlayer().setHydration(100.0);
         }
         applyTurnCosts(false, 1.0);
         checkVictory();
@@ -662,23 +640,23 @@ public class Game {
         }
 
         if (target.isAlive()) {
-            DinosaurStats playerBase = StatsLoader.getDinoStats().get(player.getName());
+            DinosaurStats playerBase = StatsLoader.getDinoStats().get(playerManager.getPlayer().getName());
             if (playerBase == null) playerBase = new DinosaurStats();
             double dmg = damageAfterArmor(targetAtk, stats, playerBase);
-            double beforePlayer = player.getHp();
-            boolean died = applyDamage(dmg, player, playerBase);
-            double playerDamage = beforePlayer - player.getHp();
+            double beforePlayer = playerManager.getPlayer().getHp();
+            boolean died = applyDamage(dmg, playerManager.getPlayer(), playerBase);
+            double playerDamage = beforePlayer - playerManager.getPlayer().getHp();
             if (playerDamage > 0) {
                 turnMessages.add(npcLabel(target) + " deals " +
                         String.format(java.util.Locale.US, "%.0f", playerDamage) +
                         " damage to " + playerLabel() + ".");
             }
-            if (dmg > 0 && target.getAbilities().contains("bleed") && player.getHp() > 0) {
-                int bleed = (player.getAbilities().contains("light_armor") || player.getAbilities().contains("heavy_armor")) ? 2 : 5;
-                player.setBleeding(bleed);
+            if (dmg > 0 && target.getAbilities().contains("bleed") && playerManager.getPlayer().getHp() > 0) {
+                int bleed = (playerManager.getPlayer().getAbilities().contains("light_armor") || playerManager.getPlayer().getAbilities().contains("heavy_armor")) ? 2 : 5;
+                playerManager.getPlayer().setBleeding(bleed);
             }
-            if (dmg > 0 && target.getAbilities().contains("bone_break") && target.getWeight() >= player.getWeight()/3 && player.getHp() > 0) {
-                player.setBrokenBone(10);
+            if (dmg > 0 && target.getAbilities().contains("bone_break") && target.getWeight() >= playerManager.getPlayer().getWeight()/3 && playerManager.getPlayer().getHp() > 0) {
+                playerManager.getPlayer().setBrokenBone(10);
             }
             if (died) {
                 MapUtils.revealAdjacentMountains(map, x, y);
@@ -689,7 +667,7 @@ public class Game {
         }
 
         double dmgToTarget = damageAfterArmor(playerAtk,
-                StatsLoader.getDinoStats().get(player.getName()), stats);
+                StatsLoader.getDinoStats().get(playerManager.getPlayer().getName()), stats);
         double beforeTarget = target.getHp();
         boolean targetDied = applyDamage(dmgToTarget, target, stats);
         double dealt = beforeTarget - target.getHp();
@@ -698,23 +676,23 @@ public class Game {
                     String.format(java.util.Locale.US, "%.0f", dealt) +
                     " damage to " + npcLabel(target) + ".");
         }
-        if (dmgToTarget > 0 && player.getAbilities().contains("bleed") && target.getHp() > 0 && target.isAlive()) {
+        if (dmgToTarget > 0 && playerManager.getPlayer().getAbilities().contains("bleed") && target.getHp() > 0 && target.isAlive()) {
             int bleed = (target.getAbilities().contains("light_armor") || target.getAbilities().contains("heavy_armor")) ? 2 : 5;
             target.setBleeding(bleed);
         }
-        if (dmgToTarget > 0 && player.getAbilities().contains("bone_break") && player.getWeight() >= target.getWeight()/3 && target.getHp() > 0) {
+        if (dmgToTarget > 0 && playerManager.getPlayer().getAbilities().contains("bone_break") && playerManager.getPlayer().getWeight() >= target.getWeight()/3 && target.getHp() > 0) {
             target.setBrokenBone(10);
         }
 
         if (!target.isAlive()) {
             double meat = target.getWeight();
-            double energyGain = 1000 * meat / Math.max(player.getWeight(), 0.1);
-            double need = 100.0 - player.getEnergy();
+            double energyGain = 1000 * meat / Math.max(playerManager.getPlayer().getWeight(), 0.1);
+            double need = 100.0 - playerManager.getPlayer().getEnergy();
             double actual = Math.min(energyGain, need);
-            player.setEnergy(Math.min(100.0, player.getEnergy() + actual));
-            double used = actual * player.getWeight() / 1000.0;
+            playerManager.getPlayer().setEnergy(Math.min(100.0, playerManager.getPlayer().getEnergy() + actual));
+            double used = actual * playerManager.getPlayer().getWeight() / 1000.0;
             double leftover = Math.max(0.0, meat - used);
-            double[] growth = applyGrowth(leftover);
+            double[] growth = playerManager.applyGrowth(leftover);
             target.setWeight(Math.max(0.0, target.getWeight() - (used + growth[0])));
             if (target.getWeight() <= 0) {
                 map.removeAnimal(x, y, target);
@@ -745,13 +723,13 @@ public class Game {
         }
         EggCluster egg = map.takeEggs(x, y);
         double weight = egg.getWeight();
-        double energyGain = 1000 * weight / Math.max(player.getWeight(), 0.1);
-        double need = 100.0 - player.getEnergy();
+        double energyGain = 1000 * weight / Math.max(playerManager.getPlayer().getWeight(), 0.1);
+        double need = 100.0 - playerManager.getPlayer().getEnergy();
         double actual = Math.min(energyGain, need);
-        player.setEnergy(Math.min(100.0, player.getEnergy() + actual));
-        double used = actual * player.getWeight() / 1000.0;
+        playerManager.getPlayer().setEnergy(Math.min(100.0, playerManager.getPlayer().getEnergy() + actual));
+        double used = actual * playerManager.getPlayer().getWeight() / 1000.0;
         double leftover = Math.max(0.0, weight - used);
-        applyGrowth(leftover);
+        playerManager.applyGrowth(leftover);
         applyTurnCosts(false, 1.0);
         checkVictory();
         MapUtils.revealAdjacentMountains(map, x, y);
@@ -764,7 +742,7 @@ public class Game {
         startTurn();
         Burrow b = map.getBurrow(x, y);
         if (b != null && b.isFull()) {
-            double gain = player.getAbilities().contains("digger") ? 100.0 : 25.0;
+            double gain = playerManager.getPlayer().getAbilities().contains("digger") ? 100.0 : 25.0;
             b.setProgress(Math.min(100.0, b.getProgress() + gain));
             if (b.getProgress() >= 100.0) {
                 b.setFull(false);
@@ -808,7 +786,7 @@ public class Game {
     /** Lay eggs if conditions allow. */
     public void layEggs() {
         startTurn();
-        if (!canPlayerLayEggs()) {
+        if (!playerManager.canPlayerLayEggs(map, x, y)) {
             applyTurnCosts(false, 1.0);
             MapUtils.revealAdjacentMountains(map, x, y);
             checkVictory();
@@ -816,20 +794,20 @@ public class Game {
             endTurn();
             return;
         }
-        player.setEnergy(player.getEnergy() * 0.7);
-        Object stats = StatsLoader.getDinoStats().get(player.getName());
+        playerManager.getPlayer().setEnergy(playerManager.getPlayer().getEnergy() * 0.7);
+        Object stats = StatsLoader.getDinoStats().get(playerManager.getPlayer().getName());
         int numEggs = (int) getStat(stats, "num_eggs");
         double hatchW = getStat(stats, "hatchling_weight");
         if (hatchW <= 0) {
             double adultW = getStat(stats, "adult_weight");
             hatchW = Math.max(1.0, adultW * 0.001);
         }
-        EggCluster ec = new EggCluster(player.getName(), numEggs,
+        EggCluster ec = new EggCluster(playerManager.getPlayer().getName(), numEggs,
                 hatchW * numEggs, 5, true);
         map.getEggs(x, y).add(ec);
-        player.setTurnsUntilLayEggs(10);
+        playerManager.getPlayer().setTurnsUntilLayEggs(10);
         int interval = (int) getStat(stats, "egg_laying_interval");
-        player.setTurnsUntilLayEggs(interval);
+        playerManager.getPlayer().setTurnsUntilLayEggs(interval);
         applyTurnCosts(false, 1.0);
         checkVictory();
         MapUtils.revealAdjacentMountains(map, x, y);
@@ -847,7 +825,7 @@ public class Game {
         }
         if (partner != null) {
             cell.remove(partner);
-            player.setMated(true);
+            playerManager.getPlayer().setMated(true);
         }
         applyTurnCosts(false, 1.0);
         checkVictory();
@@ -873,7 +851,7 @@ public class Game {
         Random r = new Random();
         boolean killed = false;
         if (!stronger.isEmpty()) {
-            player.setHp(0.0);
+            playerManager.getPlayer().setHp(0.0);
             killed = true;
         } else {
             java.util.Map<String,int[]> dirs = java.util.Map.of(
@@ -897,7 +875,7 @@ public class Game {
         }
         applyTurnCosts(false, 2.0);
         if (killed) {
-            player.setHp(0.0);
+            playerManager.getPlayer().setHp(0.0);
         }
         checkVictory();
         MapUtils.revealAdjacentMountains(map, x, y);
@@ -1034,45 +1012,9 @@ public class Game {
     // Player growth and combat helpers
     // ------------------------------------------------------------------
 
-    private double maxGrowthGain() {
-        double weight = player.getWeight();
-        double adult = player.getAdultWeight();
-        if (weight >= adult) return 0.0;
-        double maxWeight = adult * 1.05;
-        double r = player.getGrowthRate();
-        if (r == 0.0) r = 0.35;
-        double gain = r * weight * (1 - weight / maxWeight);
-        return Math.min(gain, adult - weight);
-    }
+    // PlayerManager handles growth calculations
 
-    private double[] applyGrowth(double available) {
-        double maxGain = maxGrowthGain();
-        double weightGain = Math.min(available, maxGain);
-        double oldWeight = player.getWeight();
-        player.setWeight(Math.min(player.getWeight() + weightGain, player.getAdultWeight()));
-        if (player.getAdultWeight() > 0) {
-            double pct = player.getWeight() / player.getAdultWeight();
-            pct = Math.max(0.0, Math.min(pct, 1.0));
-            player.setAttack(player.getAdultAttack() * pct);
-            double oldMax = statFromWeight(oldWeight, player.getAdultWeight(), player.getHatchlingHp(), player.getAdultHp());
-            double newMax = statFromWeight(player.getWeight(), player.getAdultWeight(), player.getHatchlingHp(), player.getAdultHp());
-            double ratio = oldMax <= 0 ? 1.0 : player.getHp() / oldMax;
-            player.setMaxHp(newMax);
-            player.setHp(newMax * ratio);
-            player.setSpeed(statFromWeight(player.getWeight(), player.getAdultWeight(),
-                    player.getHatchlingSpeed(), player.getAdultSpeed()));
-        }
-        return new double[]{weightGain, maxGain};
-    }
-
-    private boolean canPlayerLayEggs() {
-        List<NPCAnimal> animals = map.getAnimals(x, y);
-        return player.getWeight() >= player.getAdultWeight()
-                && player.getEnergy() >= 80
-                && player.getHp() >= player.getMaxHp() * 0.8
-                && player.getTurnsUntilLayEggs() == 0
-                && animals.size() < 4;
-    }
+    // Growth helpers provided by PlayerManager
 
     private List<String> abilities(Object stats) {
         if (stats instanceof DinosaurStats ds) {
@@ -1131,11 +1073,11 @@ public class Game {
         if (terrain.equals("lava") || terrain.equals("volcano_erupting") ||
                 terrain.equals("forest_fire") ||
                 terrain.equals("highland_forest_fire")) {
-            player.setHp(0.0);
+            playerManager.getPlayer().setHp(0.0);
         }
         if (terrain.equals("toxic_badlands")) {
-            double dmg = player.getMaxHp() * 0.2;
-            player.setHp(Math.max(0.0, player.getHp() - dmg));
+            double dmg = playerManager.getPlayer().getMaxHp() * 0.2;
+            playerManager.getPlayer().setHp(Math.max(0.0, playerManager.getPlayer().getHp() - dmg));
         }
 
         for (int ty = 0; ty < map.getHeight(); ty++) {
@@ -1183,8 +1125,8 @@ public class Game {
                 }
             }
         }
-        if (player.getName() != null) {
-            counts.merge(player.getName(), 1, Integer::sum);
+        if (playerManager.getPlayer().getName() != null) {
+            counts.merge(playerManager.getPlayer().getName(), 1, Integer::sum);
         }
         return counts;
     }
@@ -1222,7 +1164,7 @@ public class Game {
     }
 
     public DinosaurStats getPlayer() {
-        return player;
+        return playerManager.getPlayer();
     }
 
     public java.util.List<Integer> getPopulationHistory(String name) {
@@ -1267,50 +1209,21 @@ public class Game {
      * Effective speed value for the player dinosaur.
      */
     public double playerEffectiveSpeed() {
-        double speed = player.getSpeed();
-        Terrain terrain = map.terrainAt(x, y);
-        double boost = 0.0;
-        if (terrain == Terrain.LAKE) {
-            boost = player.getAquaticBoost();
-        } else if (terrain == Terrain.SWAMP) {
-            boost = player.getAquaticBoost() / 2.0;
-        }
-        speed *= 1 + boost / 100.0;
-        if (player.getAbilities().contains("ambush")) {
-            speed *= 1 + Math.min(player.getAmbushStreak(), 3) * 0.05;
-        }
-        if (player.getBrokenBone() > 0) {
-            speed *= 0.5;
-        }
-        return Math.max(speed, 0.1);
+        return playerManager.playerEffectiveSpeed(map, x, y);
     }
 
     /**
      * Return true if the player can currently lay eggs.
      */
     public boolean playerCanLayEggs() {
-        return canPlayerLayEggs();
+        return playerManager.canPlayerLayEggs(map, x, y);
     }
 
     /**
      * Determine the growth stage description for the player dinosaur.
      */
     public String playerGrowthStage() {
-        double adult = player.getAdultWeight();
-        if (adult <= 0) {
-            return "Adult";
-        }
-        double pct = player.getWeight() / adult;
-        if (pct <= 0.10) {
-            return "Hatchling";
-        }
-        if (pct <= 1.0 / 3.0) {
-            return "Juvenile";
-        }
-        if (pct <= 2.0 / 3.0) {
-            return "Sub-Adult";
-        }
-        return "Adult";
+        return playerManager.playerGrowthStage();
     }
 
     /**
