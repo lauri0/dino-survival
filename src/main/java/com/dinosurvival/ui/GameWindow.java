@@ -739,14 +739,15 @@ public class GameWindow extends JFrame {
 
         speedLabel.setText(String.format("%.1f", game.playerEffectiveSpeed()));
 
-        descendantLabel.setText(String.valueOf(game.descendantCount()));
+        descendantLabel.setText(String.valueOf(game.descendantCount()) + "/" + Game.DESCENDANTS_TO_WIN);
         turnLabel.setText(String.valueOf(game.getTurn()));
     }
 
     private Color barColor(double percent) {
         double ratio = Math.max(0.0, Math.min(1.0, percent / 100.0));
+        // Multiplying by 0.8 to make the colors less bright
         int red = (int) Math.round(255 * (1.0 - ratio));
-        int green = (int) Math.round(255 * ratio);
+        int green = (int) Math.round(255 * ratio * 0.8);
         return new Color(red, green, 0);
     }
 
