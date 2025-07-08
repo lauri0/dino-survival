@@ -3,13 +3,7 @@ package com.dinosurvival.game;
 import com.dinosurvival.model.DinosaurStats;
 import com.dinosurvival.model.NPCAnimal;
 import com.dinosurvival.model.Plant;
-import com.dinosurvival.game.EncounterEntry;
-import com.dinosurvival.game.EggCluster;
-import com.dinosurvival.game.Burrow;
-import com.dinosurvival.game.MapUtils;
-import com.dinosurvival.game.Setting;
-import com.dinosurvival.game.Terrain;
-import com.dinosurvival.game.Settings;
+
 import java.util.Iterator;
 import com.dinosurvival.util.StatsLoader;
 import java.io.IOException;
