@@ -28,7 +28,7 @@
                 <directory>src/main/resources</directory>
             </resource>
             <resource>
-                <directory>../assets</directory>
+                <directory>assets</directory>
                 <targetPath>assets</targetPath>
             </resource>
         </resources>
