@@ -720,12 +720,17 @@ public class GameWindow extends JFrame {
         hpValueLabel.setText(String.format("%.1f/%.1f", p.getHp(), maxHp));
         hpBar.setValue((int) Math.round(hpPct));
         hpBar.setString(String.format("%.0f%%", hpPct));
+        hpBar.setForeground(barColor(hpPct));
 
-        energyBar.setValue((int) Math.round(p.getEnergy()));
-        energyBar.setString(String.format("%.0f%%", p.getEnergy()));
+        double energyPct = p.getEnergy();
+        energyBar.setValue((int) Math.round(energyPct));
+        energyBar.setString(String.format("%.0f%%", energyPct));
+        energyBar.setForeground(barColor(energyPct));
 
-        hydrationBar.setValue((int) Math.round(p.getHydration()));
-        hydrationBar.setString(String.format("%.0f%%", p.getHydration()));
+        double hydrationPct = p.getHydration();
+        hydrationBar.setValue((int) Math.round(hydrationPct));
+        hydrationBar.setString(String.format("%.0f%%", hydrationPct));
+        hydrationBar.setForeground(barColor(hydrationPct));
 
         double hatch = p.getHatchlingWeight();
         double adult = p.getAdultWeight();
@@ -736,6 +741,13 @@ public class GameWindow extends JFrame {
 
         descendantLabel.setText(String.valueOf(game.descendantCount()));
         turnLabel.setText(String.valueOf(game.getTurn()));
+    }
+
+    private Color barColor(double percent) {
+        double ratio = Math.max(0.0, Math.min(1.0, percent / 100.0));
+        int red = (int) Math.round(255 * (1.0 - ratio));
+        int green = (int) Math.round(255 * ratio);
+        return new Color(red, green, 0);
     }
 
     private void updateWeatherPanel() {
