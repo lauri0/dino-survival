@@ -799,8 +799,17 @@ public class Game {
 
     /** Lay eggs if conditions allow. */
     public void layEggs() {
+        // capture the number of animals on the player's tile before turn start
+        int animalsBefore = map.getAnimals(x, y).size();
         startTurn();
-        if (!playerManager.canPlayerLayEggs(map, x, y)) {
+        // check conditions using the pre-turn animal count to avoid random spawns
+        DinosaurStats player = playerManager.getPlayer();
+        boolean canLay = player.getWeight() >= player.getAdultWeight()
+                && player.getEnergy() >= 80
+                && player.getHp() >= player.getMaxHp() * 0.8
+                && player.getTurnsUntilLayEggs() == 0
+                && animalsBefore < 4;
+        if (!canLay) {
             applyTurnCosts(false, 1.0);
             MapUtils.revealAdjacentMountains(map, x, y);
             checkVictory();
