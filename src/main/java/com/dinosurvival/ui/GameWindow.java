@@ -127,6 +127,24 @@ public class GameWindow extends JFrame {
         return base.deriveFont((float) (base.getSize2D() * factor));
     }
 
+    private JLabel createEncounterHeader(String text) {
+        JLabel label = new JLabel(text);
+        label.setAlignmentX(Component.LEFT_ALIGNMENT);
+        label.setBorder(BorderFactory.createEmptyBorder(0, 10, 5, 0));
+        Font baseFont = label.getFont();
+        label.setFont(baseFont.deriveFont(baseFont.getStyle(), 16f));
+        return label;
+    }
+
+    private JPanel buildStatRow(JLabel... labels) {
+        JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+        row.setAlignmentX(Component.LEFT_ALIGNMENT);
+        for (JLabel l : labels) {
+            row.add(l);
+        }
+        return row;
+    }
+
     public GameWindow(Game game) {
         super("Dino Survival");
         this.game = game;
@@ -627,14 +645,20 @@ public class GameWindow extends JFrame {
             if (e.getBurrow() != null) {
                 ImageIcon bIcon = loadScaledIcon("/assets/other/burrow.png", 100, 70);
                 if (bIcon != null) img.setIcon(bIcon);
-                info.add(new JLabel("Burrow" + (e.getBurrow().isFull() ? " (Full)" : " (Empty)")));
-                info.add(new JLabel(String.format("Dig: %.0f%%", e.getBurrow().getProgress())));
+                info.add(createEncounterHeader("Burrow" + (e.getBurrow().isFull() ? " (Full)" : " (Empty)")));
+                JLabel digLabel = new JLabel(String.format("Dig: %.0f%%", e.getBurrow().getProgress()));
+                info.add(buildStatRow(digLabel));
                 actBtn.setText("Dig");
                 actBtn.addActionListener(ev -> doAction(() -> game.digBurrow(), "Dig"));
                 statsBtn.setVisible(false);
             } else if (e.getEggs() != null) {
-                info.add(new JLabel(e.getEggs().getSpecies() + " Eggs"));
-                info.add(new JLabel(String.format("W: %.1fkg", e.getEggs().getWeight())));
+                info.add(createEncounterHeader(e.getEggs().getSpecies() + " Eggs"));
+                JLabel weightLabel = new JLabel(String.format("%.1fkg", e.getEggs().getWeight()));
+                weightLabel.setIcon(weightSmallIcon);
+                weightLabel.setHorizontalTextPosition(SwingConstants.RIGHT);
+                JLabel countLabel = new JLabel("x" + e.getEggs().getNumber());
+                JLabel hatchLabel = new JLabel("Hatch: " + e.getEggs().getTurnsUntilHatch());
+                info.add(buildStatRow(weightLabel, countLabel, hatchLabel));
                 actBtn.setText("Eat");
                 actBtn.addActionListener(ev -> doAction(() -> game.collectEggs(), "Eat eggs"));
                 statsBtn.setVisible(false);
