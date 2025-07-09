@@ -76,6 +76,9 @@ public class DinoFactsDialog extends JDialog {
             if (!ds.getAbilities().isEmpty()) {
                 label(left, "Abilities: " + String.join(", ", ds.getAbilities()));
             }
+            if (!ds.getPreferredBiomes().isEmpty()) {
+                label(left, "Preferred biomes: " + String.join(", ", ds.getPreferredBiomes()));
+            }
         } else if (info instanceof Map<?,?> map) {
             iconLabel(left, "/assets/icons/weight.png", String.format("%.0f kg", getDouble(map.get("adult_weight"))));
             iconLabel(left, "/assets/icons/attack.png", String.format("%.0f", getDouble(map.get("attack"))));
@@ -89,6 +92,10 @@ public class DinoFactsDialog extends JDialog {
             Object abilities = map.get("abilities");
             if (abilities instanceof List<?> list && !list.isEmpty()) {
                 label(left, "Abilities: " + String.join(", ", list.stream().map(Object::toString).toList()));
+            }
+            Object prefBiomes = map.get("preferred_biomes");
+            if (prefBiomes instanceof List<?> list && !list.isEmpty()) {
+                label(left, "Preferred biomes: " + String.join(", ", list.stream().map(Object::toString).toList()));
             }
         }
 
