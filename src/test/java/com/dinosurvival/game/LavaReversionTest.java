@@ -3,10 +3,7 @@ package com.dinosurvival.game;
 import com.dinosurvival.model.NPCAnimal;
 import com.dinosurvival.model.Plant;
 import com.dinosurvival.util.StatsLoader;
-import com.dinosurvival.game.EggCluster;
-import com.dinosurvival.game.Map;
-import com.dinosurvival.game.Terrain;
-import com.dinosurvival.game.LavaInfo;
+
 import java.lang.reflect.Field;
 import java.nio.file.Path;
 import org.junit.jupiter.api.Assertions;
@@ -30,7 +27,7 @@ public class LavaReversionTest {
         int x = game.getPlayerX();
         int y = game.getPlayerY();
         grid[y][x] = Terrain.LAVA;
-        game._apply_terrain_effects();
+        game.applyTerrainEffects();
         Assertions.assertEquals(0.0, game.getPlayer().getHp(), 1e-9);
     }
 
@@ -56,7 +53,7 @@ public class LavaReversionTest {
         p.setName("Ferns");
         p.setWeight(5.0);
         map.getPlants(x, y).add(p);
-        game._apply_terrain_effects();
+        game.applyTerrainEffects();
         Assertions.assertFalse(npc.isAlive());
         Assertions.assertTrue(map.getEggs(x, y).isEmpty());
         Assertions.assertFalse(map.hasBurrow(x, y));

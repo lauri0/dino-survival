@@ -3,11 +3,9 @@ package com.dinosurvival.game;
 import com.dinosurvival.model.DinosaurStats;
 import com.dinosurvival.model.NPCAnimal;
 import com.dinosurvival.model.Plant;
-import com.dinosurvival.game.PlayerManager;
 
 import java.util.Iterator;
 import com.dinosurvival.util.StatsLoader;
-import com.dinosurvival.game.CombatUtils;
 import com.dinosurvival.util.Constants;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -544,7 +542,7 @@ public class Game {
 
     private void endTurn() {
         updateNpcs();
-        _apply_terrain_effects();
+        applyTerrainEffects();
         spoilCarcasses();
         generateEncounters();
         aggressiveAttackCheck();
@@ -1085,7 +1083,7 @@ public class Game {
     }
 
     /** Apply end-of-turn terrain effects similar to the Python version. */
-    void _apply_terrain_effects() {
+    void applyTerrainEffects() {
         String terrain = map.terrainAt(x, y).getName();
         double prev = playerManager.getPlayer().getHp();
         if (terrain.equals("lava") || terrain.equals("volcano_erupting")) {
