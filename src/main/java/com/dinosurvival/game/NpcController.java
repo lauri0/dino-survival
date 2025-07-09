@@ -5,6 +5,7 @@ import com.dinosurvival.model.NPCAnimal;
 import com.dinosurvival.model.Plant;
 import com.dinosurvival.util.StatsLoader;
 import com.dinosurvival.game.CombatUtils;
+import com.dinosurvival.game.WorldStats;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,13 +17,15 @@ import java.util.Random;
 public class NpcController {
     private Map map;
     private Weather weather;
+    private WorldStats stats;
     private int nextNpcId = 1;
     private final List<NPCAnimal> spawned = new ArrayList<>();
     private final List<String> mammalSpecies = new ArrayList<>();
 
-    public NpcController(Map map, Weather weather) {
+    public NpcController(Map map, Weather weather, WorldStats stats) {
         this.map = map;
         this.weather = weather;
+        this.stats = stats;
     }
 
     public void setMap(Map map) {
@@ -319,6 +322,9 @@ public class NpcController {
                 npc.setAlive(false);
                 npc.setAge(-1);
                 npc.setSpeed(0.0);
+                if (this.stats != null) {
+                    this.stats.recordDeath(npc.getName(), "combat");
+                }
                 return true;
             }
         } else if (regen > 0 && npc.getHp() < npc.getMaxHp()) {
@@ -341,6 +347,9 @@ public class NpcController {
                 npc.setAlive(false);
                 npc.setAge(-1);
                 npc.setSpeed(0.0);
+                if (this.stats != null) {
+                    this.stats.recordDeath(npc.getName(), "starvation");
+                }
                 return true;
             }
         }
@@ -661,6 +670,9 @@ public class NpcController {
                         npc.setAlive(false);
                         npc.setAge(-1);
                         npc.setSpeed(0.0);
+                        if (this.stats != null) {
+                            this.stats.recordDeath(npc.getName(), "starvation");
+                        }
                         if (tx == playerX && ty == playerY) {
                             messages.add(npcLabel(npc) + " starves to death.");
                         }
@@ -701,6 +713,9 @@ public class NpcController {
                                 EggCluster ec = new EggCluster(npc.getName(), numEggs,
                                         hatchW * numEggs, 5, npc.isDescendant());
                                 eggs.add(ec);
+                                if (this.stats != null) {
+                                    this.stats.recordEggsLaid(npc.getName(), numEggs);
+                                }
                             }
                             npc.setTurnsUntilLayEggs((int) getStat(stats, "egg_laying_interval"));
                             npc.setLastAction("act");
@@ -950,6 +965,9 @@ public class NpcController {
             pt.npc.setBrokenBone(10);
         }
         if (killed) {
+            if (this.stats != null) {
+                this.stats.recordDeath(pt.npc.getName(), "combat");
+            }
             java.util.Map<String, Integer> hunts = npc.getHunts();
             hunts.put(pt.npc.getName(), hunts.getOrDefault(pt.npc.getName(), 0) + 1);
             if (tx == playerX && ty == playerY) {
@@ -965,6 +983,9 @@ public class NpcController {
             npc.setAlive(false);
             npc.setAge(-1);
             npc.setSpeed(0.0);
+            if (this.stats != null) {
+                this.stats.recordDeath(npc.getName(), "combat");
+            }
         }
 
         npc.setNextMove("None");
