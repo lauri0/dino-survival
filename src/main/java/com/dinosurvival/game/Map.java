@@ -484,6 +484,16 @@ public class Map {
             int nx = p[0];
             int ny = p[1];
             int steps = p[2];
+            for (NPCAnimal npc : new ArrayList<>(animals[ny][nx])) {
+                if (npc.isAlive()) {
+                    npc.setAlive(false);
+                    npc.setAge(-1);
+                    npc.setSpeed(0.0);
+                    if (nx == playerX && ny == playerY) {
+                        msgs.add(npcLabel(npc) + " is incinerated by lava.");
+                    }
+                }
+            }
             animals[ny][nx].clear();
             eggs[ny][nx].clear();
             burrows[ny][nx] = null;
@@ -501,8 +511,10 @@ public class Map {
         if (player != null && playerX != Integer.MIN_VALUE) {
             Terrain t = terrainAt(playerX, playerY);
             if (t == Terrain.LAVA || t == Terrain.VOLCANO_ERUPTING) {
-                player.setHp(0.0);
-                msgs.add("Game Over.");
+                if (player.getHp() > 0) {
+                    player.setHp(0.0);
+                    msgs.add("You are burned alive by lava! Game Over.");
+                }
             }
         }
 
@@ -675,19 +687,29 @@ public class Map {
         for (NPCAnimal npc : new ArrayList<>(animals[y][x])) {
             if (npc.isAlive()) {
                 double dmg = npc.getMaxHp() * 0.5;
+                double before = npc.getHp();
                 npc.setHp(Math.max(0.0, npc.getHp() - dmg));
                 if (npc.getHp() <= 0) {
                     npc.setAlive(false);
                     npc.setAge(-1);
                     npc.setSpeed(0.0);
+                    if (player != null && x == playerX && y == playerY && before > 0) {
+                        if (msgs != null) {
+                            msgs.add(npcLabel(npc) + " drowns in the flood.");
+                        }
+                    }
                 }
             }
         }
         if (player != null && x == playerX && y == playerY) {
+            double before = player.getHp();
             player.setHp(Math.max(0.0,
                     player.getHp() - player.getMaxHp() * 0.5));
             if (msgs != null) {
                 msgs.add("Flood waters sweep over you!");
+                if (before > 0 && player.getHp() <= 0) {
+                    msgs.add("You drown in the flood! Game Over.");
+                }
             }
         }
     }
@@ -783,5 +805,9 @@ public class Map {
         }
 
         return msgs;
+    }
+
+    private String npcLabel(NPCAnimal npc) {
+        return npc.getName() + " (" + npc.getId() + ")";
     }
 }
