@@ -21,6 +21,7 @@ public class DinoFactsDialog extends JDialog {
 
         ImageIcon img = loadScaledIcon(imagePath(name), 400, 250);
         java.util.List<Integer> counts = game.getPopulationHistory(name);
+        java.util.Map<String, Integer> deathCounts = game.getWorldStats().getDeathCounts(name);
         JPanel header = new JPanel();
         header.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
         boolean haveHeader = false;
@@ -31,6 +32,10 @@ public class DinoFactsDialog extends JDialog {
         }
         if (counts != null && !counts.isEmpty()) {
             header.add(new PopGraphPanel(counts, game.getTurnHistory()));
+            haveHeader = true;
+        }
+        if (!deathCounts.isEmpty()) {
+            header.add(new DeathChartPanel(deathCounts));
             haveHeader = true;
         }
         if (haveHeader) {
@@ -52,33 +57,53 @@ public class DinoFactsDialog extends JDialog {
             info = Map.of();
         }
 
+        JPanel columns = new JPanel();
+        columns.setLayout(new BoxLayout(columns, BoxLayout.X_AXIS));
+        JPanel left = new JPanel();
+        left.setLayout(new BoxLayout(left, BoxLayout.Y_AXIS));
+        JPanel right = new JPanel();
+        right.setLayout(new BoxLayout(right, BoxLayout.Y_AXIS));
+
         if (isDino) {
             DinosaurStats ds = (DinosaurStats) info;
-            iconLabel(panel, "/assets/icons/weight.png", String.format("%.0f kg", ds.getAdultWeight()));
-            iconLabel(panel, "/assets/icons/attack.png", String.format("%.0f", ds.getAdultAttack()));
-            iconLabel(panel, "/assets/icons/health.png", String.format("%.0f", ds.getAdultHp()));
-            iconLabel(panel, "/assets/icons/speed.png", String.format("%.0f", ds.getAdultSpeed()));
-            iconLabel(panel, "/assets/icons/turn.png", "Energy drain: " + ds.getAdultEnergyDrain());
+            iconLabel(left, "/assets/icons/weight.png", String.format("%.0f kg", ds.getAdultWeight()));
+            iconLabel(left, "/assets/icons/attack.png", String.format("%.0f", ds.getAdultAttack()));
+            iconLabel(left, "/assets/icons/health.png", String.format("%.0f", ds.getAdultHp()));
+            iconLabel(left, "/assets/icons/speed.png", String.format("%.0f", ds.getAdultSpeed()));
+            iconLabel(left, "/assets/icons/turn.png", "Energy drain: " + ds.getAdultEnergyDrain());
             String diet = String.join(", ", ds.getDiet().stream().map(Object::toString).toList());
-            label(panel, "Diet: " + diet);
+            label(left, "Diet: " + diet);
             if (!ds.getAbilities().isEmpty()) {
-                label(panel, "Abilities: " + String.join(", ", ds.getAbilities()));
+                label(left, "Abilities: " + String.join(", ", ds.getAbilities()));
             }
         } else if (info instanceof Map<?,?> map) {
-            iconLabel(panel, "/assets/icons/weight.png", String.format("%.0f kg", getDouble(map.get("adult_weight"))));
-            iconLabel(panel, "/assets/icons/attack.png", String.format("%.0f", getDouble(map.get("attack"))));
-            iconLabel(panel, "/assets/icons/health.png", String.format("%.0f", getDouble(map.get("hp"))));
-            iconLabel(panel, "/assets/icons/speed.png", String.format("%.0f", getDouble(map.get("adult_speed"))));
-            iconLabel(panel, "/assets/icons/turn.png", "Energy drain: " + getDouble(map.get("adult_energy_drain")));
+            iconLabel(left, "/assets/icons/weight.png", String.format("%.0f kg", getDouble(map.get("adult_weight"))));
+            iconLabel(left, "/assets/icons/attack.png", String.format("%.0f", getDouble(map.get("attack"))));
+            iconLabel(left, "/assets/icons/health.png", String.format("%.0f", getDouble(map.get("hp"))));
+            iconLabel(left, "/assets/icons/speed.png", String.format("%.0f", getDouble(map.get("adult_speed"))));
+            iconLabel(left, "/assets/icons/turn.png", "Energy drain: " + getDouble(map.get("adult_energy_drain")));
             Object diet = map.get("diet");
             if (diet instanceof List<?> list && !list.isEmpty()) {
-                label(panel, "Diet: " + String.join(", ", list.stream().map(Object::toString).toList()));
+                label(left, "Diet: " + String.join(", ", list.stream().map(Object::toString).toList()));
             }
             Object abilities = map.get("abilities");
             if (abilities instanceof List<?> list && !list.isEmpty()) {
-                label(panel, "Abilities: " + String.join(", ", list.stream().map(Object::toString).toList()));
+                label(left, "Abilities: " + String.join(", ", list.stream().map(Object::toString).toList()));
             }
         }
+
+        int[] eggStats = game.getWorldStats().getEggStats(name);
+        int laid = eggStats[0];
+        int hatched = eggStats[1];
+        label(right, "Eggs hatched/laid: " + hatched + "/" + laid);
+        double pct = laid > 0 ? hatched * 100.0 / laid : 0.0;
+        label(right, String.format("Hatch rate: %.1f%%", pct));
+
+        columns.add(left);
+        columns.add(Box.createHorizontalStrut(20));
+        columns.add(right);
+        columns.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panel.add(columns);
 
         JButton close = new JButton("Close");
         close.addActionListener(e -> dispose());
@@ -147,6 +172,44 @@ public class DinoFactsDialog extends JDialog {
             return new ImageIcon(cropped);
         } catch (IOException ex) {
             return null;
+        }
+    }
+
+    private static class DeathChartPanel extends JPanel {
+        private final java.util.Map<String, Integer> counts;
+        DeathChartPanel(java.util.Map<String, Integer> counts) {
+            this.counts = counts;
+            setPreferredSize(new Dimension(160, 234));
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            Graphics2D g2 = (Graphics2D) g;
+            int width = 120;
+            int height = 200;
+            int margin = 24;
+            int topPad = 10;
+            int bars = counts.size();
+            if (bars == 0) return;
+            int total = counts.values().stream().mapToInt(Integer::intValue).sum();
+            int bw = width / bars;
+            int i = 0;
+            java.util.List<String> keys = new java.util.ArrayList<>(counts.keySet());
+            for (String k : keys) {
+                int val = counts.getOrDefault(k, 0);
+                double pct = total > 0 ? val * 1.0 / total : 0.0;
+                int bh = (int) Math.round(pct * height);
+                int x = margin + i * bw;
+                int y = topPad + height - bh;
+                g2.setColor(Color.ORANGE);
+                g2.fillRect(x, y, bw - 4, bh);
+                g2.setColor(Color.BLACK);
+                g2.drawString(String.format("%.0f%%", pct * 100), x, y - 2);
+                g2.drawString(k, x, topPad + height + 12);
+                i++;
+            }
+            g2.drawRect(margin, topPad, width, height);
         }
     }
 

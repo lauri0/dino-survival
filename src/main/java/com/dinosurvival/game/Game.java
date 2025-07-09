@@ -37,6 +37,7 @@ public class Game {
     private final List<Integer> turnHistory = new ArrayList<>();
     private List<String> turnMessages = new ArrayList<>();
     private String formation;
+    private WorldStats worldStats = new WorldStats();
 
     /** Number of descendants required to win the game. */
     public static final int DESCENDANTS_TO_WIN = Constants.DESCENDANTS_TO_WIN;
@@ -86,7 +87,12 @@ public class Game {
             throw new RuntimeException(e);
         }
 
+        worldStats = new WorldStats();
+        worldStats.initSpecies(StatsLoader.getDinoStats().keySet());
+        worldStats.initSpecies(StatsLoader.getCritterStats().keySet());
+
         map = new Map(18, 10, setting, seed);
+        map.setStats(worldStats);
         map.populateBurrows(setting.getNumBurrows());
 
         // choose player dinosaur
@@ -117,7 +123,7 @@ public class Game {
         MapUtils.revealAdjacentMountains(map, x, y);
         weather = chooseWeather();
         weatherTurns = 0;
-        npcController = new NpcController(map, weather);
+        npcController = new NpcController(map, weather, worldStats);
         npcController.initMammalSpecies(setting.getFormation());
         npcController.populateAnimals();
         npcController.spawnCritters(true);
@@ -442,6 +448,7 @@ public class Game {
             map.addAnimal(tx, ty, npc);
             npcController.trackSpawn(npc);
         }
+        worldStats.recordEggsHatched(cluster.getSpecies(), cluster.getNumber());
     }
 
     /**
@@ -718,6 +725,7 @@ public class Game {
         }
 
         if (!target.isAlive()) {
+            worldStats.recordDeath(target.getName(), "combat");
             double meat = target.getWeight();
             double energyGain = 1000 * meat / Math.max(playerManager.getPlayer().getWeight(), 0.1);
             double need = 100.0 - playerManager.getPlayer().getEnergy();
@@ -859,6 +867,7 @@ public class Game {
         EggCluster ec = new EggCluster(playerManager.getPlayer().getName(), numEggs,
                 hatchW * numEggs, 5, true);
         map.getEggs(x, y).add(ec);
+        worldStats.recordEggsLaid(playerManager.getPlayer().getName(), numEggs);
         playerManager.getPlayer().setTurnsUntilLayEggs(10);
         int interval = (int) getStat(stats, "egg_laying_interval");
         playerManager.getPlayer().setTurnsUntilLayEggs(interval);
@@ -1155,6 +1164,7 @@ public class Game {
                             npc.setAlive(false);
                             npc.setAge(-1);
                             npc.setSpeed(0.0);
+                            worldStats.recordDeath(npc.getName(), "disaster");
                             if (tx == x && ty == y) {
                                 turnMessages.add(npcLabel(npc) + " perishes in the flames.");
                             }
@@ -1173,6 +1183,7 @@ public class Game {
                             npc.setAlive(false);
                             npc.setAge(-1);
                             npc.setSpeed(0.0);
+                            worldStats.recordDeath(npc.getName(), "disaster");
                             if (tx == x && ty == y && beforeNpc > 0) {
                                 turnMessages.add(npcLabel(npc) + " succumbs to the toxic fumes.");
                             }
@@ -1256,6 +1267,10 @@ public class Game {
 
     public java.util.Map<String, int[]> getHuntStats() {
         return java.util.Collections.unmodifiableMap(huntStats);
+    }
+
+    public WorldStats getWorldStats() {
+        return worldStats;
     }
 
     public int getPlayerX() {

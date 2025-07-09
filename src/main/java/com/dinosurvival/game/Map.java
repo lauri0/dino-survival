@@ -7,6 +7,7 @@ import com.dinosurvival.game.EggCluster;
 import com.dinosurvival.game.Burrow;
 import com.dinosurvival.game.LavaInfo;
 import com.dinosurvival.model.DinosaurStats;
+import com.dinosurvival.game.WorldStats;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -39,6 +40,7 @@ public class Map {
     private final Random rng;
     private boolean activeFlood = false;
     private int floodTurn = 0;
+    private WorldStats stats;
 
     /**
      * Construct a map using the provided setting configuration.
@@ -69,6 +71,10 @@ public class Map {
         this.floodInfo = new Terrain[height][width];
         this.rng = rng;
         generate(setting.getTerrains(), setting.getHeightLevels(), setting.getHumidityLevels());
+    }
+
+    public void setStats(WorldStats stats) {
+        this.stats = stats;
     }
 
     /**
@@ -489,6 +495,9 @@ public class Map {
                     npc.setAlive(false);
                     npc.setAge(-1);
                     npc.setSpeed(0.0);
+                    if (stats != null) {
+                        stats.recordDeath(npc.getName(), "disaster");
+                    }
                     if (nx == playerX && ny == playerY) {
                         msgs.add(npcLabel(npc) + " is incinerated by lava.");
                     }
@@ -561,6 +570,16 @@ public class Map {
 
         fireTurns[y][x] = 5;
         burntTurns[y][x] = 0;
+        for (NPCAnimal npc : new ArrayList<>(animals[y][x])) {
+            if (npc.isAlive()) {
+                npc.setAlive(false);
+                npc.setAge(-1);
+                npc.setSpeed(0.0);
+                if (stats != null) {
+                    stats.recordDeath(npc.getName(), "disaster");
+                }
+            }
+        }
         animals[y][x].clear();
         eggs[y][x].clear();
         burrows[y][x] = null;
@@ -693,6 +712,9 @@ public class Map {
                     npc.setAlive(false);
                     npc.setAge(-1);
                     npc.setSpeed(0.0);
+                    if (stats != null) {
+                        stats.recordDeath(npc.getName(), "disaster");
+                    }
                     if (player != null && x == playerX && y == playerY && before > 0) {
                         if (msgs != null) {
                             msgs.add(npcLabel(npc) + " drowns in the flood.");
