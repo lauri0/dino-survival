@@ -405,11 +405,42 @@ public class Game {
                 for (Iterator<EggCluster> it = cell.iterator(); it.hasNext(); ) {
                     EggCluster egg = it.next();
                     egg.setTurnsUntilHatch(egg.getTurnsUntilHatch() - 1);
-                    if (egg.getTurnsUntilHatch() <= 0 || egg.getWeight() <= 0) {
+                    if (egg.getWeight() <= 0) {
+                        it.remove();
+                        continue;
+                    }
+                    if (egg.getTurnsUntilHatch() <= 0) {
+                        hatchEggCluster(tx, ty, egg);
                         it.remove();
                     }
                 }
             }
+        }
+    }
+
+    private void hatchEggCluster(int tx, int ty, EggCluster cluster) {
+        DinosaurStats stats = StatsLoader.getDinoStats().get(cluster.getSpecies());
+        if (stats == null) {
+            return;
+        }
+        double weight = stats.getHatchlingWeight();
+        for (int i = 0; i < cluster.getNumber(); i++) {
+            NPCAnimal npc = new NPCAnimal();
+            npc.setId(npcController.allocateNpcId());
+            npc.setName(cluster.getSpecies());
+            npc.setWeight(weight);
+            double pct = stats.getAdultWeight() > 0
+                    ? weight / stats.getAdultWeight() : 1.0;
+            pct = Math.max(0.0, Math.min(1.0, pct));
+            npc.setAttack(stats.getAdultAttack() * pct);
+            npc.setMaxHp(stats.getAdultHp() * pct);
+            npc.setHp(npc.getMaxHp());
+            npc.setSpeed(stats.getHatchlingSpeed());
+            npc.setAbilities(new ArrayList<>(stats.getAbilities()));
+            npc.setDescendant(cluster.isDescendant());
+            npc.setLastAction("spawned");
+            map.addAnimal(tx, ty, npc);
+            npcController.trackSpawn(npc);
         }
     }
 
