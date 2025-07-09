@@ -417,8 +417,9 @@ public class NpcController {
     private void npcConsumeEggs(int tx, int ty, NPCAnimal npc, EggCluster egg, Object stats,
                                 int playerX, int playerY, List<String> messages) {
         double energyNeeded = 100.0 - npc.getEnergy();
+        double weightForEnergy = energyNeeded * npc.getWeight() / 1000.0;
         double growthTarget = npcMaxGrowthGain(npc.getWeight(), stats);
-        double eatAmount = egg.getWeight();
+        double eatAmount = Math.min(egg.getWeight(), weightForEnergy + growthTarget);
         double energyGainPossible = 1000 * eatAmount / Math.max(npc.getWeight(), 0.1);
         double actualGain = Math.min(energyNeeded, energyGainPossible);
         double beforeEnergy = npc.getEnergy();
