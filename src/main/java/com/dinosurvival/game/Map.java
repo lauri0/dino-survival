@@ -587,10 +587,23 @@ public class Map {
     }
 
     public List<String> updateForestFire() {
+        return updateForestFire(null);
+    }
+
+    public List<String> updateForestFire(Weather weather) {
         List<String> msgs = new ArrayList<>();
+
+        if (weather != null && "Heatwave".equals(weather.getName())) {
+            maybeStartRandomFire();
+        }
+
+        double spreadChance = spreadChanceFor(weather);
+        List<int[]> newFires = new ArrayList<>();
+
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 if (fireTurns[y][x] > 0) {
+                    attemptSpread(x, y, spreadChance, newFires);
                     fireTurns[y][x]--;
                     if (fireTurns[y][x] == 0) {
                         if (grid[y][x] == Terrain.FOREST_FIRE) {
@@ -614,7 +627,64 @@ public class Map {
                 }
             }
         }
+
+        for (int[] p : newFires) {
+            startForestFire(p[0], p[1]);
+        }
+
         return msgs;
+    }
+
+    private void maybeStartRandomFire() {
+        if (fireRng.nextDouble() >= 0.01) {
+            return;
+        }
+        List<int[]> options = new ArrayList<>();
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                Terrain t = grid[y][x];
+                if ((t == Terrain.FOREST || t == Terrain.HIGHLAND_FOREST)
+                        && fireTurns[y][x] == 0 && burntTurns[y][x] == 0) {
+                    options.add(new int[]{x, y});
+                }
+            }
+        }
+        if (!options.isEmpty()) {
+            int[] p = options.get(fireRng.nextInt(options.size()));
+            startForestFire(p[0], p[1]);
+        }
+    }
+
+    private double spreadChanceFor(Weather weather) {
+        if (weather == null) {
+            return 0.0;
+        }
+        return switch (weather.getName()) {
+            case "Heatwave" -> 0.4;
+            case "Sunny", "Cloudy" -> 0.2;
+            case "Light Rain" -> 0.05;
+            case "Heavy Rain" -> 0.02;
+            default -> 0.2;
+        };
+    }
+
+    private void attemptSpread(int x, int y, double chance, List<int[]> targets) {
+        if (chance <= 0) {
+            return;
+        }
+        int[][] dirs = { {1,0}, {-1,0}, {0,1}, {0,-1} };
+        for (int[] d : dirs) {
+            int nx = x + d[0];
+            int ny = y + d[1];
+            if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                Terrain t = grid[ny][nx];
+                if (t == Terrain.FOREST || t == Terrain.HIGHLAND_FOREST) {
+                    if (fireRng.nextDouble() < chance) {
+                        targets.add(new int[]{nx, ny});
+                    }
+                }
+            }
+        }
     }
 
     public void refreshBurrows() {
