@@ -392,11 +392,7 @@ public class NpcController {
         npcApplyGrowth(npc, remaining, stats);
         double weightGain = npc.getWeight() - beforeWeight;
         plant.setWeight(plant.getWeight() - eatAmount);
-        if (tx == playerX && ty == playerY) {
-            messages.add(npcLabel(npc) + " eats " + String.format(java.util.Locale.US, "%.1f", eatAmount)
-                    + "kg and regains " + String.format(java.util.Locale.US, "%.1f", npc.getEnergy() - beforeEnergy)
-                    + " energy gaining " + String.format(java.util.Locale.US, "%.1f", weightGain) + "kg.");
-        }
+        printNpcEatingInfoIfOnPlayersTile(tx, ty, npc, playerX, playerY, messages, eatAmount, beforeEnergy, weightGain);
     }
 
     private void npcConsumeMeat(int tx, int ty, NPCAnimal npc, NPCAnimal carcass, Object stats,
@@ -415,11 +411,7 @@ public class NpcController {
         npcApplyGrowth(npc, remaining, stats);
         double weightGain = npc.getWeight() - beforeWeight;
         carcass.setWeight(carcass.getWeight() - eatAmount);
-        if (tx == playerX && ty == playerY) {
-            messages.add(npcLabel(npc) + " eats " + String.format(java.util.Locale.US, "%.1f", eatAmount)
-                    + "kg and regains " + String.format(java.util.Locale.US, "%.1f", npc.getEnergy() - beforeEnergy)
-                    + " energy gaining " + String.format(java.util.Locale.US, "%.1f", weightGain) + "kg.");
-        }
+        printNpcEatingInfoIfOnPlayersTile(tx, ty, npc, playerX, playerY, messages, eatAmount, beforeEnergy, weightGain);
     }
 
     private void npcConsumeEggs(int tx, int ty, NPCAnimal npc, EggCluster egg, Object stats,
@@ -440,10 +432,14 @@ public class NpcController {
         if (eatAmount > 0) {
             npc.setEggClustersEaten(npc.getEggClustersEaten() + 1);
         }
+        printNpcEatingInfoIfOnPlayersTile(tx, ty, npc, playerX, playerY, messages, eatAmount, beforeEnergy, weightGain);
+    }
+
+    private void printNpcEatingInfoIfOnPlayersTile(int tx, int ty, NPCAnimal npc, int playerX, int playerY, List<String> messages, double eatAmount, double beforeEnergy, double weightGain) {
         if (tx == playerX && ty == playerY) {
             messages.add(npcLabel(npc) + " eats " + String.format(java.util.Locale.US, "%.1f", eatAmount)
                     + "kg and regains " + String.format(java.util.Locale.US, "%.1f", npc.getEnergy() - beforeEnergy)
-                    + " energy gaining " + String.format(java.util.Locale.US, "%.1f", weightGain) + "kg.");
+                    + "% energy gaining " + String.format(java.util.Locale.US, "%.1f", weightGain) + "kg.");
         }
     }
 
