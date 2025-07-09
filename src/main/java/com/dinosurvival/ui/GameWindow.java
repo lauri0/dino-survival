@@ -674,9 +674,14 @@ public class GameWindow extends JFrame {
                     img.setIcon(icon);
                 }
                 JLabel npcNameLabel = getNpcNameLabel(name, npc);
+                npcNameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+                npcNameLabel.setBorder(BorderFactory.createEmptyBorder(0, 10, 5, 0));
+                Font baseFont = npcNameLabel.getFont();
+                npcNameLabel.setFont(baseFont.deriveFont(baseFont.getStyle(), 16f));
                 info.add(npcNameLabel);
 
                 JPanel statRowOne = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+                statRowOne.setAlignmentX(Component.LEFT_ALIGNMENT);
                 JLabel attackValueLabel = new JLabel(String.format("%.1f", game.npcEffectiveAttack(npc)));
                 attackValueLabel.setIcon(attackSmallIcon);
                 attackValueLabel.setHorizontalTextPosition(SwingConstants.RIGHT);
@@ -688,6 +693,7 @@ public class GameWindow extends JFrame {
                 info.add(statRowOne);
 
                 JPanel statRowTwo = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+                statRowTwo.setAlignmentX(Component.LEFT_ALIGNMENT);
                 double rel = game.npcEffectiveSpeed(npc) / Math.max(0.1, game.playerEffectiveSpeed());
                 double chance = game.calculateCatchChance(rel) * 100.0;
                 JLabel speedValue = new JLabel(String.format("%.2f (%.0f%%)", rel, chance));
@@ -698,7 +704,7 @@ public class GameWindow extends JFrame {
                 energyValue.setIcon(energySmallIcon);
                 energyValue.setHorizontalTextPosition(SwingConstants.RIGHT);
                 statRowTwo.add(energyValue);
-                JLabel weightValue = new JLabel(String.format("%.1fkg", npc.getWeight()));
+                JLabel weightValue = new JLabel(String.format("%.0fkg", npc.getWeight()));
                 weightValue.setIcon(weightSmallIcon);
                 weightValue.setHorizontalTextPosition(SwingConstants.RIGHT);
                 statRowTwo.add(weightValue);
