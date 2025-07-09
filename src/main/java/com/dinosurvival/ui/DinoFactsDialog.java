@@ -34,6 +34,7 @@ public class DinoFactsDialog extends JDialog {
             haveHeader = true;
         }
         if (haveHeader) {
+            header.setAlignmentX(Component.LEFT_ALIGNMENT);
             panel.add(header);
         }
         JLabel heading = new JLabel(name);
@@ -90,6 +91,7 @@ public class DinoFactsDialog extends JDialog {
 
     private static void label(JPanel panel, String text) {
         JLabel l = new JLabel(text);
+        l.setAlignmentX(Component.LEFT_ALIGNMENT);
         l.setAlignmentX(Component.LEFT_ALIGNMENT);
         panel.add(l);
     }

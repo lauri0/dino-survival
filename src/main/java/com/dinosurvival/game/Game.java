@@ -740,7 +740,7 @@ public class Game {
             }
             turnMessages.add("You eat " + String.format(java.util.Locale.US, "%.1f", eaten)
                     + "kg and regain " + String.format(java.util.Locale.US, "%.1f", playerManager.getPlayer().getEnergy() - beforeEnergy)
-                    + " energy gaining " + String.format(java.util.Locale.US, "%.1f", growth[0]) + "kg.");
+                    + "% energy gaining " + String.format(java.util.Locale.US, "%.1f", growth[0]) + "kg.");
         }
 
         applyTurnCosts(false, 1.0);
@@ -774,7 +774,7 @@ public class Game {
         double[] growth = playerManager.applyGrowth(leftover);
         turnMessages.add("You eat " + String.format(java.util.Locale.US, "%.1f", weight)
                 + "kg of eggs and regain " + String.format(java.util.Locale.US, "%.1f", playerManager.getPlayer().getEnergy() - beforeEnergy)
-                + " energy gaining " + String.format(java.util.Locale.US, "%.1f", growth[0]) + "kg.");
+                + "% energy gaining " + String.format(java.util.Locale.US, "%.1f", growth[0]) + "kg.");
         applyTurnCosts(false, 1.0);
         checkVictory();
         MapUtils.revealAdjacentMountains(map, x, y);
