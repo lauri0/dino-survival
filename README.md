@@ -26,7 +26,7 @@ The jar produced by the build does not bundle its dependencies. Run the
 application with Maven so that they are included on the classpath:
 
 ```bash
-mvn exec:java -Dexec.mainClass=com.dinosurvival.ui.Main
+mvn exec:java
 ```
 
 Running the game opens a menu with buttons for the available
