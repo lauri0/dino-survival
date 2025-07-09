@@ -15,8 +15,8 @@ public class EncounterHelpDialog extends JDialog {
         area.setEditable(false);
         area.setText(String.join("\n",
                 "The encounters list displays animals or nests in your current cell.",
-                "W: prey weight, A: attack power, HP: health points,",
-                "S: speed relative to you (%) and E: energy available.",
+                "Icons show attack power, health points, speed relative to you (%),",
+                "current energy and prey weight.",
                 "Higher attack deals more damage while higher speed",
                 "makes prey harder to catch."));
         area.setBorder(BorderFactory.createEmptyBorder(5,10,5,10));

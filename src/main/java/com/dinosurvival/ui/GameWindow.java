@@ -58,6 +58,11 @@ public class GameWindow extends JFrame {
     private final JLabel turnLabel = new JLabel();
     private final ImageIcon bleedIcon;
     private final ImageIcon brokenBoneIcon;
+    private final ImageIcon attackSmallIcon;
+    private final ImageIcon healthSmallIcon;
+    private final ImageIcon energySmallIcon;
+    private final ImageIcon speedSmallIcon;
+    private final ImageIcon weightSmallIcon;
 
     private static final int TILE_SIZE = 22;
 
@@ -165,6 +170,11 @@ public class GameWindow extends JFrame {
         Font largeFont = scaleFont(baseFont, 1.3);
         bleedIcon = loadScaledIcon("/assets/icons/bleed.png", 20, 20);
         brokenBoneIcon = loadScaledIcon("/assets/icons/broken_bone.png", 20, 20);
+        attackSmallIcon = loadScaledIcon("/assets/icons/attack.png", 20, 20);
+        healthSmallIcon = loadScaledIcon("/assets/icons/health.png", 20, 20);
+        energySmallIcon = loadScaledIcon("/assets/icons/energy.png", 20, 20);
+        speedSmallIcon = loadScaledIcon("/assets/icons/speed.png", 20, 20);
+        weightSmallIcon = loadScaledIcon("/assets/icons/weight.png", 20, 20);
         nameLabel.setFont(largeFont.deriveFont(Font.BOLD));
         nameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         statsPanel.add(nameLabel);
@@ -665,10 +675,35 @@ public class GameWindow extends JFrame {
                 }
                 JLabel npcNameLabel = getNpcNameLabel(name, npc);
                 info.add(npcNameLabel);
-                info.add(new JLabel(String.format("A: %.1f  HP: %.1f/%.1f", game.npcEffectiveAttack(npc), npc.getHp(), game.npcMaxHp(npc))));
+
+                JPanel statRowOne = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+                JLabel attackValueLabel = new JLabel(String.format("%.1f", game.npcEffectiveAttack(npc)));
+                attackValueLabel.setIcon(attackSmallIcon);
+                attackValueLabel.setHorizontalTextPosition(SwingConstants.RIGHT);
+                statRowOne.add(attackValueLabel);
+                JLabel hpValue = new JLabel(String.format("%.1f/%.1f", npc.getHp(), game.npcMaxHp(npc)));
+                hpValue.setIcon(healthSmallIcon);
+                hpValue.setHorizontalTextPosition(SwingConstants.RIGHT);
+                statRowOne.add(hpValue);
+                info.add(statRowOne);
+
+                JPanel statRowTwo = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
                 double rel = game.npcEffectiveSpeed(npc) / Math.max(0.1, game.playerEffectiveSpeed());
                 double chance = game.calculateCatchChance(rel) * 100.0;
-                info.add(new JLabel(String.format("S: %.2f (%.0f%%)  W: %.1fkg", rel, chance, npc.getWeight())));
+                JLabel speedValue = new JLabel(String.format("%.2f (%.0f%%)", rel, chance));
+                speedValue.setIcon(speedSmallIcon);
+                speedValue.setHorizontalTextPosition(SwingConstants.RIGHT);
+                statRowTwo.add(speedValue);
+                JLabel energyValue = new JLabel(String.format("%.0f%%", npc.getEnergy()));
+                energyValue.setIcon(energySmallIcon);
+                energyValue.setHorizontalTextPosition(SwingConstants.RIGHT);
+                statRowTwo.add(energyValue);
+                JLabel weightValue = new JLabel(String.format("%.1fkg", npc.getWeight()));
+                weightValue.setIcon(weightSmallIcon);
+                weightValue.setHorizontalTextPosition(SwingConstants.RIGHT);
+                statRowTwo.add(weightValue);
+                info.add(statRowTwo);
+
                 actBtn.setText(npc.isAlive() ? "Attack" : "Eat");
                 actBtn.addActionListener(ev -> doAction(() -> game.huntNpc(npc.getId()), "Hunt"));
                 statsBtn.addActionListener(ev -> new NpcStatsDialog(this, game, npc).setVisible(true));
