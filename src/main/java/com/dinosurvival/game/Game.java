@@ -523,9 +523,9 @@ public class Game {
             }
         }
 
-        map.updateVolcanicActivity(x, y, playerManager.getPlayer());
-        map.updateFlood(x, y, playerManager.getPlayer(), weather.getFloodChance());
-        map.updateForestFire();
+        turnMessages.addAll(map.updateVolcanicActivity(x, y, playerManager.getPlayer()));
+        turnMessages.addAll(map.updateFlood(x, y, playerManager.getPlayer(), weather.getFloodChance()));
+        turnMessages.addAll(map.updateForestFire());
         updateEggs();
         map.growPlants(StatsLoader.getPlantStats());
         npcController.spawnCritters(false);
@@ -1087,14 +1087,23 @@ public class Game {
     /** Apply end-of-turn terrain effects similar to the Python version. */
     void _apply_terrain_effects() {
         String terrain = map.terrainAt(x, y).getName();
-        if (terrain.equals("lava") || terrain.equals("volcano_erupting") ||
-                terrain.equals("forest_fire") ||
-                terrain.equals("highland_forest_fire")) {
-            playerManager.getPlayer().setHp(0.0);
-        }
-        if (terrain.equals("toxic_badlands")) {
+        double prev = playerManager.getPlayer().getHp();
+        if (terrain.equals("lava") || terrain.equals("volcano_erupting")) {
+            if (prev > 0) {
+                playerManager.getPlayer().setHp(0.0);
+                turnMessages.add("You are burned alive by lava! Game Over.");
+            }
+        } else if (terrain.equals("forest_fire") || terrain.equals("highland_forest_fire")) {
+            if (prev > 0) {
+                playerManager.getPlayer().setHp(0.0);
+                turnMessages.add("You burn up in the forest fire! Game Over.");
+            }
+        } else if (terrain.equals("toxic_badlands")) {
             double dmg = playerManager.getPlayer().getMaxHp() * 0.2;
-            playerManager.getPlayer().setHp(Math.max(0.0, playerManager.getPlayer().getHp() - dmg));
+            playerManager.getPlayer().setHp(Math.max(0.0, prev - dmg));
+            if (prev > 0 && playerManager.getPlayer().getHp() <= 0) {
+                turnMessages.add("The toxic fumes overwhelm you! Game Over.");
+            }
         }
 
         for (int ty = 0; ty < map.getHeight(); ty++) {
@@ -1104,9 +1113,14 @@ public class Game {
                         tname.equals("forest_fire") ||
                         tname.equals("highland_forest_fire")) {
                     for (NPCAnimal npc : map.getAnimals(tx, ty)) {
-                        npc.setAlive(false);
-                        npc.setAge(-1);
-                        npc.setSpeed(0.0);
+                        if (npc.isAlive()) {
+                            npc.setAlive(false);
+                            npc.setAge(-1);
+                            npc.setSpeed(0.0);
+                            if (tx == x && ty == y) {
+                                turnMessages.add(npcLabel(npc) + " perishes in the flames.");
+                            }
+                        }
                     }
                     map.getEggs(tx, ty).clear();
                     map.removeBurrow(tx, ty);
@@ -1115,11 +1129,15 @@ public class Game {
                     for (NPCAnimal npc : map.getAnimals(tx, ty)) {
                         if (!npc.isAlive()) continue;
                         double dmg = npc.getMaxHp() * 0.2;
+                        double beforeNpc = npc.getHp();
                         npc.setHp(Math.max(0.0, npc.getHp() - dmg));
                         if (npc.getHp() <= 0) {
                             npc.setAlive(false);
                             npc.setAge(-1);
                             npc.setSpeed(0.0);
+                            if (tx == x && ty == y && beforeNpc > 0) {
+                                turnMessages.add(npcLabel(npc) + " succumbs to the toxic fumes.");
+                            }
                         }
                     }
                 }

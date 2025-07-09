@@ -644,6 +644,9 @@ public class NpcController {
                             npcChooseMove(tx, ty, npc, cstats);
                             double regen = getStat(cstats, "health_regen");
                             if (applyBleedAndRegen(npc, regen)) {
+                                if (tx == playerX && ty == playerY) {
+                                    messages.add(npcLabel(npc) + " bleeds to death.");
+                                }
                                 continue;
                             }
                         }
@@ -661,11 +664,17 @@ public class NpcController {
                         npc.setAlive(false);
                         npc.setAge(-1);
                         npc.setSpeed(0.0);
+                        if (tx == playerX && ty == playerY) {
+                            messages.add(npcLabel(npc) + " starves to death.");
+                        }
                         continue;
                     }
 
                     double regen = getStat(stats, "health_regen");
                     if (applyBleedAndRegen(npc, regen)) {
+                        if (tx == playerX && ty == playerY) {
+                            messages.add(npcLabel(npc) + " bleeds to death.");
+                        }
                         continue;
                     }
 
@@ -678,6 +687,9 @@ public class NpcController {
                             npcChooseMoveForced(tx, ty, npc, stats);
                             if (!"None".equals(npc.getNextMove())) {
                                 if (npcApplyWalkingDrain(npc, baseDrain)) {
+                                    if (tx == playerX && ty == playerY) {
+                                        messages.add(npcLabel(npc) + " starves to death.");
+                                    }
                                     continue;
                                 }
                             }
@@ -787,6 +799,9 @@ public class NpcController {
                     npcChooseMove(tx, ty, npc, stats);
                     if (!"None".equals(npc.getNextMove())) {
                         if (npcApplyWalkingDrain(npc, baseDrain)) {
+                            if (tx == playerX && ty == playerY) {
+                                messages.add(npcLabel(npc) + " starves to death.");
+                            }
                             continue;
                         }
                         npc.setLastAction("move");
