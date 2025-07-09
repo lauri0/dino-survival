@@ -561,7 +561,7 @@ public class Game {
 
         turnMessages.addAll(map.updateVolcanicActivity(x, y, playerManager.getPlayer()));
         turnMessages.addAll(map.updateFlood(x, y, playerManager.getPlayer(), weather.getFloodChance()));
-        turnMessages.addAll(map.updateForestFire());
+        turnMessages.addAll(map.updateForestFire(weather));
         updateEggs();
         map.growPlants(StatsLoader.getPlantStats());
         npcController.spawnCritters(false);
