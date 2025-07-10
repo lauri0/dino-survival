@@ -26,6 +26,7 @@ public class Game {
     private Weather weather;
     private int weatherTurns;
     private final Random weatherRng = new Random(1);
+    private Random rng = new Random();
     private NpcController npcController;
     private boolean won;
     private int turn;
@@ -87,6 +88,7 @@ public class Game {
             throw new RuntimeException(e);
         }
 
+        rng = new Random(seed);
         worldStats = new WorldStats();
         worldStats.initSpecies(StatsLoader.getDinoStats().keySet());
         worldStats.initSpecies(StatsLoader.getCritterStats().keySet());
@@ -668,7 +670,7 @@ public class Game {
             double targetSpeed = npcEffectiveSpeed(target, stats);
             double relSpeed = targetSpeed / Math.max(playerSpeed, 0.1);
             double catchChance = calculateCatchChance(relSpeed);
-            if (Math.random() > catchChance) {
+            if (rng.nextDouble() > catchChance) {
                 turnMessages.add("The " + npcLabel(target) + " escaped before you could catch it.");
                 applyTurnCosts(false, 5.0);
                 checkVictory();
