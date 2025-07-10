@@ -11,7 +11,7 @@ public class DamageMessageTest {
     public void testHuntOnlyOneDamageMessage() throws Exception {
         StatsLoader.load(Path.of("conf"), "Hell Creek");
         Game game = new Game();
-        game.start("Hell Creek", "Tyrannosaurus");
+        game.start("Hell Creek", "Tyrannosaurus", 0L);
         Map map = game.getMap();
         for (int y = 0; y < map.getHeight(); y++) {
             for (int x = 0; x < map.getWidth(); x++) {
